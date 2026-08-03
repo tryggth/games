@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Player, DragItem, HandTile } from '../types/game';
+import type { Player, DragItem, HandTile, Tile } from '../types/game';
 import { TileComponent } from './TileComponent';
 import { Sparkles, X } from 'lucide-react';
 
@@ -105,18 +105,33 @@ export const Hand: React.FC<HandProps> = ({
             [Your hand tray is empty! You played all your tiles.]
           </div>
         ) : (
-          handTiles.map((ht) => (
-            <TileComponent
-              key={ht.tile.id}
-              tile={ht.tile}
-              isSelected={selectedTileIds.includes(ht.tile.id)}
-              isDrawnTile={ht.tile.id === drawnTileId}
-              isMagnifierEnabled={isMagnifierEnabled}
-              onClick={() => isHumanTurn && onToggleTileSelection(ht.tile.id)}
-              source="rack"
-              size="md"
-            />
-          ))
+          handTiles.map((ht, idx) => {
+            const prevTile = idx > 0 ? handTiles[idx - 1].tile : null;
+            const currTile = ht.tile;
+            const getGroupKey = (t: Tile) => (t.isJoker ? 'joker' : t.color);
+            const isNewGroup = prevTile !== null && getGroupKey(currTile) !== getGroupKey(prevTile);
+
+            return (
+              <React.Fragment key={ht.tile.id}>
+                {isNewGroup && (
+                  <div
+                    key={`spacer-${ht.tile.id}`}
+                    className="w-11 h-16 pointer-events-none flex-shrink-0"
+                    aria-hidden="true"
+                  />
+                )}
+                <TileComponent
+                  tile={ht.tile}
+                  isSelected={selectedTileIds.includes(ht.tile.id)}
+                  isDrawnTile={ht.tile.id === drawnTileId}
+                  isMagnifierEnabled={isMagnifierEnabled}
+                  onClick={() => isHumanTurn && onToggleTileSelection(ht.tile.id)}
+                  source="rack"
+                  size="md"
+                />
+              </React.Fragment>
+            );
+          })
         )}
       </div>
     </div>
