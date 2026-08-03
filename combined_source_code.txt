@@ -1,6 +1,6 @@
 ================================================================================
  RUMMIKUB PRO - COMBINED SOURCE CODE BUNDLE
- Generated on: 2026-08-03T18:59:29.868Z
+ Generated on: 2026-08-03T19:08:59.059Z
  Total Source Files: 31
 ================================================================================
 
@@ -27,7 +27,7 @@
 
     <!-- Favicons & App Icons -->
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-    <link rel="apple-touch-icon" href="./pwa-192x192.svg" />
+    <link rel="apple-touch-icon" href="./pwa-192x192.png" />
     
     <title>Rummikub - Offline PWA</title>
   </head>
@@ -35,14 +35,34 @@
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     
-    <!-- Offline Service Worker Registration -->
+    <!-- Offline Service Worker & Auto-Invalidation Handler -->
     <script>
       if ('serviceWorker' in navigator) {
+        let refreshing = false;
+
+        // Auto-reload app when new Service Worker takes control
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (!refreshing) {
+            refreshing = true;
+            console.log('[PWA Update] New version activated! Reloading app...');
+            window.location.reload();
+          }
+        });
+
         window.addEventListener('load', () => {
           navigator.serviceWorker
             .register('./sw.js')
-            .then((reg) => console.log('Rummikub PWA Service Worker registered with scope:', reg.scope))
-            .catch((err) => console.warn('Service Worker registration failed:', err));
+            .then((reg) => {
+              console.log('[PWA] Service Worker active with scope:', reg.scope);
+              // Force check for SW update on launch
+              reg.update();
+
+              // Check for SW update whenever user refocuses tab/app window
+              window.addEventListener('focus', () => {
+                reg.update();
+              });
+            })
+            .catch((err) => console.warn('[PWA] Service Worker registration failed:', err));
         });
       }
     </script>
@@ -62,6 +82,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "prebuild": "node update-sw-version.js",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
@@ -146,7 +167,7 @@
  * FILE: public/sw.js
  * ============================================================================= */
 
-const CACHE_NAME = 'rummikub-pwa-v2';
+const CACHE_NAME = 'rummikub-pwa-v1785784136900';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

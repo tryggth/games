@@ -16,7 +16,7 @@
 
     <!-- Favicons & App Icons -->
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-    <link rel="apple-touch-icon" href="./pwa-192x192.svg" />
+    <link rel="apple-touch-icon" href="./pwa-192x192.png" />
     
     <title>Rummikub - Offline PWA</title>
   </head>
@@ -24,14 +24,34 @@
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     
-    <!-- Offline Service Worker Registration -->
+    <!-- Offline Service Worker & Auto-Invalidation Handler -->
     <script>
       if ('serviceWorker' in navigator) {
+        let refreshing = false;
+
+        // Auto-reload app when new Service Worker takes control
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (!refreshing) {
+            refreshing = true;
+            console.log('[PWA Update] New version activated! Reloading app...');
+            window.location.reload();
+          }
+        });
+
         window.addEventListener('load', () => {
           navigator.serviceWorker
             .register('./sw.js')
-            .then((reg) => console.log('Rummikub PWA Service Worker registered with scope:', reg.scope))
-            .catch((err) => console.warn('Service Worker registration failed:', err));
+            .then((reg) => {
+              console.log('[PWA] Service Worker active with scope:', reg.scope);
+              // Force check for SW update on launch
+              reg.update();
+
+              // Check for SW update whenever user refocuses tab/app window
+              window.addEventListener('focus', () => {
+                reg.update();
+              });
+            })
+            .catch((err) => console.warn('[PWA] Service Worker registration failed:', err));
         });
       }
     </script>
