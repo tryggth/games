@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#1e293b" />
+    <meta name="description" content="Classic Rummikub tile game with AI opponents, 2D hand canvas, and offline PWA support for ChromeOS." />
+    
+    <!-- ChromeOS PWA Manifest & App Capabilities -->
+    <link rel="manifest" href="./manifest.json" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Rummikub" />
+    <meta name="application-name" content="Rummikub" />
+
+    <!-- Favicons & App Icons -->
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="apple-touch-icon" href="./pwa-192x192.svg" />
+    
+    <title>Rummikub - Offline PWA</title>
+  </head>
+  <body class="bg-slate-950 text-slate-100 overflow-hidden select-none">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Offline Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker
+            .register('./sw.js')
+            .then((reg) => console.log('Rummikub PWA Service Worker registered with scope:', reg.scope))
+            .catch((err) => console.warn('Service Worker registration failed:', err));
+        });
+      }
+    </script>
+  </body>
+</html>

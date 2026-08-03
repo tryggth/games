@@ -1,0 +1,4362 @@
+================================================================================
+ RUMMIKUB PRO - COMBINED SOURCE CODE BUNDLE
+ Generated on: 2026-08-03T18:59:29.868Z
+ Total Source Files: 31
+================================================================================
+
+
+/* =============================================================================
+ * FILE: index.html
+ * ============================================================================= */
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="theme-color" content="#1e293b" />
+    <meta name="description" content="Classic Rummikub tile game with AI opponents, 2D hand canvas, and offline PWA support for ChromeOS." />
+    
+    <!-- ChromeOS PWA Manifest & App Capabilities -->
+    <link rel="manifest" href="./manifest.json" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Rummikub" />
+    <meta name="application-name" content="Rummikub" />
+
+    <!-- Favicons & App Icons -->
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+    <link rel="apple-touch-icon" href="./pwa-192x192.svg" />
+    
+    <title>Rummikub - Offline PWA</title>
+  </head>
+  <body class="bg-slate-950 text-slate-100 overflow-hidden select-none">
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    
+    <!-- Offline Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker
+            .register('./sw.js')
+            .then((reg) => console.log('Rummikub PWA Service Worker registered with scope:', reg.scope))
+            .catch((err) => console.warn('Service Worker registration failed:', err));
+        });
+      }
+    </script>
+  </body>
+</html>
+
+
+
+/* =============================================================================
+ * FILE: package.json
+ * ============================================================================= */
+
+{
+  "name": "rummikube",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "lint": "oxlint",
+    "preview": "vite preview",
+    "concat": "node concat-source.js"
+  },
+  "dependencies": {
+    "canvas-confetti": "^1.9.4",
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.28.0",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "tailwind-merge": "^3.6.0"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "@types/canvas-confetti": "^1.9.0",
+    "@types/node": "^24.13.3",
+    "@types/react": "^19.2.17",
+    "@types/react-dom": "^19.2.3",
+    "@vitejs/plugin-react": "^6.0.4",
+    "oxlint": "^1.75.0",
+    "tailwindcss": "^4.3.3",
+    "typescript": "~6.0.2",
+    "vite": "^8.2.0",
+    "vite-plugin-singlefile": "^2.3.3"
+  }
+}
+
+
+
+/* =============================================================================
+ * FILE: public/manifest.json
+ * ============================================================================= */
+
+{
+  "name": "Rummikub",
+  "short_name": "Rummikub",
+  "description": "Classic Rummikub tile game with AI opponents, 2D hand canvas, and offline PWA support.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#090d16",
+  "theme_color": "#1e293b",
+  "icons": [
+    {
+      "src": "./pwa-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./pwa-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./pwa-192x192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./pwa-512x512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./pwa-maskable.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
+
+
+
+/* =============================================================================
+ * FILE: public/sw.js
+ * ============================================================================= */
+
+const CACHE_NAME = 'rummikub-pwa-v2';
+const ASSETS_TO_CACHE = [
+  './',
+  './index.html',
+  './manifest.json',
+  './pwa-192x192.png',
+  './pwa-512x512.png',
+  './pwa-192x192.svg',
+  './pwa-512x512.svg',
+  './pwa-maskable.svg',
+  './favicon.svg',
+];
+
+// Service Worker Installation
+self.addEventListener('install', (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      console.log('[Service Worker] Pre-caching offline game assets');
+      return cache.addAll(ASSETS_TO_CACHE);
+    })
+  );
+  self.skipWaiting();
+});
+
+// Service Worker Activation & Cache Cleanup
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cache) => {
+          if (cache !== CACHE_NAME) {
+            console.log('[Service Worker] Deleting old cache:', cache);
+            return caches.delete(cache);
+          }
+        })
+      );
+    })
+  );
+  self.clients.claim();
+});
+
+// Offline Fetch Handler (Cache First, Network Fallback)
+self.addEventListener('fetch', (event) => {
+  if (event.request.method !== 'GET') return;
+
+  event.respondWith(
+    caches.match(event.request).then((cachedResponse) => {
+      if (cachedResponse) {
+        return cachedResponse;
+      }
+      return fetch(event.request)
+        .then((networkResponse) => {
+          if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'opaque' && networkResponse.type !== 'basic') {
+            return networkResponse;
+          }
+          const responseToCache = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseToCache);
+          });
+          return networkResponse;
+        })
+        .catch(() => {
+          return caches.match('./index.html');
+        });
+    })
+  );
+});
+
+
+
+/* =============================================================================
+ * FILE: src/App.css
+ * ============================================================================= */
+
+.counter {
+  font-size: 16px;
+  padding: 5px 10px;
+  border-radius: 5px;
+  color: var(--accent);
+  background: var(--accent-bg);
+  border: 2px solid transparent;
+  transition: border-color 0.3s;
+  margin-bottom: 24px;
+
+  &:hover {
+    border-color: var(--accent-border);
+  }
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+.hero {
+  position: relative;
+
+  .base,
+  .framework,
+  .vite {
+    inset-inline: 0;
+    margin: 0 auto;
+  }
+
+  .base {
+    width: 170px;
+    position: relative;
+    z-index: 0;
+  }
+
+  .framework,
+  .vite {
+    position: absolute;
+  }
+
+  .framework {
+    z-index: 1;
+    top: 34px;
+    height: 28px;
+    transform: perspective(2000px) rotateZ(300deg) rotateX(44deg) rotateY(39deg)
+      scale(1.4);
+  }
+
+  .vite {
+    z-index: 0;
+    top: 107px;
+    height: 26px;
+    width: auto;
+    transform: perspective(2000px) rotateZ(300deg) rotateX(40deg) rotateY(39deg)
+      scale(0.8);
+  }
+}
+
+#center {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  place-content: center;
+  place-items: center;
+  flex-grow: 1;
+
+  @media (max-width: 1024px) {
+    padding: 32px 20px 24px;
+    gap: 18px;
+  }
+}
+
+#next-steps {
+  display: flex;
+  border-top: 1px solid var(--border);
+  text-align: left;
+
+  & > div {
+    flex: 1 1 0;
+    padding: 32px;
+    @media (max-width: 1024px) {
+      padding: 24px 20px;
+    }
+  }
+
+  .icon {
+    margin-bottom: 16px;
+    width: 22px;
+    height: 22px;
+  }
+
+  @media (max-width: 1024px) {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
+#docs {
+  border-right: 1px solid var(--border);
+
+  @media (max-width: 1024px) {
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+  }
+}
+
+#next-steps ul {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  gap: 8px;
+  margin: 32px 0 0;
+
+  .logo {
+    height: 18px;
+  }
+
+  a {
+    color: var(--text-h);
+    font-size: 16px;
+    border-radius: 6px;
+    background: var(--social-bg);
+    display: flex;
+    padding: 6px 12px;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    transition: box-shadow 0.3s;
+
+    &:hover {
+      box-shadow: var(--shadow);
+    }
+    .button-icon {
+      height: 18px;
+      width: 18px;
+    }
+  }
+
+  @media (max-width: 1024px) {
+    margin-top: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+
+    li {
+      flex: 1 1 calc(50% - 8px);
+    }
+
+    a {
+      width: 100%;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+  }
+}
+
+#spacer {
+  height: 88px;
+  border-top: 1px solid var(--border);
+  @media (max-width: 1024px) {
+    height: 48px;
+  }
+}
+
+.ticks {
+  position: relative;
+  width: 100%;
+
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: -4.5px;
+    border: 5px solid transparent;
+  }
+
+  &::before {
+    left: 0;
+    border-left-color: var(--border);
+  }
+  &::after {
+    right: 0;
+    border-right-color: var(--border);
+  }
+}
+
+
+
+/* =============================================================================
+ * FILE: src/App.tsx
+ * ============================================================================= */
+
+import { useState } from 'react';
+import { useGameState } from './hooks/useGameState';
+import { usePwaInstall } from './hooks/usePwaInstall';
+import { Header } from './components/Header';
+import { Board } from './components/Board';
+import { Hand } from './components/Hand';
+import { TurnControls } from './components/TurnControls';
+import { RulesModal } from './components/RulesModal';
+import { WinnerModal } from './components/WinnerModal';
+import { HintModal } from './components/HintModal';
+import { AlertCircle, CheckCircle2, Info } from 'lucide-react';
+import { clsx } from 'clsx';
+
+export function App() {
+  const [isRulesOpen, setIsRulesOpen] = useState(false);
+  const { installPwa } = usePwaInstall();
+
+  const {
+    tilePool,
+    boardMelds,
+    humanPlayer,
+    aiPlayer,
+    activePlayer,
+    isHumanTurn,
+    winner,
+    selectedTileIds,
+    notification,
+    isAiThinking,
+    soundEnabled,
+    highlightedMeldIds,
+    drawnTileId,
+    hintResult,
+    isHintOpen,
+    isMagnifierEnabled,
+    turnSnapshot,
+    startNewGame,
+    toggleSound,
+    toggleMagnifier,
+    toggleTileSelection,
+    clearSelection,
+    createMeldFromSelection,
+    handleDropTile,
+    handleDropTileCanvas,
+    splitMeldAt,
+    drawTile,
+    endTurn,
+    getHint,
+    closeHint,
+    selectSuggestedTiles,
+  } = useGameState();
+
+  const tilesPlayedCount = turnSnapshot
+    ? turnSnapshot.handTiles.length - (humanPlayer?.handTiles?.length || 0)
+    : 0;
+
+  const isBoardValid = boardMelds.every((m) => m.isValid);
+
+  const snapshotPoints = turnSnapshot
+    ? turnSnapshot.boardMelds.reduce((acc, m) => acc + (m.isValid ? m.value : 0), 0)
+    : 0;
+
+  const currentPoints = boardMelds.reduce((acc, m) => acc + (m.isValid ? m.value : 0), 0);
+  const turnPointsGained = currentPoints - snapshotPoints;
+
+  return (
+    <div className="w-screen h-screen overflow-hidden flex flex-col bg-slate-950 text-slate-100 selection:bg-amber-500/30 selection:text-amber-200">
+      {/* Toast Notification Banner */}
+      {notification && (
+        <div
+          className={clsx(
+            'fixed top-14 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-xl shadow-2xl border text-xs font-semibold flex items-center gap-2 transition-all animate-bounce',
+            notification.type === 'error' && 'bg-rose-950/90 border-rose-600 text-rose-200 shadow-rose-950/50',
+            notification.type === 'success' && 'bg-emerald-950/90 border-emerald-600 text-emerald-200 shadow-emerald-950/50',
+            notification.type === 'info' && 'bg-slate-900/95 border-amber-500/40 text-amber-200 shadow-slate-950/50'
+          )}
+        >
+          {notification.type === 'error' && <AlertCircle className="w-4 h-4 text-rose-400" />}
+          {notification.type === 'success' && <CheckCircle2 className="w-4 h-4 text-emerald-400" />}
+          {notification.type === 'info' && <Info className="w-4 h-4 text-amber-400" />}
+          <span>{notification.message}</span>
+        </div>
+      )}
+
+      {/* Header Bar (fixed-none) */}
+      <Header
+        poolCount={tilePool.length}
+        activePlayer={activePlayer}
+        humanPlayer={humanPlayer}
+        aiPlayer={aiPlayer}
+        isHumanTurn={isHumanTurn}
+        soundEnabled={soundEnabled}
+        isMagnifierEnabled={isMagnifierEnabled}
+        onToggleSound={toggleSound}
+        onToggleMagnifier={toggleMagnifier}
+        onOpenRules={() => setIsRulesOpen(true)}
+        onRestartGame={startNewGame}
+        onGetHint={getHint}
+        onInstallApp={installPwa}
+      />
+
+      {/* Main Responsive Viewport Workspace (No Window Scrollbars) */}
+      <main className="flex-1 min-h-0 max-w-7xl w-full mx-auto p-3 md:p-4 flex flex-col gap-3 overflow-hidden">
+        {/* Table Board Area (flex-1 dynamically takes remaining height) */}
+        <Board
+          melds={boardMelds}
+          selectedTileIds={selectedTileIds}
+          highlightedMeldIds={highlightedMeldIds}
+          isMagnifierEnabled={isMagnifierEnabled}
+          onToggleTileSelection={toggleTileSelection}
+          onDropTile={handleDropTile}
+          onSplitMeld={splitMeldAt}
+          isHumanTurn={isHumanTurn}
+        />
+
+        {/* Always Auto-Sorted Player Hand Tray */}
+        <Hand
+          humanPlayer={humanPlayer}
+          selectedTileIds={selectedTileIds}
+          drawnTileId={drawnTileId}
+          isMagnifierEnabled={isMagnifierEnabled}
+          onToggleTileSelection={toggleTileSelection}
+          onClearSelection={clearSelection}
+          onCreateMeldFromSelection={createMeldFromSelection}
+          onDropTileCanvas={handleDropTileCanvas}
+          isHumanTurn={isHumanTurn}
+        />
+
+        {/* Turn Action Bar */}
+        <TurnControls
+          isHumanTurn={isHumanTurn}
+          isAiThinking={isAiThinking}
+          tilesPlayedCount={tilesPlayedCount}
+          isBoardValid={isBoardValid}
+          turnPointsGained={turnPointsGained}
+          hasInitialMeld={humanPlayer?.hasInitialMeld ?? false}
+          onEndTurn={endTurn}
+          onDrawTile={drawTile}
+          poolCount={tilePool.length}
+        />
+      </main>
+
+      {/* Move Suggestions Hint Modal */}
+      <HintModal
+        isOpen={isHintOpen}
+        onClose={closeHint}
+        hintResult={hintResult}
+        onSelectSuggestedTiles={selectSuggestedTiles}
+      />
+
+      {/* Interactive Rules Modal */}
+      <RulesModal isOpen={isRulesOpen} onClose={() => setIsRulesOpen(false)} />
+
+      {/* Celebration Winner Modal */}
+      <WinnerModal winner={winner} onPlayAgain={startNewGame} />
+    </div>
+  );
+}
+
+export default App;
+
+
+
+/* =============================================================================
+ * FILE: src/assets/hero.png
+ * ============================================================================= */
+
+�PNG
+
+   IHDR  W  i   ���  �PLTE   ���~v�~v�pdu���������dZl���}u����~v�����������~v����w�\̀x����~w����������Q�}v�~v����V�~v����x��F����R����TNZ�~����g^p|u�OHU�x�I�YQ^���������|v�˱�}v�Z�|�x�xC�����x��a԰��\-�g�m�|Ċ��f4�}u�B�LEQ���q5��a�h�iׁHǟc�k�V(��X�r!ܯo�}.�m7��M�O��_�t۴}�[�o3����q�V�Y%�o�Q�Q�s0�fጅ�E�@9FX�J�h,äh�pE��H�:	�B�O��<�=��_ڋ5�r�O��d\j~:�g`mË�8	��H�:	�w�4{�O�~F��m�P�>
+�=
+��TϏS�@��[�LćM��I�}v��Q�4
+u�m��w�]�x>�{E��YΓW�w?��Kܘ[�v@�;|q7��g�a�iބB�G�A��N�U�0p}?ԅJ�~B��_�[(��_߮t�v:��Rܡf�Yɡe�d-�j5�D�p<�L��r��I�T�p9�v1�a-����^�Z�S �U%�K��D�Q�m�f�L��e�C��?�bތO�_�T�X"�Ì�|>ŝc�e4��V�k2�k5�J��o�D�D΁DƔU�N�t�:�]%�P��k�}�v9΄I�F��P�}�L�,gG~�J�_!��[�g,�ɔ��r��M̦c�p/�}+�h'�u7�{�n1�i ԰�����0�B   |tRNS ��p#� ��T�;é���*`YJA�C�d� �S#�20�>� �|c�A��߻���s��|u�o^Y_]���?�٤?�Ǯ���}d�kecۢ8��¬�s�����������Т����Ð�}4  /:IDATx���[��0�a�	!�DH���:m�HTQ%��f_�knݛ�� �6�tV`E��g �0�0c��S�٫��r�������l����6����u��-�Uvc'����n�т?��� �4�x�PS��у�x�[��� �.i[���DX�͏��S���>�\��d{��Ճ�,�mn�E����
+���H���Wؘ0x��'{b������W�X�`�3X�7�-21����`'��Ԅ��ݪ�G�?"�����V�`�pM�B#����9���J�=L�5��(Z]��(mW�>٬�`��K�Y��jϱ��Y擂s�IϳO��"X?��T.�K+mI��Oa���=��Cs�D�y)a�8�a.1[H��J`F����1K
+Z�`^^�{̆)O0�|�R}���[<Z�
+�Q߇�[��5���i��tt7p|iK@/a�I�v���s��J`-�c�9٬����׺�,I1ـ<6[,�� :����z/V~ѱK�t|�� ��]=��U��j{�>�"�|�f�Yqz�)��h�@n�K���|�H�k��R��?FXԐ+3#�V�����1�(FX�[���$���0}Ո�V�bxn�	�{�����@��V1�ʹ^G*iѪr��4�Am"f�
+g�%xfoO�z���>�@��:R�z�XWL��S&q7p�M���:g�U*Z��^��|+i�ꍵ��bs�W�@�o�]v[���0��n�1��@�k���!|��_B�UVRź��|���������%��� ��V�`�k��;fZh��5K������>{�H=��/*tEѪ�3�x{�gŬ����yR����xO�	ST��e��哮�9v�{�ڏ��]:,���w�*m	cղ��^MQچ�.�h����p��åXh��?r�.+T����E6���i�M."fO��T��K<�]���K��1�h�Z�`�??b�	z���D@?1���=�ʔW}�QK��a<2������m���u�8���8�Xu��%��[ěD�b3o0O2D@��O����.`ӫ�����A�����evM��R`T֭��p2�j���]�X�xfuKz^�.8��&-c��T�����[���Ղ4���6ÞJS�բ����QGV��5�!u4a#�k�ڭ�f�J[WPG�����b�&�,jꪺ�v|)����	A2U��Jv���Me�|�A���ᩯ5u��hE�6_������E/bMC����%gd��q�xk�X萡�����-[u!,�[n�ȩ�Yv����,;cy��P@]�U�)�O�z�j�C�î�c�.��Y�3�aoY։�;daLD�zU�j���a8n�{�ׁF*�{����xJ;��:#.�N���{�_)Y��3�X־�r�{�B�蠺��7�-�:�����?���������/	������}�w�kw
+��1��,����e���l�=�����$��\V9O�1�N�J����5��~ r�@6b�8*յ!ˮ�r;c�#���ݿi޹���٫�fo�*�ґ�[���CZ�klmӞ�I����==���i��g<��Qx��g}�֕|V+5�5%��Ƕ3�c{7�;����ZD�eȩv���VX�]��U�l2)b�DDz����'�T6�x1�̅k#e寇U�t߭O�YD9��evɗ�ڛҳ	-+��|��5����n��^��l�`�Q�����n�����O�\�EI�"��x`ծ׏���eD^��D�{̝av����ׇ�K�Wa�b�.�\��a�VR���o'�ؔ �K��t1���{.��F��)����b��J~4� �JT r���>�E��,d�S��J��KW(f�,�5>k��R�8
+�������@�d.���B��È�0���{���V�wS)Z�}�k�ɬcY{/����u v�]��[�����w��f�[� �+��X+$$3�[�e���En@2�Q�|PXUtK�c���ڊ^ڲX�������&�F��s�
+vy�]	�I ���0�2� d�yB��0�!�\{����]Lmk[`���Znǚ�}4��nI[�eӺV9�
+11�x�*40a��Ƥ���64�aUvu�c�M5�
+������xk[������`!i���<�}CQ���1�͓#�@<A���r,q��u����@���D�R���ZۙW�lLX�����|P3uϩ�5\6����`�dX(M�x����O	a4�ֈ��>om�f)���x]մހ�
+6�x]q���Щ���n6v����n�rL]�)��2�Ҟ��0М�s�8�[��&���k�M0��_4AL���C����g�M���Z�QPbi��Oa=̾�іe3z~�:�O���2m�_�A�䩁yB��2k�M+�n�V��~�M�C����̏|'����������̊���[[;��@u��ޣum2��@��=7�����$u5��=6+y����&=�:Vq��,t$�q��j�����t���Λ���#�YV>ih`{��{'璝�c��\����ӽ�ilJTX����y �+� `��T2��{=�i�+^��2[���'�I NZc�hԴb�����e�b9׶�b:%�h#K�wUU[�^w[�1����#gAz�L���`pB�^Ko���wN5i�,px��c:�S�om1�t��$�Q��K�sI��w6�IDQ>�2|�������&�� lp �$U2:�A�	��)"�FMX�ʭ+����]�c�O0čw4j�`<̝;-򬚒��x8��3�V�(���pe������dm�"�\��6�!)�6P/��m`0���QA�^�ŷ�������ϕ_��<�;�9�n`���|����mU��uFt�TٕV9.�Pw
+�����k_�4��Е	U�w
+s�w����曑�U[��b���6�m����ΑYS�AD~d՚����yh��[���.�Y��R�� CZ�]9�6 S��I�B~h�Y8Dƚ�n�a����S�-�J�[���s�.U-�kSp��ӎ�dYr��o=�������Z9��I��P�3F��'T�e[����� �x��+S��U�_`��A�SZ&���ucG�6�MY����z�\��(�%�}�d�É�p�s}hYL���u�Q�j�,��q#i��岼U���J�)�J~8me���?�ڳZ̀2�nAD�vm�/�>��,b�U$��Ԭ�t��Jj ��b��Ӭy6[Yn��N��732UR��'�-��pӬ#VG�ɪ��d��buIv�)A ����uں���@�F��I�Δ�t/Dr�>�َ#VE[MFA ;	�z�m��X��b�X�(`q4~#���.V7͚ͳ����V4u���O�Bڦ��6�t��s_��Q#s�I�?������-�h8	��d
+7j����a�#ֹ��3� ���Њ�lڏiV.8m��/ƭ,�A����@4�H�ɴ��T�1b�x~���f�S��.�j���\����\���|x �(�eS�'�A��U�a�"Wm ?΅o��,8�V~�-�s��u5���Cm�a.�Ī�/Ѓ���o��~���p�^��{�ѓm ?ѫ�������X������G �TR_��wO��m[�.�V�V���g���o*���,��ޘ��b�I� ��H��R�  zu��A��k�3ab�V'jjG�%��	b+Q�� �}�kx5���r��PVX�$�;�����֦d�)B�:��[��G��%�x���*u����u5�P�)5�b_b�������/��,�WQb=nT 8h�����躮hQ
+zu��S?r��
+�l�`Y���7��l{�{g��,�||V�4���EX.V����/4���A�z�ճ�����6��a9�t��Y�c��~�m�o/�S	�?��_�?z�n����޳d1��_-u���(�/�ݿkSQ���V� ox�>�K!��:h
+Qj���D$��/ĩ8��!"�"����dPi#c�G#�-��B����ڸ���֓�������\�9��6�Հռ;09|b���2����_2�LZ�v�g�g�<�3z���5�x�֙?��������pz���-wW�F�_9PKkN���(����|d��u_q�1ݓ쮉�L�l��D3{+�y=3fl����������n�#T�=j�h�{+�@�����Ļ �u�8��VA�%���\4�tX�vn4�/֝5k �
+C7�y�j=�Xn	磽���S��[̞a�h֠] �C��1��2Ҍ58W�+��f�F��g�1�؇#���aow�
+;��9��b��:�H�ZS�w]mu��_z����nboY�5�s-�k����x��g؝e�B�f���,ѶJv͵ݹ�HpG�Q��A�4rh���[�5P6��֗S�q��D<,�k�W�z�#�čF��Z*�vb4�o�@�}챠��^.ק)� ����c�u��V��;�H�ΖP
+���uGt�	F�1X(o ����\�b�ن�j�:�HOW�r�K��ॱ~]�r��6(o���ӻl���-��y �#,ז�K�͕���	��B�D��ZH%(ٍa��niUKO	O�j�F�7`��p�XAsm�<�8��|�v-1M�2���|���Oj����	O���Jp��T�W�q*�=N�3K])uW��W�k�	,�Y�k�u�<��+����X������V���-����@�>I��n4�ݡ�G�qOr^����"fњ��xaIki[���+JJY|�C�uƄju���b���V�5�]KYT��;�X�8��ag��ta��X���XI�!^��HDb#�N�V[�p8s\3c8L�cΠ͐��z�i��嶣�C���^�c�x���4�.�I~�����9?k���c��������R0>g���
+�V�?/�����A'^�b/�1���V#�,2��)���^��3���A�}G�GR�#O�;+c�<��  .9X����[���==�`���F`pG�A��K�����p�x>oB� � )�$`�t���C|�f���3��!T0��ᧅ�0B��`���㸕8m�ru�Slpg%p��P����N>l�������t��C�z��Wr�\|�@(�ou�z]|V~Z��4����nx�!T`���#�9C5͎�-���՜߆���!��P��P6^Jt�:�(�֠jn�{��BD�>��SqG�7�d�>yɵ�=&<�;�E0�.��01��ǲ֘t���
+	1ZTf�M�=z���2j,���]�)�9��\k;%v��\��ʙ��5"@�� �qh�!&���&�����ʔ�J�?:p{��^�� P�H�4������76eH��%��7�jw�����0����N�\tN$���6��A[�N�C��]L\�4h�`���gN.�0dȎ�ܥ�K_��jι�l���yQtyA�1�����@G�^O��5���b:q��j�Q��[�U�g�68�dhd��c�R�Ӄ�;{��z�_c�!�� ��@'���<��˵s�ŻEcg�ǀ�y5���\�ɣ��8=;ؗO�آ!���i���R��ԷfgȦ��C��.A��+�ʑ�];פ�Ԙ/��x#d�bj�5W�4��i��~K�����*�
+��l��.x�z$Rl6�}0'[��GY�B��wJ��-�� �nV�B��M��}Np)����0�?`4���+6�3׈�]�o
+�[�r��n��4�T�
+���O��K���lχ忴���T����(�i��F�h�j�{��QӹO��b$}��>h�N��L:�J�"�b�J�;���:M}���cv}.�l�c�%����n�(��m#�q������Qh�+���T*��w�?�b�sq��.y�� )�������JR�Uf���aLC�5s���bC�2����o� �ڒ�"��^Ӳ��?h���ݔ |<�5����͞��r"%$bkL��l�-�j�1��hRU��� ��X=�wN}�����&��{��I�ЫF�2�S�]*�s�� g�A�P3r������	�X"u$-���l��(��{{�P5MeHI��=��w����j6wU	iR���T�oYw*p7�r)Ҋ
+B:���g�I�	]�r�v{!r�&���Ŭ�i��L�4� �F�4��F�����޲�*�T@�$��$����W<��{�X,��τ��һV�$ؔ�S�m��.����l̘b��7�Q���GUUMڪ�Ju��c��l�E5.�s6'�䤽��#��{�T,�<��������NV�}�R~��A0����e�<��X��(�ǄV��,�Q�MEiﳩ�� �%�Ҽ�|�������hRJ�S��{G��V��x��D��i�H"!�������_�e^Jp�ǎ�/8�t*}7����K����*U5ն9�w�a.�G9�Cj��Iɖ�������[Ҋ�xI�9X1�[�ٽh�?��N�}�UA����R��e�U��z]��o�W%��h/M����!�_�;��8�����>���x� "�8#Dq߄!� ��5#�XuO��s�[���Zt�`���jK#���o�����vڷ�7��|��v{4���յƆL������4X���tK'���w���\]����ڜ#�.�nS�#���$��K+R�L�T:�c�Z����9?A�/`v����v�5`��N�)�Sמ<ִ�fY!j٘���]��O����zN��U��l�#xb�`RKj����4[fv�a<߶�'��"���4�P�w��?^֊��'ٔ�0��Ƚ����Z��ye�T� �����T_�9pr����3�����`��]�9d��-�üW�_�;׭�/?֒QhJ|�#X���%gw���`��ɉ�R�+�W�t���
+��N�x� U:Vz�<7g1���n��l�0����ͩ�k�?y�����a��0b^-��W��O��U�����6Ǩ�k�[&ԯiH�[҇�~���h�1 ��[��8�n>w���Ѓ}p��˗�I�'�B(���E�J�����f������7���\�6�+ >׉U�i��'WAIP.?�qoȟ��{�!;�9��t&����cj5_�p�ub�}��f�Q�|���E��2��	�����X�c��:GuH�8����u��}ǎev��3W���_*�?�6����A�E��c�x�1�P��go��M����y�!����j���Ӯ����B����S����3�O����b���r�\޽��X�5+$�<!��@%d�4*$�����m�}�j���5*l�WT�a��0L/�Y�%�ʼ9�şU�!�>?ؕٻ�b���h����)<,b����wwu��A��ߤm�E���D0d[:�\�-Ř���0�O��M=X2�ş��%/ʥMG�E�A)�8���'�Gⲱ�(j�}wY�fu���W�]W�	?<i|RBp�D`�Hb���d���q;5�[���n=J�ӏ�_�\,|	�pP��� aJ=Bi�["��"7VwhFt�7���O�8yhW X�K�0��V_�z�f	���Ǉ��X���u(-_{�q1YL��e!쁡�
+`���5�zK�H��]�t�zw�;��k��KڪQ����b�(C��u �#lY?0 ���������P��h%>���O��V�|"�%�����2W����=�f�H��08c\�b�)���C� ��Z���[����D@,ߣ�gI*Œz��+�%Hhy\2.l�<�zwy`�ڵ�Ϊs��F��[�HQ�U�	�B(�X�~�,�����n*$�dE����"P�� P� �%������U���&�A���;L��<����D �lo0��l[q�h�"�6cZ��vbc-	�r�#,)��U�� aKS�D.�����}i�v��]��Ugmv�ge�)��ۍJ]���aTy�����?��Y�"ؓEO!��J\)8=�Г���_���?��;�|��sӄ��7˒y�����K��u��v�+�(����e�Tf�2BI��= ����/�tYN�������_�q��~g��6�Uϙٷ�f��Opՠޓ�{$cL�犻B�*�r4����y���
+b�b����(�o��|#�2��{u⟝��}�t�y~����k��םs�ܫ��w�a�\<?��W$�Mk��<ۣ��)��I��׸x$h�����	���<u�ի����6c�߹���ۨ޻i�W���Ͻo�\(y�}�� t�.�@-7�l���1%�.] A��c����o��O��s7رn.�?�����9�˨�ɫ;w�|���ͪ�����~��S!>5*�Vnl��߀y*!��-����z�wy��x��\''qA���X�EA��Ny�6Dh��bգU���+���]��(�M�z�
+-�4��V��7N�l���#�'�'��;f>`����hi��Ǐ��p[�aFD�P�����g��+�μ�8��g�\����v�eJ���}�*!7�f�KG/�[[�j�j��M(��5Bb�YAF\�3�<���u0��ȫ{��|��2g��)�5��g�G�ˆ��ג��um=����\.��U_�
+���q�O�
+Gi^$"�.�������s�b���
+�����fCw�E�~Y/��d�+ ��Y����-��V�2��پ� UR�L�(ǈG�k�n�ˬ\�/�O��]0v�|n:N�1������ix�o/��_&r���'���Xj�ێ��*B8s�J�\Pf���@��g^ֿ���4���I��8fѝ6Ɠ�e�dG.�E	ɮX�ƬbJIdφ�.4K"E�#�1�Er�"
+�-��GN���;{㥪���:2]w����*bq�w������j㲯E$[��2V��pR��  [ۜ>�{��=�n�jk��T�
+�4����w�hN����5��r���Q��jf7h�roɄ\|�U"�bS!B��6j�6��) S�-ίeWr��p�մ0N>�OG�nZ[�` �:s���7��DdI�f'I���oȥ�K;�J+�0�A�YMSk��!,x����V����'q�p=�?=��=�ۭ<9_�imͦ3�=Ej�%����s�ݣ�g$��9Q
++�6G�TT�?|�y�4�R�-4��<�]��?��ξ��@����:n��������3݄Bm����Ffwi�z�+S��� �%�~H�<|UBa���a
+$hZ��K�^ʵ 9��Ք�[o��Vo�=�
+���d>�'���
+�]�:����]��0�����~@�EAP�xCguvʐX�!i֤��/`i>[���G5�Bi���l�(�%g�����'�;�>�A���'�����ͧ���^v�$���(��ۼ�|�������v2���z ӬY�������j��3Im��[�9ĵ �:����۳�w�����y����p�5���	o#Q���������aD�������ε� Z�ȳF���n?��z����
+�6���3��$����o� ��~Z �6��)A:�>b�\)6�"#uw:5���}��y<c[��%��aL�ޛxR��W�����g���X��e뷘��6C�&M��H�}��Q�#L�&Vr8�絆����\��5�2���`'�g`%6Q�i5�4��^��|>L>f�О�@��[}W-d��Qʈ*�u�Cj9=b����������g���c�^��[�a��%	���X^6pҸ�'[��
+x�[��-��E�&��
+ D���f�G��+ؘB`��yѹ����[�S�z4r���Q���WZ�3g��5������e5t�fA<��)DVRuNʙ�N+��T�E�LK�0�As�#���]��$�cSx�K� �8��Q���ǃ�j|��d<�=�xd���غ�K�Hx�Q�X��FH��(f�>���S���܅j�X�z ��cS�&ʍ���V��״e����sK�X���*q:�%N"���ZqC��E.W�97����p{Q�ȕ��=}�����$k&$��@{��7��մ�d�K���9�zeU�fP*��OU�0�e9�ϊy��]��\��p���q�Jy�ѵ�{u�����o=(���{�������|���v�U����Vʁ���s5ձ����$eU�>�ˢ,�o�9��,�r7�'x\�w̠,���U8�~�3lM���g���<��^�0�ީ�YdU�y������8��^������윻��0����8�(N�� ���88H� �$�6$J
+5K�&�Gɠ\>���.]�.".�����<>thׇ����M�����e�$�@��A²l)���{�.lo�[�CC�N)VG�8�o�"���{s����,[۸��=��Z�6�-��Q�~��h�Y��r��׺�j�^���mUF6�1PJ%��O������n����2Z�a'�	;��?t���@9�U��[C��!����%���'��W�~�#�?C�/-���\�l�m�B��/7�7���	CM�F����*��ց�{��p�����9����i��d���<�N���z]bK����[w�<y�p5�گ?��ӵ��(��"�c:�i|��p�z�y��wg"	9g�}ad�B��##��	�`���h�괫�ܹ��!�b��ww7�_�OY�n�7���Mf[I0�鉤�wo=ؾ�]���u|�R���J  4F�aB�vKq"`�81�����l}N�c\�5V�OZO!��O��׳C����%rp�iI��av	�cy^n��6�q���!4�Vhc!���$�@6(t�)��j$]}����e�:��WϮ�����^��m�9kj�9��,����b�>h7y��um�H�V�F!`�(�JZ��P����@rJV��������̏x��o*Z��D�<�>��X�-6��e*��:h�sTP�'� �j�D@T�B���E=OS���u��8'/u�B���M�_Ю�.����Iϝ�w߮��
+���L�R����piB@�%a܋��#,'�s�Ma��M�\���g=�pRc�+v�mrLZt����.6�:챷I��g\�0 ��o�&0ƛr.��yܭ���M��
+��`�og�����U�n��MWnV_�~�=��4�Ć�7��@�q �;��U�҅s��@��M:t�Z��N!}~ǿ��W���]����j�K��͚nJ�mT8 $�rB�V�-����4-sW�uYt�E���m����.Gp��z-����x^m�4((���Y64�� + \9+�0@�BU#4�1y�הu뎋����~&�{Sz����
+�F����1aeC��$"@�VCc ,o�`�"�AE����S�}���5m�q�v.W�|�8y<N)��5p�`��0�~B�*��Х��H��J�%-�<ۮX� �'���-��m���s�<نF�!  ϊ�V�@Ҳ�e �8�-r[P��S�������#`Pw���}�b���P�HEi�mK �lc� 1؈ �@��)G?y_��m����6wǢC����'��ɉj���{�:��G %��t��uL��p�_�V���k���.��ian0V��ŭ�,�9e���ȁ[F�P<�e��f���Y�+��ߢc�%�k����`�l$@����,����"H5Goihcz����h�Z�v���b��%1V����J:8�IH�s�"bZh��֯�=�k7�51Rܛ�C�m�m 7 (����Zv��/�?Xߵoƨ1=�q�2ur nB��*u�2۩�X��Ѡ"(,3���n!��ʇH����G�qc�R�G��<k�͇���
+�� ��"�$Po	=�c�!�1B���z�7{X���, y!PA%C�葆	s�婪z	��9���i1�mv�/��t�cL,��� ���,�y�j��
+��9�%��Ie:�n�%x����z,�Q5)P����k��M��;i���1;�߮�nw�C��^��lt�*7�    IEND�B`�
+
+
+/* =============================================================================
+ * FILE: src/assets/react.svg
+ * ============================================================================= */
+
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" class="iconify iconify--logos" width="35.93" height="32" preserveAspectRatio="xMidYMid meet" viewBox="0 0 256 228"><path fill="#00D8FF" d="M210.483 73.824a171.49 171.49 0 0 0-8.24-2.597c.465-1.9.893-3.777 1.273-5.621c6.238-30.281 2.16-54.676-11.769-62.708c-13.355-7.7-35.196.329-57.254 19.526a171.23 171.23 0 0 0-6.375 5.848a155.866 155.866 0 0 0-4.241-3.917C100.759 3.829 77.587-4.822 63.673 3.233C50.33 10.957 46.379 33.89 51.995 62.588a170.974 170.974 0 0 0 1.892 8.48c-3.28.932-6.445 1.924-9.474 2.98C17.309 83.498 0 98.307 0 113.668c0 15.865 18.582 31.778 46.812 41.427a145.52 145.52 0 0 0 6.921 2.165a167.467 167.467 0 0 0-2.01 9.138c-5.354 28.2-1.173 50.591 12.134 58.266c13.744 7.926 36.812-.22 59.273-19.855a145.567 145.567 0 0 0 5.342-4.923a168.064 168.064 0 0 0 6.92 6.314c21.758 18.722 43.246 26.282 56.54 18.586c13.731-7.949 18.194-32.003 12.4-61.268a145.016 145.016 0 0 0-1.535-6.842c1.62-.48 3.21-.974 4.76-1.488c29.348-9.723 48.443-25.443 48.443-41.52c0-15.417-17.868-30.326-45.517-39.844Zm-6.365 70.984c-1.4.463-2.836.91-4.3 1.345c-3.24-10.257-7.612-21.163-12.963-32.432c5.106-11 9.31-21.767 12.459-31.957c2.619.758 5.16 1.557 7.61 2.4c23.69 8.156 38.14 20.213 38.14 29.504c0 9.896-15.606 22.743-40.946 31.14Zm-10.514 20.834c2.562 12.94 2.927 24.64 1.23 33.787c-1.524 8.219-4.59 13.698-8.382 15.893c-8.067 4.67-25.32-1.4-43.927-17.412a156.726 156.726 0 0 1-6.437-5.87c7.214-7.889 14.423-17.06 21.459-27.246c12.376-1.098 24.068-2.894 34.671-5.345a134.17 134.17 0 0 1 1.386 6.193ZM87.276 214.515c-7.882 2.783-14.16 2.863-17.955.675c-8.075-4.657-11.432-22.636-6.853-46.752a156.923 156.923 0 0 1 1.869-8.499c10.486 2.32 22.093 3.988 34.498 4.994c7.084 9.967 14.501 19.128 21.976 27.15a134.668 134.668 0 0 1-4.877 4.492c-9.933 8.682-19.886 14.842-28.658 17.94ZM50.35 144.747c-12.483-4.267-22.792-9.812-29.858-15.863c-6.35-5.437-9.555-10.836-9.555-15.216c0-9.322 13.897-21.212 37.076-29.293c2.813-.98 5.757-1.905 8.812-2.773c3.204 10.42 7.406 21.315 12.477 32.332c-5.137 11.18-9.399 22.249-12.634 32.792a134.718 134.718 0 0 1-6.318-1.979Zm12.378-84.26c-4.811-24.587-1.616-43.134 6.425-47.789c8.564-4.958 27.502 2.111 47.463 19.835a144.318 144.318 0 0 1 3.841 3.545c-7.438 7.987-14.787 17.08-21.808 26.988c-12.04 1.116-23.565 2.908-34.161 5.309a160.342 160.342 0 0 1-1.76-7.887Zm110.427 27.268a347.8 347.8 0 0 0-7.785-12.803c8.168 1.033 15.994 2.404 23.343 4.08c-2.206 7.072-4.956 14.465-8.193 22.045a381.151 381.151 0 0 0-7.365-13.322Zm-45.032-43.861c5.044 5.465 10.096 11.566 15.065 18.186a322.04 322.04 0 0 0-30.257-.006c4.974-6.559 10.069-12.652 15.192-18.18ZM82.802 87.83a323.167 323.167 0 0 0-7.227 13.238c-3.184-7.553-5.909-14.98-8.134-22.152c7.304-1.634 15.093-2.97 23.209-3.984a321.524 321.524 0 0 0-7.848 12.897Zm8.081 65.352c-8.385-.936-16.291-2.203-23.593-3.793c2.26-7.3 5.045-14.885 8.298-22.6a321.187 321.187 0 0 0 7.257 13.246c2.594 4.48 5.28 8.868 8.038 13.147Zm37.542 31.03c-5.184-5.592-10.354-11.779-15.403-18.433c4.902.192 9.899.29 14.978.29c5.218 0 10.376-.117 15.453-.343c-4.985 6.774-10.018 12.97-15.028 18.486Zm52.198-57.817c3.422 7.8 6.306 15.345 8.596 22.52c-7.422 1.694-15.436 3.058-23.88 4.071a382.417 382.417 0 0 0 7.859-13.026a347.403 347.403 0 0 0 7.425-13.565Zm-16.898 8.101a358.557 358.557 0 0 1-12.281 19.815a329.4 329.4 0 0 1-23.444.823c-7.967 0-15.716-.248-23.178-.732a310.202 310.202 0 0 1-12.513-19.846h.001a307.41 307.41 0 0 1-10.923-20.627a310.278 310.278 0 0 1 10.89-20.637l-.001.001a307.318 307.318 0 0 1 12.413-19.761c7.613-.576 15.42-.876 23.31-.876H128c7.926 0 15.743.303 23.354.883a329.357 329.357 0 0 1 12.335 19.695a358.489 358.489 0 0 1 11.036 20.54a329.472 329.472 0 0 1-11 20.722Zm22.56-122.124c8.572 4.944 11.906 24.881 6.52 51.026c-.344 1.668-.73 3.367-1.15 5.09c-10.622-2.452-22.155-4.275-34.23-5.408c-7.034-10.017-14.323-19.124-21.64-27.008a160.789 160.789 0 0 1 5.888-5.4c18.9-16.447 36.564-22.941 44.612-18.3ZM128 90.808c12.625 0 22.86 10.235 22.86 22.86s-10.235 22.86-22.86 22.86s-22.86-10.235-22.86-22.86s10.235-22.86 22.86-22.86Z"></path></svg>
+
+
+/* =============================================================================
+ * FILE: src/assets/vite.svg
+ * ============================================================================= */
+
+<svg xmlns="http://www.w3.org/2000/svg" width="77" height="47" fill="none" aria-labelledby="vite-logo-title" viewBox="0 0 77 47"><title id="vite-logo-title">Vite</title><style>.parenthesis{fill:#000}@media (prefers-color-scheme:dark){.parenthesis{fill:#fff}}</style><path fill="#9135ff" d="M40.151 45.71c-.663.844-2.02.374-2.02-.699V34.708a2.26 2.26 0 0 0-2.262-2.262H24.493c-.92 0-1.457-1.04-.92-1.788l7.479-10.471c1.07-1.498 0-3.578-1.842-3.578H15.443c-.92 0-1.456-1.04-.92-1.788l9.696-13.576c.213-.297.556-.474.92-.474h28.894c.92 0 1.456 1.04.92 1.788l-7.48 10.472c-1.07 1.497 0 3.578 1.842 3.578h11.376c.944 0 1.474 1.087.89 1.83L40.153 45.712z"/><mask id="a" width="48" height="47" x="14" y="0" maskUnits="userSpaceOnUse" style="mask-type:alpha"><path fill="#000" d="M40.047 45.71c-.663.843-2.02.374-2.02-.699V34.708a2.26 2.26 0 0 0-2.262-2.262H24.389c-.92 0-1.457-1.04-.92-1.788l7.479-10.472c1.07-1.497 0-3.578-1.842-3.578H15.34c-.92 0-1.456-1.04-.92-1.788l9.696-13.575c.213-.297.556-.474.92-.474H53.93c.92 0 1.456 1.04.92 1.788L47.37 13.03c-1.07 1.498 0 3.578 1.842 3.578h11.376c.944 0 1.474 1.088.89 1.831L40.049 45.712z"/></mask><g mask="url(#a)"><g filter="url(#b)"><ellipse cx="5.508" cy="14.704" fill="#eee6ff" rx="5.508" ry="14.704" transform="rotate(269.814 20.96 11.29)scale(-1 1)"/></g><g filter="url(#c)"><ellipse cx="10.399" cy="29.851" fill="#eee6ff" rx="10.399" ry="29.851" transform="rotate(89.814 -16.902 -8.275)scale(1 -1)"/></g><g filter="url(#d)"><ellipse cx="5.508" cy="30.487" fill="#8900ff" rx="5.508" ry="30.487" transform="rotate(89.814 -19.197 -7.127)scale(1 -1)"/></g><g filter="url(#e)"><ellipse cx="5.508" cy="30.599" fill="#8900ff" rx="5.508" ry="30.599" transform="rotate(89.814 -25.928 4.177)scale(1 -1)"/></g><g filter="url(#f)"><ellipse cx="5.508" cy="30.599" fill="#8900ff" rx="5.508" ry="30.599" transform="rotate(89.814 -25.738 5.52)scale(1 -1)"/></g><g filter="url(#g)"><ellipse cx="14.072" cy="22.078" fill="#eee6ff" rx="14.072" ry="22.078" transform="rotate(93.35 31.245 55.578)scale(-1 1)"/></g><g filter="url(#h)"><ellipse cx="3.47" cy="21.501" fill="#8900ff" rx="3.47" ry="21.501" transform="rotate(89.009 35.419 55.202)scale(-1 1)"/></g><g filter="url(#i)"><ellipse cx="3.47" cy="21.501" fill="#8900ff" rx="3.47" ry="21.501" transform="rotate(89.009 35.419 55.202)scale(-1 1)"/></g><g filter="url(#j)"><ellipse cx="14.592" cy="9.743" fill="#8900ff" rx="4.407" ry="29.108" transform="rotate(39.51 14.592 9.743)"/></g><g filter="url(#k)"><ellipse cx="61.728" cy="-5.321" fill="#8900ff" rx="4.407" ry="29.108" transform="rotate(37.892 61.728 -5.32)"/></g><g filter="url(#l)"><ellipse cx="55.618" cy="7.104" fill="#00c2ff" rx="5.971" ry="9.665" transform="rotate(37.892 55.618 7.104)"/></g><g filter="url(#m)"><ellipse cx="12.326" cy="39.103" fill="#8900ff" rx="4.407" ry="29.108" transform="rotate(37.892 12.326 39.103)"/></g><g filter="url(#n)"><ellipse cx="12.326" cy="39.103" fill="#8900ff" rx="4.407" ry="29.108" transform="rotate(37.892 12.326 39.103)"/></g><g filter="url(#o)"><ellipse cx="49.857" cy="30.678" fill="#8900ff" rx="4.407" ry="29.108" transform="rotate(37.892 49.857 30.678)"/></g><g filter="url(#p)"><ellipse cx="52.623" cy="33.171" fill="#00c2ff" rx="5.971" ry="15.297" transform="rotate(37.892 52.623 33.17)"/></g></g><path d="M6.919 0c-9.198 13.166-9.252 33.575 0 46.789h6.215c-9.25-13.214-9.196-33.623 0-46.789zm62.424 0h-6.215c9.198 13.166 9.252 33.575 0 46.789h6.215c9.25-13.214 9.196-33.623 0-46.789" class="parenthesis"/><defs><filter id="b" width="60.045" height="41.654" x="-5.564" y="16.92" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="7.659"/></filter><filter id="c" width="90.34" height="51.437" x="-40.407" y="-6.762" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="7.659"/></filter><filter id="d" width="79.355" height="29.4" x="-35.435" y="2.801" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="e" width="79.579" height="29.4" x="-30.84" y="20.8" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="f" width="79.579" height="29.4" x="-29.307" y="21.949" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="g" width="74.749" height="58.852" x="29.961" y="-17.13" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="7.659"/></filter><filter id="h" width="61.377" height="25.362" x="37.754" y="3.055" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="i" width="61.377" height="25.362" x="37.754" y="3.055" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="j" width="56.045" height="63.649" x="-13.43" y="-22.082" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="k" width="54.814" height="64.646" x="34.321" y="-37.644" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="l" width="33.541" height="35.313" x="38.847" y="-10.552" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="m" width="54.814" height="64.646" x="-15.081" y="6.78" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="n" width="54.814" height="64.646" x="-15.081" y="6.78" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="o" width="54.814" height="64.646" x="22.45" y="-1.645" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter><filter id="p" width="39.409" height="43.623" x="32.919" y="11.36" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17286" stdDeviation="4.596"/></filter></defs></svg>
+
+
+
+/* =============================================================================
+ * FILE: src/components/Board.tsx
+ * ============================================================================= */
+
+import React, { useState, useRef, useEffect } from 'react';
+import type { Meld, DragItem } from '../types/game';
+import { TileComponent } from './TileComponent';
+import { CheckCircle2, XCircle, PlusCircle, Bot, ChevronDown } from 'lucide-react';
+import { clsx } from 'clsx';
+
+interface BoardProps {
+  melds: Meld[];
+  selectedTileIds: string[];
+  highlightedMeldIds?: string[];
+  isMagnifierEnabled?: boolean;
+  onToggleTileSelection: (tileId: string) => void;
+  onDropTile: (
+    item: DragItem,
+    targetLocation: {
+      type: 'board-new' | 'board-meld' | 'rack-0' | 'rack-1' | 'rack';
+      meldId?: string;
+      targetIndex?: number;
+    }
+  ) => void;
+  onSplitMeld: (meldId: string, splitIndex: number) => void;
+  isHumanTurn: boolean;
+}
+
+/**
+ * Single Unified Meld Container Component
+ */
+const MeldContainer: React.FC<{
+  meld: Meld;
+  selectedTileIds: string[];
+  isHighlighted?: boolean;
+  isMagnifierEnabled?: boolean;
+  onToggleTileSelection: (tileId: string) => void;
+  onDropTile: BoardProps['onDropTile'];
+  isHumanTurn: boolean;
+}> = ({
+  meld,
+  selectedTileIds,
+  isHighlighted = false,
+  isMagnifierEnabled = false,
+  onToggleTileSelection,
+  onDropTile,
+  isHumanTurn,
+}) => {
+  const [isDragOver, setIsDragOver] = useState(false);
+
+  const handleDragOver = (e: React.DragEvent) => {
+    if (!isHumanTurn) return;
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = 'move';
+    setIsDragOver(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    if (!isHumanTurn) return;
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+
+    const dataStr = e.dataTransfer.getData('application/json');
+    if (!dataStr) return;
+
+    try {
+      const item: DragItem = JSON.parse(dataStr);
+      onDropTile(item, {
+        type: 'board-meld',
+        meldId: meld.id,
+      });
+    } catch {
+      // Ignore invalid JSON
+    }
+  };
+
+  return (
+    <div
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+      className={clsx(
+        'relative p-3 rounded-2xl border transition-all duration-300 backdrop-blur-md shadow-lg flex flex-col gap-2.5 select-none cursor-pointer',
+        isDragOver
+          ? 'bg-amber-950/70 border-amber-400 ring-4 ring-amber-400/80 shadow-2xl shadow-amber-500/50 scale-102 z-30'
+          : isHighlighted
+          ? 'ring-2 ring-amber-400 bg-amber-500/10 shadow-lg shadow-amber-500/30 scale-101 border-amber-400/60 z-20'
+          : meld.isValid
+          ? 'bg-emerald-950/40 border-emerald-600/50 shadow-emerald-950/50 ring-1 ring-emerald-500/20'
+          : 'bg-rose-950/50 border-rose-600/60 ring-1 ring-rose-500/40 shadow-rose-950/50'
+      )}
+      title="Drop tile anywhere on this meld to add and auto-sort into logical order"
+    >
+      {/* Compact Meld Status Badge & Bot Move Highlight Indicator */}
+      <div className="flex items-center justify-between gap-2 pb-1.5 border-b border-white/10 text-xs pointer-events-none">
+        <div className="flex items-center gap-1.5">
+          {meld.isValid ? (
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-300 bg-emerald-500/20 px-2 py-0.5 rounded-md border border-emerald-500/30">
+              <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+              <span>
+                {meld.type.toUpperCase()} ({meld.value} pts)
+              </span>
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-300 bg-rose-500/20 px-2 py-0.5 rounded-md border border-rose-500/30">
+              <XCircle className="w-3 h-3 text-rose-400" />
+              <span className="max-w-[150px] truncate">{meld.errorReason || 'Invalid'}</span>
+            </span>
+          )}
+
+          {isHighlighted && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded-md border border-amber-400/40 animate-pulse">
+              <Bot className="w-3 h-3 text-amber-400" />
+              <span>Bot Move</span>
+            </span>
+          )}
+        </div>
+      </div>
+
+      {/* Clean Tiles Row */}
+      <div className="flex items-center gap-1.5 p-1 overflow-x-auto">
+        {meld.tiles.map((tile, idx) => (
+          <TileComponent
+            key={`${meld.id}_${tile.id}_${idx}`}
+            tile={tile}
+            isSelected={selectedTileIds.includes(tile.id)}
+            isMagnifierEnabled={isMagnifierEnabled}
+            onClick={() => isHumanTurn && onToggleTileSelection(tile.id)}
+            source="board"
+            sourceMeldId={meld.id}
+            sourceIndex={idx}
+            size="md"
+          />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+export const Board: React.FC<BoardProps> = ({
+  melds,
+  selectedTileIds,
+  highlightedMeldIds = [],
+  isMagnifierEnabled = false,
+  onToggleTileSelection,
+  onDropTile,
+  isHumanTurn,
+}) => {
+  const [isBoardDragOver, setIsBoardDragOver] = useState(false);
+  const [isScrolledUp, setIsScrolledUp] = useState(false);
+  const [hiddenMeldCount, setHiddenMeldCount] = useState(0);
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Check scroll & overflow boundaries
+  const checkOverflow = () => {
+    if (!scrollRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
+    const isOverflowing = scrollHeight > clientHeight + 10;
+    const isBottom = scrollTop + clientHeight >= scrollHeight - 20;
+    setIsScrolledUp(isOverflowing && !isBottom);
+
+    // Approximate hidden meld count below fold
+    if (isOverflowing && !isBottom) {
+      const pixelsRemaining = scrollHeight - (scrollTop + clientHeight);
+      const estCount = Math.max(1, Math.ceil(pixelsRemaining / 120));
+      setHiddenMeldCount(estCount);
+    } else {
+      setHiddenMeldCount(0);
+    }
+  };
+
+  useEffect(() => {
+    checkOverflow();
+  }, [melds]);
+
+  // Auto-scroll container to bring newly added or modified melds into view
+  useEffect(() => {
+    if (scrollRef.current && melds.length > 0) {
+      scrollRef.current.scrollTo({
+        top: scrollRef.current.scrollHeight,
+        behavior: 'smooth',
+      });
+    }
+  }, [melds.length, highlightedMeldIds]);
+
+  const handleBoardDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    setIsBoardDragOver(true);
+  };
+
+  const handleBoardDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsBoardDragOver(false);
+  };
+
+  const handleBoardDropOnNewZone = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsBoardDragOver(false);
+    const dataStr = e.dataTransfer.getData('application/json');
+    if (!dataStr) return;
+    try {
+      const item: DragItem = JSON.parse(dataStr);
+      onDropTile(item, { type: 'board-new' });
+    } catch {
+      // Ignore invalid JSON
+    }
+  };
+
+  return (
+    <div
+      onDragOver={handleBoardDragOver}
+      onDragLeave={handleBoardDragLeave}
+      onDrop={handleBoardDropOnNewZone}
+      className={clsx(
+        'w-full flex-1 min-h-0 bg-table-felt rounded-2xl border p-4 md:p-6 shadow-2xl relative flex flex-col justify-between overflow-hidden transition-all',
+        isBoardDragOver ? 'border-amber-400/80 ring-2 ring-amber-400/30' : 'border-emerald-900/60'
+      )}
+    >
+      {/* Background Ambient Radial Gradient */}
+      <div className="absolute inset-0 bg-radial from-emerald-500/5 via-transparent to-black/40 pointer-events-none" />
+
+      {/* Board Header Bar */}
+      <div className="flex items-center justify-between pb-3 border-b border-emerald-800/40 z-10 mb-4">
+        <div className="flex items-center gap-2">
+          <span className="w-3 h-3 rounded-full bg-emerald-500 ring-4 ring-emerald-500/20" />
+          <h2 className="text-sm font-bold uppercase tracking-wider text-emerald-200/90">
+            Table Board ({melds.length} Melds)
+          </h2>
+        </div>
+        <span className="text-xs text-emerald-300/60 font-mono hidden sm:inline">
+          Container-level drop targets • Instant auto-reordering into logical groups & runs
+        </span>
+      </div>
+
+      {/* Dense Multi-Meld Flex-Wrap Grid Container with Scroll Feedback */}
+      <div
+        ref={scrollRef}
+        onScroll={checkOverflow}
+        className="flex-1 overflow-y-auto z-10 pr-1 pb-4 min-h-[260px] scroll-smooth"
+      >
+        {melds.length === 0 ? (
+          <div className="w-full h-56 rounded-xl border-2 border-dashed border-emerald-700/50 flex flex-col items-center justify-center text-emerald-300/60 transition-all hover:border-emerald-500/80 hover:bg-emerald-950/20 group">
+            <PlusCircle className="w-10 h-10 mb-2 opacity-50 group-hover:opacity-100 group-hover:scale-110 transition-all text-emerald-400" />
+            <p className="text-sm font-medium">Table is currently empty</p>
+            <p className="text-xs opacity-70 mt-1">
+              {isHumanTurn ? 'Drag tiles anywhere on the table to start a new meld' : 'Waiting for opponent move...'}
+            </p>
+          </div>
+        ) : (
+          <div className="flex flex-wrap gap-4 items-start content-start">
+            {melds.map((meld) => (
+              <MeldContainer
+                key={meld.id}
+                meld={meld}
+                selectedTileIds={selectedTileIds}
+                isHighlighted={highlightedMeldIds.includes(meld.id)}
+                isMagnifierEnabled={isMagnifierEnabled}
+                onToggleTileSelection={onToggleTileSelection}
+                onDropTile={onDropTile}
+                isHumanTurn={isHumanTurn}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Bottom Gradient Fade Overlay for Overflow Indication */}
+      {isScrolledUp && (
+        <div className="absolute bottom-12 inset-x-0 h-16 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent pointer-events-none z-20" />
+      )}
+
+      {/* Floating Scroll Overflow Banner Indicator */}
+      {isScrolledUp && (
+        <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-30 px-3.5 py-1.5 rounded-full bg-slate-900/95 border border-amber-400/50 text-amber-300 text-xs font-bold shadow-2xl flex items-center gap-1.5 animate-bounce pointer-events-none">
+          <ChevronDown className="w-4 h-4 text-amber-400" />
+          <span>{hiddenMeldCount} more meld(s) below — Scroll to view</span>
+        </div>
+      )}
+
+      {/* Footer Drop Prompt Zone */}
+      {melds.length > 0 && isHumanTurn && (
+        <div
+          onDragOver={handleBoardDragOver}
+          onDrop={handleBoardDropOnNewZone}
+          className={clsx(
+            'mt-3 py-2.5 px-4 rounded-xl border border-dashed text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer z-10',
+            isBoardDragOver
+              ? 'border-amber-400 bg-amber-500/20 text-amber-200 scale-102 shadow-lg shadow-amber-500/30'
+              : 'border-emerald-600/40 bg-emerald-950/30 text-emerald-300/80 hover:border-emerald-400 hover:bg-emerald-950/50 hover:text-emerald-100'
+          )}
+        >
+          <PlusCircle className="w-4 h-4 text-emerald-400 animate-pulse" />
+          <span>Drop tile anywhere here to form a NEW table meld</span>
+        </div>
+      )}
+    </div>
+  );
+};
+
+
+
+/* =============================================================================
+ * FILE: src/components/GameBoard.tsx
+ * ============================================================================= */
+
+import { Board } from './Board';
+
+export const GameBoard = Board;
+export default Board;
+
+
+
+/* =============================================================================
+ * FILE: src/components/Hand.tsx
+ * ============================================================================= */
+
+import React from 'react';
+import type { Player, DragItem, HandTile } from '../types/game';
+import { TileComponent } from './TileComponent';
+import { Sparkles, X } from 'lucide-react';
+
+interface HandProps {
+  humanPlayer: Player | null;
+  selectedTileIds: string[];
+  drawnTileId?: string | null;
+  isMagnifierEnabled?: boolean;
+  onToggleTileSelection: (tileId: string) => void;
+  onClearSelection: () => void;
+  onCreateMeldFromSelection: () => void;
+  onDropTileCanvas: (item: DragItem) => void;
+  isHumanTurn: boolean;
+}
+
+export const Hand: React.FC<HandProps> = ({
+  humanPlayer,
+  selectedTileIds,
+  drawnTileId,
+  isMagnifierEnabled = false,
+  onToggleTileSelection,
+  onClearSelection,
+  onCreateMeldFromSelection,
+  onDropTileCanvas,
+  isHumanTurn,
+}) => {
+  const handTiles: HandTile[] = humanPlayer?.handTiles || [];
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+
+  const handleCanvasDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const dataStr = e.dataTransfer.getData('application/json');
+    if (!dataStr) return;
+
+    try {
+      const item: DragItem = JSON.parse(dataStr);
+      onDropTileCanvas(item);
+    } catch {
+      // Ignore invalid JSON
+    }
+  };
+
+  return (
+    <div
+      onDragOver={handleDragOver}
+      onDrop={handleCanvasDrop}
+      className="w-full flex-none h-52 md:h-60 bg-rack-wood rounded-2xl border border-amber-900/60 shadow-2xl relative overflow-hidden select-none flex flex-col justify-between p-4"
+    >
+      {/* Wood Finish Accent Line */}
+      <div className="absolute inset-x-4 top-2 h-0.5 bg-amber-950/80 rounded pointer-events-none" />
+
+      {/* Header Controls Overlay Bar */}
+      <div className="w-full flex items-center justify-between pb-2 border-b border-amber-900/40 z-20">
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-bold text-amber-200 uppercase tracking-wide flex items-center gap-2">
+            Player Hand Tray{' '}
+            <span className="text-xs px-2 py-0.5 rounded-full bg-amber-950/80 text-amber-400 border border-amber-800/40 font-mono">
+              {handTiles.length} tiles (Auto-Sorted)
+            </span>
+          </span>
+
+          {selectedTileIds.length > 0 && (
+            <div className="flex items-center gap-2 bg-amber-500/20 px-2.5 py-1 rounded-md border border-amber-500/40 text-xs text-amber-300">
+              <span className="font-semibold">{selectedTileIds.length} selected</span>
+              <button
+                onClick={onClearSelection}
+                className="hover:text-white p-0.5 rounded hover:bg-amber-500/30 transition cursor-pointer"
+                title="Clear selection"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center gap-2">
+          {selectedTileIds.length >= 3 && isHumanTurn && (
+            <button
+              onClick={onCreateMeldFromSelection}
+              className="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-xs shadow-lg shadow-amber-500/20 flex items-center gap-1.5 transition transform hover:scale-105 active:scale-95 cursor-pointer"
+            >
+              <Sparkles className="w-4 h-4" />
+              <span>Create Meld ({selectedTileIds.length})</span>
+            </button>
+          )}
+
+          <span className="text-[11px] text-amber-400/80 font-mono italic hidden md:inline">
+            ★ Always sorted by Color & Number
+          </span>
+        </div>
+      </div>
+
+      {/* Auto-Sorted Flex Wrap Hand Tiles Container */}
+      <div className="w-full flex-1 overflow-y-auto pt-3 pb-1 pr-1 z-10 flex flex-wrap gap-2.5 items-start content-start">
+        {handTiles.length === 0 ? (
+          <div className="w-full h-full flex items-center justify-center text-amber-500/30 text-xs font-mono">
+            [Your hand tray is empty! You played all your tiles.]
+          </div>
+        ) : (
+          handTiles.map((ht) => (
+            <TileComponent
+              key={ht.tile.id}
+              tile={ht.tile}
+              isSelected={selectedTileIds.includes(ht.tile.id)}
+              isDrawnTile={ht.tile.id === drawnTileId}
+              isMagnifierEnabled={isMagnifierEnabled}
+              onClick={() => isHumanTurn && onToggleTileSelection(ht.tile.id)}
+              source="rack"
+              size="md"
+            />
+          ))
+        )}
+      </div>
+    </div>
+  );
+};
+
+
+
+/* =============================================================================
+ * FILE: src/components/Header.tsx
+ * ============================================================================= */
+
+import React from 'react';
+import type { Player } from '../types/game';
+import { Volume2, VolumeX, HelpCircle, RefreshCw, Layers, ShieldCheck, ShieldAlert, Lightbulb, Download, Bot, Search } from 'lucide-react';
+import { clsx } from 'clsx';
+
+interface HeaderProps {
+  poolCount: number;
+  activePlayer: Player | null;
+  humanPlayer: Player | null;
+  aiPlayer: Player | null;
+  isHumanTurn: boolean;
+  soundEnabled: boolean;
+  isMagnifierEnabled: boolean;
+  onToggleSound: () => void;
+  onToggleMagnifier: () => void;
+  onOpenRules: () => void;
+  onRestartGame: () => void;
+  onGetHint?: () => void;
+  onInstallApp?: () => void;
+}
+
+export const Header: React.FC<HeaderProps> = ({
+  poolCount,
+  activePlayer,
+  humanPlayer,
+  aiPlayer,
+  isHumanTurn,
+  soundEnabled,
+  isMagnifierEnabled,
+  onToggleSound,
+  onToggleMagnifier,
+  onOpenRules,
+  onRestartGame,
+  onGetHint,
+  onInstallApp,
+}) => {
+  const aiTileCount = aiPlayer?.handTiles?.length ?? 14;
+
+  return (
+    <header className="w-full bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 py-3 shadow-xl sticky top-0 z-30">
+      <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center shadow-lg ring-2 ring-amber-400/30">
+            <span className="font-extrabold text-slate-950 text-xl tracking-wider">R</span>
+          </div>
+          <div>
+            <h1 className="text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
+              Rummikub <span className="text-amber-400 text-xs px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 font-mono">PRO</span>
+            </h1>
+            <p className="text-xs text-slate-400">Classic Tile Strategy Game</p>
+          </div>
+        </div>
+
+        {/* HUD Game Status Bar */}
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700/60 shadow-inner">
+            <Layers className="w-4 h-4 text-amber-400" />
+            <span className="text-xs text-slate-400 font-medium">Pool:</span>
+            <span className="text-sm font-bold font-mono text-amber-300">{poolCount} tiles</span>
+          </div>
+
+          {/* Persistent Bot Hand Tile Count Display Badge */}
+          <div className="flex items-center gap-1.5 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700/60 text-xs font-semibold shadow-inner text-amber-300">
+            <Bot className="w-4 h-4 text-amber-400" />
+            <span className="text-slate-400">Bot:</span>
+            <span className="font-bold font-mono text-amber-300">{aiTileCount} tiles</span>
+          </div>
+
+          <div
+            className={clsx(
+              'flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-semibold shadow-sm transition-all',
+              isHumanTurn
+                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 animate-pulse-subtle'
+                : 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+            )}
+          >
+            <span className={clsx('w-2 h-2 rounded-full', isHumanTurn ? 'bg-emerald-400' : 'bg-amber-400')} />
+            <span>Turn: {activePlayer?.name || 'Loading...'}</span>
+          </div>
+
+          <div
+            className={clsx(
+              'hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium',
+              humanPlayer?.hasInitialMeld
+                ? 'bg-emerald-950/40 border-emerald-800/50 text-emerald-300'
+                : 'bg-amber-950/40 border-amber-800/50 text-amber-300'
+            )}
+          >
+            {humanPlayer?.hasInitialMeld ? (
+              <>
+                <ShieldCheck className="w-4 h-4 text-emerald-400" />
+                <span>Initial Meld Done</span>
+              </>
+            ) : (
+              <>
+                <ShieldAlert className="w-4 h-4 text-amber-400" />
+                <span>Initial Meld Required (&ge; 30 pts)</span>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* Action & Settings Buttons */}
+        <div className="flex items-center gap-2">
+          {onInstallApp && (
+            <button
+              onClick={onInstallApp}
+              className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-extrabold text-xs shadow-lg shadow-cyan-500/20 flex items-center gap-1.5 transition transform hover:scale-105 active:scale-95 cursor-pointer border border-cyan-300/40"
+              title="Install Rummikub as a standalone PWA application on ChromeOS/Desktop"
+            >
+              <Download className="w-3.5 h-3.5 text-slate-950" />
+              <span>Install App</span>
+            </button>
+          )}
+
+          {/* Toggleable Tile Magnifier Button */}
+          <button
+            onClick={onToggleMagnifier}
+            className={clsx(
+              'px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 border transition cursor-pointer',
+              isMagnifierEnabled
+                ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 shadow-cyan-500/20 shadow-lg ring-1 ring-cyan-400/40'
+                : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white hover:bg-slate-700'
+            )}
+            title="Toggle 2x Zoom Tile Magnifier Preview on hover"
+          >
+            <Search className="w-3.5 h-3.5" />
+            <span>Magnifier: {isMagnifierEnabled ? 'ON' : 'OFF'}</span>
+          </button>
+
+          {onGetHint && (
+            <button
+              onClick={onGetHint}
+              disabled={!isHumanTurn}
+              className={clsx(
+                'px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 border transition shadow-sm',
+                isHumanTurn
+                  ? 'bg-amber-500/20 border-amber-500/50 text-amber-300 hover:bg-amber-500/30 hover:text-amber-100 shadow-amber-500/10 cursor-pointer transform hover:scale-105 active:scale-95'
+                  : 'bg-slate-800/40 border-slate-700/40 text-slate-500 cursor-not-allowed opacity-50'
+              )}
+              title="Get AI move suggestions and hints for your turn"
+            >
+              <Lightbulb className="w-4 h-4 text-amber-400 animate-pulse" />
+              <span>Hint</span>
+            </button>
+          )}
+
+          <button
+            onClick={onToggleSound}
+            className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition border border-slate-700 cursor-pointer"
+            title={soundEnabled ? 'Mute Sound' : 'Enable Sound'}
+          >
+            {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+          </button>
+
+          <button
+            onClick={onOpenRules}
+            className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition border border-slate-700 flex items-center gap-1 text-xs cursor-pointer"
+            title="Game Rules & Guide"
+          >
+            <HelpCircle className="w-4 h-4" />
+            <span className="hidden md:inline">Rules</span>
+          </button>
+
+          <button
+            onClick={onRestartGame}
+            className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white transition border border-slate-700 flex items-center gap-1.5 text-xs font-semibold cursor-pointer"
+          >
+            <RefreshCw className="w-3.5 h-3.5" />
+            <span>New Game</span>
+          </button>
+        </div>
+      </div>
+    </header>
+  );
+};
+
+
+
+/* =============================================================================
+ * FILE: src/components/HintModal.tsx
+ * ============================================================================= */
+
+import React from 'react';
+import type { HintResult, HintMove } from '../engine/hintSolver';
+import { Lightbulb, X, Sparkles, PlusCircle, Split, Info } from 'lucide-react';
+
+
+interface HintModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  hintResult: HintResult | null;
+  onSelectSuggestedTiles: (tileIds: string[]) => void;
+}
+
+export const HintModal: React.FC<HintModalProps> = ({
+  isOpen,
+  onClose,
+  hintResult,
+  onSelectSuggestedTiles,
+}) => {
+  if (!isOpen || !hintResult) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
+      <div className="w-full max-w-xl bg-slate-900 border border-amber-500/40 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+        {/* Header Bar */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-950/80">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shadow-inner">
+              <Lightbulb className="w-6 h-6 animate-pulse" />
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">
+                Move Suggestions & Hints
+              </h3>
+              <p className="text-xs text-slate-400">
+                {hintResult.hasMoves
+                  ? `Found ${hintResult.moves.length} strategic move(s) for your turn`
+                  : 'Turn Strategy Recommendation'}
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Modal Body Content */}
+        <div className="p-6 overflow-y-auto space-y-3.5 flex-1">
+          {!hintResult.hasMoves ? (
+            <div className="py-8 px-4 rounded-xl border border-dashed border-slate-800 bg-slate-950/40 flex flex-col items-center justify-center text-center gap-3">
+              <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-amber-400">
+                <Info className="w-6 h-6" />
+              </div>
+              <h4 className="text-base font-bold text-amber-200">No Valid Plays Found</h4>
+              <p className="text-xs text-slate-400 max-w-md leading-relaxed">
+                There are currently no legal melds or extensions available from your hand.
+                Click <span className="text-amber-300 font-semibold">Draw Tile</span> on the control bar below to pass your turn and get a new tile.
+              </p>
+            </div>
+          ) : (
+            hintResult.moves.map((move: HintMove, idx: number) => (
+              <div
+                key={move.id || idx}
+                className="p-4 rounded-xl border border-slate-800 bg-slate-950/60 hover:border-amber-500/40 transition flex flex-col gap-2.5 shadow-md group"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    {move.type === 'new-meld' && (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                        <Sparkles className="w-3 h-3 text-emerald-400" />
+                        <span>New Meld</span>
+                      </span>
+                    )}
+
+                    {move.type === 'extend-meld' && (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                        <PlusCircle className="w-3 h-3 text-amber-400" />
+                        <span>Extend Meld</span>
+                      </span>
+                    )}
+
+                    {move.type === 'split-recombine' && (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                        <Split className="w-3 h-3 text-purple-400" />
+                        <span>Split & Recombine</span>
+                      </span>
+                    )}
+
+                    <span className="text-xs font-bold text-slate-200">{move.title}</span>
+                  </div>
+
+                  {move.pointValue && move.pointValue > 0 && (
+                    <span className="text-xs font-mono font-bold text-amber-400">
+                      +{move.pointValue} pts
+                    </span>
+                  )}
+                </div>
+
+                <p className="text-xs text-slate-300 font-medium leading-relaxed">
+                  {move.description}
+                </p>
+
+                {move.suggestedTileIds.length > 0 && (
+                  <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between">
+                    <span className="text-[11px] text-slate-400 font-mono">
+                      {move.suggestedTileIds.length} tile(s) suggested
+                    </span>
+
+                    <button
+                      onClick={() => {
+                        onSelectSuggestedTiles(move.suggestedTileIds);
+                        onClose();
+                      }}
+                      className="px-3 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow transition transform hover:scale-105 active:scale-95 flex items-center gap-1"
+                    >
+                      <Sparkles className="w-3.5 h-3.5" />
+                      <span>Select Tiles</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            ))
+          )}
+        </div>
+
+        {/* Modal Footer */}
+        <div className="px-6 py-3 border-t border-slate-800 bg-slate-950/90 flex justify-end">
+          <button
+            onClick={onClose}
+            className="px-4 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+
+/* =============================================================================
+ * FILE: src/components/PlayerRack.tsx
+ * ============================================================================= */
+
+import { Hand } from './Hand';
+
+export const PlayerRack = Hand;
+export default Hand;
+
+
+
+/* =============================================================================
+ * FILE: src/components/RulesModal.tsx
+ * ============================================================================= */
+
+import React from 'react';
+import { X, ShieldAlert, Sparkles, CheckCircle, Layers } from 'lucide-react';
+
+interface RulesModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export const RulesModal: React.FC<RulesModalProps> = ({ isOpen, onClose }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fadeIn">
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+        {/* Modal Header */}
+        <div className="flex items-center justify-between p-5 border-b border-slate-800 bg-slate-900/50">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
+              <Sparkles className="w-5 h-5" />
+            </div>
+            <div>
+              <h2 className="text-lg font-bold text-white">How to Play Rummikub</h2>
+              <p className="text-xs text-slate-400">Official rules & game engine guide</p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        {/* Modal Body Scrollable Content */}
+        <div className="p-6 overflow-y-auto space-y-6 text-sm text-slate-300">
+          {/* Section 1: Objective */}
+          <div className="space-y-2">
+            <h3 className="text-base font-bold text-amber-400 flex items-center gap-2">
+              <Layers className="w-4 h-4" /> Game Objective
+            </h3>
+            <p>
+              Be the first player to clear all 14+ tiles from your rack by forming valid combinations (melds) on the board!
+            </p>
+          </div>
+
+          {/* Section 2: Initial Meld Requirement */}
+          <div className="p-4 rounded-xl bg-amber-950/30 border border-amber-800/40 space-y-2">
+            <h3 className="text-base font-bold text-amber-300 flex items-center gap-2">
+              <ShieldAlert className="w-5 h-5 text-amber-400" /> Initial Meld Requirement (&ge; 30 Points)
+            </h3>
+            <p className="text-xs leading-relaxed text-amber-200/90">
+              For your very first play of the game, you must place valid melds directly from your rack totaling at least{' '}
+              <strong className="text-amber-300 font-bold">30 points</strong>. You cannot manipulate existing table melds until after your initial meld is achieved.
+            </p>
+          </div>
+
+          {/* Section 3: Valid Melds */}
+          <div className="space-y-3">
+            <h3 className="text-base font-bold text-emerald-400 flex items-center gap-2">
+              <CheckCircle className="w-4 h-4" /> Valid Melds
+            </h3>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="p-3.5 rounded-xl bg-slate-800/60 border border-slate-700/60">
+                <h4 className="font-bold text-white mb-1 text-xs uppercase tracking-wider text-amber-300">Groups</h4>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  3 or 4 tiles of the <strong>same number value</strong> with <strong>different colors</strong> (e.g. Red 7, Blue 7, Black 7).
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-slate-800/60 border border-slate-700/60">
+                <h4 className="font-bold text-white mb-1 text-xs uppercase tracking-wider text-emerald-300">Runs</h4>
+                <p className="text-xs text-slate-300 leading-relaxed">
+                  3 or more <strong>consecutive numbers</strong> of the <strong>same color</strong> (e.g. Blue 4, Blue 5, Blue 6, Blue 7).
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Section 4: Jokers */}
+          <div className="space-y-2">
+            <h3 className="text-base font-bold text-amber-400">Jokers</h3>
+            <p className="text-xs leading-relaxed">
+              Jokers can substitute for any tile color or number in a group or run. Their point value matches the tile they substitute for.
+            </p>
+          </div>
+
+          {/* Section 5: Turn Controls */}
+          <div className="space-y-2 border-t border-slate-800 pt-4">
+            <h3 className="text-base font-bold text-slate-200">Turn Snapshot & Actions</h3>
+            <ul className="list-disc list-inside text-xs space-y-1.5 text-slate-400">
+              <li>
+                <strong className="text-slate-200">End Turn:</strong> Validates all melds on the table. Rejects turn if any table meld is invalid.
+              </li>
+              <li>
+                <strong className="text-slate-200">Reset Turn:</strong> Reverts the table board and your rack to the state at the start of your turn.
+              </li>
+              <li>
+                <strong className="text-slate-200">Draw Tile:</strong> Reverts modified board state, draws 1 tile from the pool to your rack, and passes turn.
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        {/* Modal Footer */}
+        <div className="p-4 border-t border-slate-800 bg-slate-900/50 flex justify-end">
+          <button
+            onClick={onClose}
+            className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition"
+          >
+            Got it, Let's Play!
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
+
+/* =============================================================================
+ * FILE: src/components/TileComponent.tsx
+ * ============================================================================= */
+
+import React, { useState } from 'react';
+import type { Tile, TileColor, DragItem } from '../types/game';
+import { Sparkles, Bot } from 'lucide-react';
+import { clsx } from 'clsx';
+
+interface TileComponentProps {
+  tile: Tile;
+  isSelected?: boolean;
+  isRecentlyPlaced?: boolean;
+  isDrawnTile?: boolean;
+  isMagnifierEnabled?: boolean;
+  onClick?: () => void;
+  source: 'rack' | 'board';
+  sourceRackIndex?: number;
+  sourceMeldId?: string;
+  sourceIndex?: number;
+  size?: 'sm' | 'md' | 'lg';
+  onDropOnTile?: (e: React.DragEvent) => void;
+}
+
+const colorStyles: Record<TileColor, { text: string; bg: string; border: string }> = {
+  red: {
+    text: 'text-red-600',
+    bg: 'bg-red-500/10',
+    border: 'border-red-500/30',
+  },
+  blue: {
+    text: 'text-blue-600',
+    bg: 'bg-blue-500/10',
+    border: 'border-blue-500/30',
+  },
+  black: {
+    text: 'text-slate-900 font-extrabold',
+    bg: 'bg-slate-900/10',
+    border: 'border-slate-800/30',
+  },
+  yellow: {
+    text: 'text-amber-500',
+    bg: 'bg-amber-500/10',
+    border: 'border-amber-500/30',
+  },
+};
+
+export const TileComponent: React.FC<TileComponentProps> = ({
+  tile,
+  isSelected = false,
+  isRecentlyPlaced = false,
+  isDrawnTile = false,
+  isMagnifierEnabled = false,
+  onClick,
+  source,
+  sourceRackIndex,
+  sourceMeldId,
+  sourceIndex,
+  size = 'md',
+  onDropOnTile,
+}) => {
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [hoverPos, setHoverPos] = useState<{ x: number; y: number } | null>(null);
+
+  const handleDragStart = (e: React.DragEvent) => {
+    setHoverPos(null);
+    const rect = e.currentTarget.getBoundingClientRect();
+    const dragItem: DragItem = {
+      tileId: tile.id,
+      source,
+      sourceRackIndex,
+      sourceMeldId,
+      sourceIndex,
+      offsetX: e.clientX - rect.left,
+      offsetY: e.clientY - rect.top,
+    };
+    e.dataTransfer.setData('application/json', JSON.stringify(dragItem));
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    if (onDropOnTile) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.dataTransfer.dropEffect = 'move';
+      setIsDragOver(true);
+    }
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    setIsDragOver(false);
+    if (onDropOnTile) {
+      onDropOnTile(e);
+    }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (isMagnifierEnabled) {
+      setHoverPos({ x: e.clientX, y: e.clientY });
+    }
+  };
+
+  const handleMouseLeave = () => {
+    setHoverPos(null);
+  };
+
+  const sizeClasses = {
+    sm: 'w-8 h-12 text-base rounded-md',
+    md: 'w-11 h-16 text-xl rounded-lg',
+    lg: 'w-14 h-20 text-2xl rounded-xl',
+  }[size];
+
+  const colorConfig = colorStyles[tile.color];
+
+  return (
+    <>
+      <div
+        draggable
+        onDragStart={handleDragStart}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        onClick={onClick}
+        className={clsx(
+          'relative select-none flex flex-col items-center justify-between p-1 cursor-grab active:cursor-grabbing',
+          'bg-gradient-to-b from-amber-50 via-amber-100 to-amber-200 border border-amber-300/80',
+          'tile-shadow tile-hover transition-all duration-150 transform',
+          sizeClasses,
+          isSelected && 'tile-selected -translate-y-2 ring-2 ring-amber-400 z-10',
+          isDrawnTile &&
+            'ring-4 ring-amber-400 ring-offset-2 ring-offset-slate-950 scale-105 z-20 shadow-xl shadow-amber-500/50 animate-pulse',
+          isRecentlyPlaced &&
+            'ring-4 ring-cyan-400 ring-offset-2 ring-offset-slate-950 animate-pulse scale-105 z-20 shadow-xl shadow-cyan-500/60',
+          isDragOver && 'ring-4 ring-amber-500 scale-105 z-20 shadow-amber-500/50',
+          colorConfig.text
+        )}
+      >
+        {/* Drawn Tile Highlight "NEW" Badge */}
+        {isDrawnTile && (
+          <span className="absolute -top-2.5 -right-2.5 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 text-[9px] font-extrabold px-1.5 py-0.5 rounded-full shadow-lg border border-amber-300 animate-bounce z-30">
+            NEW
+          </span>
+        )}
+
+        {/* Bot Placement Highlight Badge */}
+        {isRecentlyPlaced && (
+          <span className="absolute -top-2 -right-2 w-4 h-4 bg-cyan-500 text-slate-950 rounded-full font-bold text-[9px] flex items-center justify-center shadow-lg animate-bounce border border-cyan-300 z-30">
+            <Bot className="w-2.5 h-2.5" />
+          </span>
+        )}
+
+        {/* Visual Drop Insertion Line Indicator */}
+        {isDragOver && (
+          <div className="absolute -left-1 top-0 bottom-0 w-1 bg-amber-500 rounded-full animate-pulse z-30" />
+        )}
+
+        <div className="w-full flex items-center justify-between px-0.5 pt-0.5">
+          <span
+            className={clsx(
+              'w-1.5 h-1.5 rounded-full',
+              tile.color === 'red' && 'bg-red-500',
+              tile.color === 'blue' && 'bg-blue-500',
+              tile.color === 'black' && 'bg-slate-900',
+              tile.color === 'yellow' && 'bg-amber-500'
+            )}
+          />
+          <span className="text-[9px] font-mono opacity-50 select-none">R</span>
+        </div>
+
+        <div className="flex-1 flex items-center justify-center font-bold tracking-tight">
+          {tile.isJoker ? (
+            <div className="flex flex-col items-center text-amber-600 animate-pulse">
+              <Sparkles className="w-5 h-5" />
+              <span className="text-[10px] uppercase font-semibold">Joker</span>
+            </div>
+          ) : (
+            <span className="drop-shadow-sm">{tile.value}</span>
+          )}
+        </div>
+
+        <div className="w-full h-1 rounded-full opacity-20 bg-slate-900 mb-0.5" />
+      </div>
+
+      {/* 2x Magnifier Floating Portal Preview */}
+      {isMagnifierEnabled && hoverPos && (
+        <div
+          style={{
+            position: 'fixed',
+            left: `${hoverPos.x + 24}px`,
+            top: `${hoverPos.y + 24}px`,
+          }}
+          className={clsx(
+            'w-22 h-32 rounded-2xl p-2 bg-gradient-to-b from-amber-50 via-amber-100 to-amber-200 border-2 border-amber-400 shadow-2xl ring-4 ring-amber-400/60 flex flex-col items-center justify-between pointer-events-none z-50 animate-fade-in',
+            colorConfig.text
+          )}
+        >
+          <div className="w-full flex items-center justify-between">
+            <span
+              className={clsx(
+                'w-3 h-3 rounded-full',
+                tile.color === 'red' && 'bg-red-500',
+                tile.color === 'blue' && 'bg-blue-500',
+                tile.color === 'black' && 'bg-slate-900',
+                tile.color === 'yellow' && 'bg-amber-500'
+              )}
+            />
+            <span className="text-xs font-mono opacity-70 font-bold">RUMMIKUB</span>
+          </div>
+
+          <div className="flex-1 flex items-center justify-center font-extrabold text-4xl">
+            {tile.isJoker ? (
+              <div className="flex flex-col items-center text-amber-600">
+                <Sparkles className="w-8 h-8" />
+                <span className="text-xs font-bold uppercase tracking-wider mt-1">JOKER</span>
+              </div>
+            ) : (
+              <span>{tile.value}</span>
+            )}
+          </div>
+
+          <div className="w-full h-1.5 rounded-full opacity-30 bg-slate-900" />
+        </div>
+      )}
+    </>
+  );
+};
+
+
+
+/* =============================================================================
+ * FILE: src/components/TurnControls.tsx
+ * ============================================================================= */
+
+import React from 'react';
+import { Play, Plus, Loader2, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import { clsx } from 'clsx';
+
+interface TurnControlsProps {
+  isHumanTurn: boolean;
+  isAiThinking: boolean;
+  tilesPlayedCount: number;
+  isBoardValid: boolean;
+  turnPointsGained: number;
+  hasInitialMeld: boolean;
+  onEndTurn: () => void;
+  onDrawTile: () => void;
+  poolCount: number;
+}
+
+export const TurnControls: React.FC<TurnControlsProps> = ({
+  isHumanTurn,
+  isAiThinking,
+  tilesPlayedCount,
+  isBoardValid,
+  turnPointsGained,
+  hasInitialMeld,
+  onEndTurn,
+  onDrawTile,
+  poolCount,
+}) => {
+  const hasPlayedTiles = tilesPlayedCount > 0;
+  const initialMeldSatisfied = hasInitialMeld || turnPointsGained >= 30;
+  const canEndTurn = hasPlayedTiles && isBoardValid && initialMeldSatisfied;
+
+  return (
+    <div className="w-full bg-slate-900/90 backdrop-blur-md rounded-2xl border border-slate-800 p-4 shadow-xl flex flex-wrap items-center justify-between gap-4">
+      {/* Bot Thinking & Player Status Indicator */}
+      <div className="flex items-center gap-3">
+        {isAiThinking ? (
+          <div className="flex items-center gap-2 text-amber-400 text-sm font-semibold animate-pulse">
+            <Loader2 className="w-4 h-4 animate-spin" />
+            <span>Rummikub Bot is thinking & playing...</span>
+          </div>
+        ) : (
+          <div className="text-xs text-slate-400">
+            {isHumanTurn ? (
+              hasPlayedTiles ? (
+                canEndTurn ? (
+                  <span className="text-emerald-400 font-medium flex items-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4" /> Played {tilesPlayedCount} tile(s) (+{turnPointsGained} pts). Ready to submit!
+                  </span>
+                ) : !initialMeldSatisfied ? (
+                  <span className="text-amber-400 font-medium flex items-center gap-1.5">
+                    <AlertTriangle className="w-4 h-4" /> Played {tilesPlayedCount} tile(s). Initial meld requires 30+ pts from hand ({turnPointsGained}/30 pts).
+                  </span>
+                ) : (
+                  <span className="text-rose-400 font-medium flex items-center gap-1.5">
+                    <AlertTriangle className="w-4 h-4" /> Played {tilesPlayedCount} tile(s). Fix invalid melds on table before ending.
+                  </span>
+                )
+              ) : (
+                <span className="text-slate-300 font-medium">Your Turn: Make table melds or Draw a tile to pass.</span>
+              )
+            ) : (
+              <span className="text-slate-400 font-medium">Opponent's Turn</span>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Dynamic Action Buttons */}
+      <div className="flex items-center gap-3">
+        {/* Draw Tile & Pass Button (Always available to draw/pass turn) */}
+        <button
+          onClick={onDrawTile}
+          disabled={!isHumanTurn || isAiThinking}
+          className={clsx(
+            'px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition border shadow-lg cursor-pointer transform hover:scale-105 active:scale-95',
+            isHumanTurn && !isAiThinking
+              ? 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white border-cyan-400 shadow-blue-500/20'
+              : 'bg-slate-800/40 text-slate-600 border-slate-800 cursor-not-allowed'
+          )}
+          title={
+            hasPlayedTiles
+              ? 'Revert uncommitted board moves, draw 1 tile from pool, and pass turn'
+              : `Draw 1 tile from pool (${poolCount} left) and pass turn`
+          }
+        >
+          <Plus className="w-4 h-4 text-cyan-300" />
+          <span>Draw Tile & Pass (+1)</span>
+        </button>
+
+        {/* End Turn Action / Warning Button */}
+        {hasPlayedTiles && (
+          canEndTurn ? (
+            /* Valid End Turn: Glowing Emerald */
+            <button
+              onClick={onEndTurn}
+              disabled={!isHumanTurn || isAiThinking}
+              className={clsx(
+                'px-6 py-2.5 rounded-xl font-extrabold text-xs flex items-center gap-2 transition border shadow-xl cursor-pointer transform hover:scale-105 active:scale-95 animate-pulse',
+                isHumanTurn && !isAiThinking
+                  ? 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 border-emerald-300 shadow-emerald-500/40 ring-2 ring-emerald-400/60'
+                  : 'bg-slate-800/40 text-slate-600 border-slate-800 cursor-not-allowed'
+              )}
+              title="Submit turn and pass to opponent"
+            >
+              <Play className="w-4 h-4 fill-current text-slate-950" />
+              <span>End Turn</span>
+            </button>
+          ) : !initialMeldSatisfied ? (
+            /* Initial Meld Requirement Not Met */
+            <button
+              onClick={onEndTurn}
+              disabled={!isHumanTurn || isAiThinking}
+              className={clsx(
+                'px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition border shadow-md',
+                isHumanTurn && !isAiThinking
+                  ? 'bg-amber-950/80 hover:bg-amber-900 text-amber-300 border-amber-600/80 cursor-pointer'
+                  : 'bg-slate-800/40 text-slate-600 border-slate-800 cursor-not-allowed'
+              )}
+              title={`Initial meld requires 30+ points from hand (currently ${turnPointsGained} pts)`}
+            >
+              <AlertTriangle className="w-4 h-4 text-amber-400" />
+              <span>End Turn (Need 30+ Pts: {turnPointsGained}/30)</span>
+            </button>
+          ) : (
+            /* Board Melds Invalid */
+            <button
+              onClick={onEndTurn}
+              disabled={!isHumanTurn || isAiThinking}
+              className={clsx(
+                'px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition border shadow-md',
+                isHumanTurn && !isAiThinking
+                  ? 'bg-rose-950/80 hover:bg-rose-900 text-rose-300 border-rose-600/80 cursor-pointer'
+                  : 'bg-slate-800/40 text-slate-600 border-slate-800 cursor-not-allowed'
+              )}
+              title="Click to check invalid melds on the table"
+            >
+              <AlertTriangle className="w-4 h-4 text-rose-400" />
+              <span>End Turn (Fix Invalid Melds)</span>
+            </button>
+          )
+        )}
+      </div>
+    </div>
+  );
+};
+
+
+
+/* =============================================================================
+ * FILE: src/components/WinnerModal.tsx
+ * ============================================================================= */
+
+import React from 'react';
+import type { Player } from '../types/game';
+import { Trophy, RefreshCw, Bot, User } from 'lucide-react';
+
+interface WinnerModalProps {
+  winner: Player | null;
+  onPlayAgain: () => void;
+}
+
+export const WinnerModal: React.FC<WinnerModalProps> = ({ winner, onPlayAgain }) => {
+  if (!winner) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-lg animate-fadeIn">
+      <div className="bg-slate-900 border border-amber-500/40 rounded-3xl max-w-md w-full p-6 text-center shadow-2xl space-y-6 relative overflow-hidden">
+        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-48 h-48 bg-amber-500/20 rounded-full blur-3xl pointer-events-none" />
+
+        <div className="mx-auto w-20 h-20 rounded-full bg-gradient-to-tr from-amber-500 to-yellow-300 p-0.5 shadow-xl shadow-amber-500/20 ring-4 ring-amber-400/30 flex items-center justify-center animate-bounce">
+          <div className="w-full h-full rounded-full bg-slate-950 flex items-center justify-center">
+            <Trophy className="w-10 h-10 text-amber-400" />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <h2 className="text-2xl font-extrabold text-white tracking-tight">
+            {winner.isAi ? 'Game Over!' : 'Victory!'}
+          </h2>
+          <p className="text-sm text-slate-300 flex items-center justify-center gap-2">
+            {winner.isAi ? <Bot className="w-4 h-4 text-amber-400" /> : <User className="w-4 h-4 text-emerald-400" />}
+            <span className="font-bold text-amber-300">{winner.name}</span> has cleared all tiles and won the game!
+          </p>
+        </div>
+
+        <button
+          onClick={onPlayAgain}
+          className="w-full py-3.5 px-6 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-500 hover:from-amber-400 hover:to-yellow-400 text-slate-950 font-black text-sm shadow-xl shadow-amber-500/20 flex items-center justify-center gap-2 transition transform hover:scale-[1.02] active:scale-[0.98]"
+        >
+          <RefreshCw className="w-4 h-4" />
+          <span>Play Again</span>
+        </button>
+      </div>
+    </div>
+  );
+};
+
+
+
+/* =============================================================================
+ * FILE: src/engine/ai.ts
+ * ============================================================================= */
+
+import type { Tile, Meld, Player } from '../types/game';
+import { isValidMeld, calculateMeldValue } from './validator';
+
+export interface AiMoveResult {
+  newBoardMelds: Meld[];
+  newAiRack: Tile[];
+  drewTile: boolean;
+  playedTilesCount: number;
+  message: string;
+}
+
+/**
+ * Searches for all possible valid melds from a set of tiles.
+ */
+export function findPossibleMeldsFromRack(rack: Tile[]): Tile[][] {
+  const validMelds: Tile[][] = [];
+  const n = rack.length;
+
+  for (let len = 3; len <= Math.min(n, 6); len++) {
+    const subsets = getSubsetsOfLength(rack, len);
+    for (const subset of subsets) {
+      const valRes = isValidMeld(subset);
+      if (valRes.isValid) {
+        validMelds.push(subset);
+      }
+    }
+  }
+
+  return validMelds;
+}
+
+/**
+ * Helper to get subsets of fixed length
+ */
+function getSubsetsOfLength<T>(arr: T[], len: number): T[][] {
+  const results: T[][] = [];
+  function helper(start: number, current: T[]) {
+    if (current.length === len) {
+      results.push([...current]);
+      return;
+    }
+    for (let i = start; i < arr.length; i++) {
+      current.push(arr[i]);
+      helper(i + 1, current);
+      current.pop();
+    }
+  }
+  helper(0, []);
+  return results;
+}
+
+/**
+ * Performs an AI turn logic.
+ */
+export function executeAiTurn(
+  aiPlayer: Player,
+  boardMelds: Meld[],
+  tilePool: Tile[]
+): AiMoveResult {
+  const rack = [...aiPlayer.rack];
+
+  const possibleMelds = findPossibleMeldsFromRack(rack);
+
+  if (!aiPlayer.hasInitialMeld) {
+    for (const meldCandidate of possibleMelds) {
+      const val = calculateMeldValue(meldCandidate);
+      if (val >= 30) {
+        const remainingRack = rack.filter((t) => !meldCandidate.some((mt) => mt.id === t.id));
+        const newMeld: Meld = {
+          id: `meld_ai_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+          tiles: meldCandidate,
+          isValid: true,
+          type: isValidMeld(meldCandidate).type,
+          value: val,
+        };
+
+        return {
+          newBoardMelds: [...boardMelds, newMeld],
+          newAiRack: remainingRack,
+          drewTile: false,
+          playedTilesCount: meldCandidate.length,
+          message: `${aiPlayer.name} made initial meld with ${val} points!`,
+        };
+      }
+    }
+
+    return handleAiDraw(aiPlayer, boardMelds, tilePool);
+  }
+
+  if (possibleMelds.length > 0) {
+    possibleMelds.sort((a, b) => calculateMeldValue(b) - calculateMeldValue(a));
+    const bestMeld = possibleMelds[0];
+    const remainingRack = rack.filter((t) => !bestMeld.some((mt) => mt.id === t.id));
+    const val = calculateMeldValue(bestMeld);
+
+    const newMeld: Meld = {
+      id: `meld_ai_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      tiles: bestMeld,
+      isValid: true,
+      type: isValidMeld(bestMeld).type,
+      value: val,
+    };
+
+    return {
+      newBoardMelds: [...boardMelds, newMeld],
+      newAiRack: remainingRack,
+      drewTile: false,
+      playedTilesCount: bestMeld.length,
+      message: `${aiPlayer.name} played a meld of ${bestMeld.length} tiles!`,
+    };
+  }
+
+  for (let mIdx = 0; mIdx < boardMelds.length; mIdx++) {
+    const targetMeld = boardMelds[mIdx];
+    for (let rIdx = 0; rIdx < rack.length; rIdx++) {
+      const tileToTry = rack[rIdx];
+      const candidateAtStart = [tileToTry, ...targetMeld.tiles];
+      if (isValidMeld(candidateAtStart).isValid) {
+        const remainingRack = rack.filter((t) => t.id !== tileToTry.id);
+        const updatedMelds = [...boardMelds];
+        updatedMelds[mIdx] = {
+          ...targetMeld,
+          tiles: candidateAtStart,
+          isValid: true,
+          type: isValidMeld(candidateAtStart).type,
+          value: calculateMeldValue(candidateAtStart),
+        };
+        return {
+          newBoardMelds: updatedMelds,
+          newAiRack: remainingRack,
+          drewTile: false,
+          playedTilesCount: 1,
+          message: `${aiPlayer.name} added a tile to table meld!`,
+        };
+      }
+
+      const candidateAtEnd = [...targetMeld.tiles, tileToTry];
+      if (isValidMeld(candidateAtEnd).isValid) {
+        const remainingRack = rack.filter((t) => t.id !== tileToTry.id);
+        const updatedMelds = [...boardMelds];
+        updatedMelds[mIdx] = {
+          ...targetMeld,
+          tiles: candidateAtEnd,
+          isValid: true,
+          type: isValidMeld(candidateAtEnd).type,
+          value: calculateMeldValue(candidateAtEnd),
+        };
+        return {
+          newBoardMelds: updatedMelds,
+          newAiRack: remainingRack,
+          drewTile: false,
+          playedTilesCount: 1,
+          message: `${aiPlayer.name} added a tile to table meld!`,
+        };
+      }
+    }
+  }
+
+  return handleAiDraw(aiPlayer, boardMelds, tilePool);
+}
+
+function handleAiDraw(aiPlayer: Player, boardMelds: Meld[], tilePool: Tile[]): AiMoveResult {
+  if (tilePool.length === 0) {
+    return {
+      newBoardMelds: boardMelds,
+      newAiRack: aiPlayer.rack,
+      drewTile: true,
+      playedTilesCount: 0,
+      message: `${aiPlayer.name} passed (pool empty).`,
+    };
+  }
+
+  const drawnTile = tilePool[0];
+  return {
+    newBoardMelds: boardMelds,
+    newAiRack: [...aiPlayer.rack, drawnTile],
+    drewTile: true,
+    playedTilesCount: 0,
+    message: `${aiPlayer.name} drew 1 tile from the pool.`,
+  };
+}
+
+
+
+/* =============================================================================
+ * FILE: src/engine/audio.ts
+ * ============================================================================= */
+
+class SoundEngine {
+  private ctx: AudioContext | null = null;
+  private enabled: boolean = true;
+
+  constructor() {
+    // AudioContext will be initialized on first user gesture
+  }
+
+  private initCtx() {
+    if (!this.ctx && typeof window !== 'undefined') {
+      const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      if (AudioCtx) {
+        this.ctx = new AudioCtx();
+      }
+    }
+    if (this.ctx && this.ctx.state === 'suspended') {
+      this.ctx.resume();
+    }
+  }
+
+  public setEnabled(enabled: boolean) {
+    this.enabled = enabled;
+  }
+
+  public isEnabled(): boolean {
+    return this.enabled;
+  }
+
+  /**
+   * Sound when picking up or selecting a tile
+   */
+  public playTileSelect() {
+    if (!this.enabled) return;
+    this.initCtx();
+    if (!this.ctx) return;
+
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(440, this.ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(880, this.ctx.currentTime + 0.05);
+
+    gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.05);
+
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    osc.start();
+    osc.stop(this.ctx.currentTime + 0.05);
+  }
+
+  /**
+   * Tactile click sound when dropping/placing a tile
+   */
+  public playTileDrop() {
+    if (!this.enabled) return;
+    this.initCtx();
+    if (!this.ctx) return;
+
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(320, this.ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(150, this.ctx.currentTime + 0.08);
+
+    gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.08);
+
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    osc.start();
+    osc.stop(this.ctx.currentTime + 0.08);
+  }
+
+  /**
+   * Sound when drawing a tile from pool
+   */
+  public playDraw() {
+    if (!this.enabled) return;
+    this.initCtx();
+    if (!this.ctx) return;
+
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(300, now);
+    osc.frequency.exponentialRampToValueAtTime(600, now + 0.12);
+
+    gain.gain.setValueAtTime(0.12, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.12);
+  }
+
+  /**
+   * Error sound for invalid turn or invalid meld
+   */
+  public playError() {
+    if (!this.enabled) return;
+    this.initCtx();
+    if (!this.ctx) return;
+
+    const now = this.ctx.currentTime;
+    const osc = this.ctx.createOscillator();
+    const gain = this.ctx.createGain();
+
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(180, now);
+    osc.frequency.linearRampToValueAtTime(120, now + 0.2);
+
+    gain.gain.setValueAtTime(0.18, now);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
+
+    osc.connect(gain);
+    gain.connect(this.ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.2);
+  }
+
+  /**
+   * Success sound when valid turn completes
+   */
+  public playSuccess() {
+    if (!this.enabled) return;
+    this.initCtx();
+    if (!this.ctx) return;
+
+    const now = this.ctx.currentTime;
+    [523.25, 659.25, 783.99].forEach((freq, i) => {
+      if (!this.ctx) return;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, now + i * 0.08);
+
+      gain.gain.setValueAtTime(0.12, now + i * 0.08);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.15);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      osc.start(now + i * 0.08);
+      osc.stop(now + i * 0.08 + 0.15);
+    });
+  }
+
+  /**
+   * Celebration fanfare when a player wins
+   */
+  public playWin() {
+    if (!this.enabled) return;
+    this.initCtx();
+    if (!this.ctx) return;
+
+    const notes = [523.25, 659.25, 783.99, 1046.5];
+    const now = this.ctx.currentTime;
+
+    notes.forEach((freq, idx) => {
+      if (!this.ctx) return;
+      const osc = this.ctx.createOscillator();
+      const gain = this.ctx.createGain();
+
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(freq, now + idx * 0.12);
+
+      gain.gain.setValueAtTime(0.2, now + idx * 0.12);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 0.4);
+
+      osc.connect(gain);
+      gain.connect(this.ctx.destination);
+
+      osc.start(now + idx * 0.12);
+      osc.stop(now + idx * 0.12 + 0.4);
+    });
+  }
+}
+
+export const soundEngine = new SoundEngine();
+
+
+
+/* =============================================================================
+ * FILE: src/engine/hintSolver.ts
+ * ============================================================================= */
+
+import type { Tile, Meld } from '../types/game';
+import { isValidMeld, getEffectiveMeldPointValue, normalizeMeld } from './validator';
+
+export interface HintMove {
+  id: string;
+  type: 'new-meld' | 'extend-meld' | 'split-recombine';
+  title: string;
+  description: string;
+  suggestedTileIds: string[];
+  targetMeldId?: string;
+  pointValue?: number;
+}
+
+export interface HintResult {
+  hasMoves: boolean;
+  moves: HintMove[];
+}
+
+/**
+ * Validates that every resulting meld fragment contains at least 3 tiles and forms a valid Group or Run.
+ */
+function validateResultingMelds(resultingMelds: Tile[][]): boolean {
+  return resultingMelds.every(
+    (tiles) => tiles.length >= 3 && isValidMeld(tiles).isValid
+  );
+}
+
+/**
+ * Searches for all possible valid moves using the player's current hand tiles and table board melds.
+ * Rules:
+ * 1. If hasInitialMeld is false: ONLY search for new melds formed exclusively from hand tiles (>= 30 pts).
+ * 2. If hasInitialMeld is true: Search new hand melds, table extensions, and table splits/recombinations.
+ * 3. Point values for table moves reflect ONLY the net contributed points played from hand.
+ */
+export function findPossibleMoves(
+  handTiles: Tile[],
+  boardMelds: Meld[],
+  hasInitialMeld: boolean
+): HintResult {
+  const moves: HintMove[] = [];
+  const moveDescriptions = new Set<string>();
+
+  const n = handTiles.length;
+
+  // 1. Search for New Melds from Hand (subsets of length 3..6)
+  if (n >= 3) {
+    for (let len = 3; len <= Math.min(n, 6); len++) {
+      const subsets = getSubsetsOfLength(handTiles, len);
+      for (const subset of subsets) {
+        const valRes = isValidMeld(subset);
+        if (valRes.isValid) {
+          const points = getEffectiveMeldPointValue(subset);
+          // If initial meld not yet achieved, ONLY accept melds with points >= 30
+          if (hasInitialMeld || points >= 30) {
+            const norm = normalizeMeld(subset);
+            const title = valRes.type === 'run' ? 'Play Run from Hand' : 'Play Group from Hand';
+            const desc =
+              valRes.type === 'run'
+                ? `Form a Run of ${norm[0].color.toUpperCase()} (${norm[0].value}–${norm[norm.length - 1].value}) [${points} pts]`
+                : `Form a Group of ${norm[0].value}s [${points} pts]`;
+
+            if (!moveDescriptions.has(desc)) {
+              moveDescriptions.add(desc);
+              moves.push({
+                id: `hint_new_${Date.now()}_${Math.random().toString(36).substring(2, 5)}`,
+                type: 'new-meld',
+                title,
+                description: desc,
+                suggestedTileIds: subset.map((t) => t.id),
+                pointValue: points,
+              });
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // ENFORCE INITIAL MELD RULE: If initial meld is NOT done, stop here!
+  // Do NOT evaluate or suggest table extensions or table splits/recombinations.
+  if (!hasInitialMeld) {
+    moves.sort((a, b) => (b.pointValue || 0) - (a.pointValue || 0));
+    return {
+      hasMoves: moves.length > 0,
+      moves: moves.slice(0, 6),
+    };
+  }
+
+  // 2. Search for Table Extensions (ONLY when hasInitialMeld is true)
+  for (const meld of boardMelds) {
+    if (!meld.isValid) continue;
+
+    const baseMeldValue = getEffectiveMeldPointValue(meld.tiles);
+
+    for (const ht of handTiles) {
+      // Test prepending to meld
+      const prependSet = [ht, ...meld.tiles];
+      if (isValidMeld(prependSet).isValid) {
+        const netPoints = getEffectiveMeldPointValue(prependSet) - baseMeldValue;
+        const desc = `Attach ${ht.color.toUpperCase()} ${ht.isJoker ? 'Joker' : ht.value} to start of table meld (+${netPoints} pts)`;
+        if (!moveDescriptions.has(desc)) {
+          moveDescriptions.add(desc);
+          moves.push({
+            id: `hint_ext_pre_${Date.now()}_${Math.random().toString(36).substring(2, 5)}`,
+            type: 'extend-meld',
+            title: 'Extend Table Meld',
+            description: desc,
+            suggestedTileIds: [ht.id],
+            targetMeldId: meld.id,
+            pointValue: netPoints,
+          });
+        }
+      }
+
+      // Test appending to meld
+      const appendSet = [...meld.tiles, ht];
+      if (isValidMeld(appendSet).isValid) {
+        const netPoints = getEffectiveMeldPointValue(appendSet) - baseMeldValue;
+        const desc = `Attach ${ht.color.toUpperCase()} ${ht.isJoker ? 'Joker' : ht.value} to end of table meld (+${netPoints} pts)`;
+        if (!moveDescriptions.has(desc)) {
+          moveDescriptions.add(desc);
+          moves.push({
+            id: `hint_ext_app_${Date.now()}_${Math.random().toString(36).substring(2, 5)}`,
+            type: 'extend-meld',
+            title: 'Extend Table Meld',
+            description: desc,
+            suggestedTileIds: [ht.id],
+            targetMeldId: meld.id,
+            pointValue: netPoints,
+          });
+        }
+      }
+    }
+  }
+
+  // 3. Search for Table Splits / Recombinations (ONLY when hasInitialMeld is true)
+  for (const meld of boardMelds) {
+    if (!meld.isValid || meld.tiles.length < 4) continue;
+
+    for (let i = 1; i < meld.tiles.length; i++) {
+      const left = meld.tiles.slice(0, i);
+      const right = meld.tiles.slice(i);
+      const baseLeftValue = getEffectiveMeldPointValue(left);
+      const baseRightValue = getEffectiveMeldPointValue(right);
+
+      for (const ht of handTiles) {
+        // Case A: Attach hand tile to left fragment
+        const leftPrepend = [ht, ...left];
+        const leftAppend = [...left, ht];
+
+        if (validateResultingMelds([leftPrepend, right])) {
+          const netPoints = getEffectiveMeldPointValue(leftPrepend) - baseLeftValue;
+          const desc = `Split table meld and attach ${ht.color.toUpperCase()} ${ht.isJoker ? 'Joker' : ht.value} from hand (+${netPoints} pts)`;
+          if (!moveDescriptions.has(desc)) {
+            moveDescriptions.add(desc);
+            moves.push({
+              id: `hint_split_lp_${Date.now()}_${Math.random().toString(36).substring(2, 5)}`,
+              type: 'split-recombine',
+              title: 'Split & Recombine Meld',
+              description: desc,
+              suggestedTileIds: [ht.id],
+              targetMeldId: meld.id,
+              pointValue: netPoints,
+            });
+          }
+        }
+
+        if (validateResultingMelds([leftAppend, right])) {
+          const netPoints = getEffectiveMeldPointValue(leftAppend) - baseLeftValue;
+          const desc = `Split table meld and attach ${ht.color.toUpperCase()} ${ht.isJoker ? 'Joker' : ht.value} from hand (+${netPoints} pts)`;
+          if (!moveDescriptions.has(desc)) {
+            moveDescriptions.add(desc);
+            moves.push({
+              id: `hint_split_la_${Date.now()}_${Math.random().toString(36).substring(2, 5)}`,
+              type: 'split-recombine',
+              title: 'Split & Recombine Meld',
+              description: desc,
+              suggestedTileIds: [ht.id],
+              targetMeldId: meld.id,
+              pointValue: netPoints,
+            });
+          }
+        }
+
+        // Case B: Attach hand tile to right fragment
+        const rightPrepend = [ht, ...right];
+        const rightAppend = [...right, ht];
+
+        if (validateResultingMelds([left, rightPrepend])) {
+          const netPoints = getEffectiveMeldPointValue(rightPrepend) - baseRightValue;
+          const desc = `Split table meld and attach ${ht.color.toUpperCase()} ${ht.isJoker ? 'Joker' : ht.value} from hand (+${netPoints} pts)`;
+          if (!moveDescriptions.has(desc)) {
+            moveDescriptions.add(desc);
+            moves.push({
+              id: `hint_split_rp_${Date.now()}_${Math.random().toString(36).substring(2, 5)}`,
+              type: 'split-recombine',
+              title: 'Split & Recombine Meld',
+              description: desc,
+              suggestedTileIds: [ht.id],
+              targetMeldId: meld.id,
+              pointValue: netPoints,
+            });
+          }
+        }
+
+        if (validateResultingMelds([left, rightAppend])) {
+          const netPoints = getEffectiveMeldPointValue(rightAppend) - baseRightValue;
+          const desc = `Split table meld and attach ${ht.color.toUpperCase()} ${ht.isJoker ? 'Joker' : ht.value} from hand (+${netPoints} pts)`;
+          if (!moveDescriptions.has(desc)) {
+            moveDescriptions.add(desc);
+            moves.push({
+              id: `hint_split_ra_${Date.now()}_${Math.random().toString(36).substring(2, 5)}`,
+              type: 'split-recombine',
+              title: 'Split & Recombine Meld',
+              description: desc,
+              suggestedTileIds: [ht.id],
+              targetMeldId: meld.id,
+              pointValue: netPoints,
+            });
+          }
+        }
+      }
+    }
+  }
+
+  // Sort moves prioritizing highest net point values first
+  moves.sort((a, b) => (b.pointValue || 0) - (a.pointValue || 0));
+
+  return {
+    hasMoves: moves.length > 0,
+    moves: moves.slice(0, 6),
+  };
+}
+
+function getSubsetsOfLength<T>(arr: T[], len: number): T[][] {
+  const results: T[][] = [];
+  function helper(start: number, current: T[]) {
+    if (current.length === len) {
+      results.push([...current]);
+      return;
+    }
+    for (let i = start; i < arr.length; i++) {
+      current.push(arr[i]);
+      helper(i + 1, current);
+      current.pop();
+    }
+  }
+  helper(0, []);
+  return results;
+}
+
+
+
+/* =============================================================================
+ * FILE: src/engine/tilePool.ts
+ * ============================================================================= */
+
+import type { Tile, TileColor } from '../types/game';
+
+export const COLORS: TileColor[] = ['red', 'blue', 'black', 'yellow'];
+
+/**
+ * Creates a standard full pool of 106 Rummikub tiles.
+ * - 2 sets of 4 colors x values 1-13 (104 tiles)
+ * - 2 Jokers (2 tiles)
+ */
+export function createTilePool(): Tile[] {
+  const pool: Tile[] = [];
+
+  // Generate 2 sets of 4 colors x 1-13
+  for (let set = 1; set <= 2; set++) {
+    for (const color of COLORS) {
+      for (let value = 1; value <= 13; value++) {
+        pool.push({
+          id: `tile_${color}_${value}_set${set}`,
+          color,
+          value,
+          isJoker: false,
+        });
+      }
+    }
+  }
+
+  // Generate 2 Jokers
+  pool.push({
+    id: 'tile_joker_1',
+    color: 'red', // Default visual accent for joker 1
+    value: 0,
+    isJoker: true,
+  });
+
+  pool.push({
+    id: 'tile_joker_2',
+    color: 'black', // Default visual accent for joker 2
+    value: 0,
+    isJoker: true,
+  });
+
+  return pool;
+}
+
+/**
+ * Shuffles an array of tiles in-place using Fisher-Yates algorithm.
+ */
+export function shuffleTiles(tiles: Tile[]): Tile[] {
+  const array = [...tiles];
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+/**
+ * Sorts tiles by value (1-13), then by color.
+ */
+export function sortTilesByValue(tiles: Tile[]): Tile[] {
+  return [...tiles].sort((a, b) => {
+    if (a.isJoker && !b.isJoker) return 1;
+    if (!a.isJoker && b.isJoker) return -1;
+    if (a.value !== b.value) return a.value - b.value;
+    return COLORS.indexOf(a.color) - COLORS.indexOf(b.color);
+  });
+}
+
+/**
+ * Sorts tiles by color, then by value (1-13).
+ */
+export function sortTilesByColor(tiles: Tile[]): Tile[] {
+  return [...tiles].sort((a, b) => {
+    if (a.isJoker && !b.isJoker) return 1;
+    if (!a.isJoker && b.isJoker) return -1;
+    if (a.color !== b.color) {
+      return COLORS.indexOf(a.color) - COLORS.indexOf(b.color);
+    }
+    return a.value - b.value;
+  });
+}
+
+const COLOR_ORDER: TileColor[] = ['red', 'blue', 'black', 'yellow'];
+
+/**
+ * Sorts hand tiles by color hierarchy ('red' -> 'blue' -> 'black' -> 'yellow'),
+ * then ascending numerical value (1-13), placing Jokers at the end.
+ */
+export function sortHandColorThenNumber(tiles: Tile[]): Tile[] {
+  return [...tiles].sort((a, b) => {
+    // 1. Jokers always go to the end
+    if (a.isJoker && !b.isJoker) return 1;
+    if (!a.isJoker && b.isJoker) return -1;
+    if (a.isJoker && b.isJoker) return 0;
+
+    // 2. Sort by color order
+    const colorIndexA = COLOR_ORDER.indexOf(a.color);
+    const colorIndexB = COLOR_ORDER.indexOf(b.color);
+
+    if (colorIndexA !== colorIndexB) {
+      return colorIndexA - colorIndexB;
+    }
+
+    // 3. Within same color, sort ascending by numerical value
+    return a.value - b.value;
+  });
+}
+
+
+
+/* =============================================================================
+ * FILE: src/engine/validator.ts
+ * ============================================================================= */
+
+import type { Tile, TileColor, MeldValidationResult, Meld } from '../types/game';
+
+/**
+ * Validates if a set of tiles forms a valid Rummikub Group.
+ * Group rules:
+ * - 3 or 4 tiles.
+ * - Same number value (1-13).
+ * - Different colors for each non-joker tile.
+ */
+export function isValidGroup(tiles: Tile[]): MeldValidationResult {
+  if (tiles.length < 3 || tiles.length > 4) {
+    return { isValid: false, type: 'invalid', value: 0, errorReason: 'Groups must contain 3 or 4 tiles' };
+  }
+
+  const nonJokers = tiles.filter((t) => !t.isJoker);
+  const jokers = tiles.filter((t) => t.isJoker);
+
+  // All jokers is a valid group (e.g. representing 13s)
+  if (nonJokers.length === 0) {
+    const groupVal = 13;
+    return {
+      isValid: true,
+      type: 'group',
+      value: groupVal * tiles.length,
+    };
+  }
+
+  // All non-jokers must have the exact same value
+  const targetValue = nonJokers[0].value;
+  const hasSameValue = nonJokers.every((t) => t.value === targetValue);
+  if (!hasSameValue) {
+    return { isValid: false, type: 'invalid', value: 0, errorReason: 'Group tiles must have the same number' };
+  }
+
+  // All non-jokers must have unique colors
+  const colorsUsed = new Set<TileColor>();
+  for (const t of nonJokers) {
+    if (colorsUsed.has(t.color)) {
+      return { isValid: false, type: 'invalid', value: 0, errorReason: 'Group tiles cannot have duplicate colors' };
+    }
+    colorsUsed.add(t.color);
+  }
+
+  // Check total colors available (max 4)
+  if (colorsUsed.size + jokers.length > 4) {
+    return { isValid: false, type: 'invalid', value: 0, errorReason: 'Group cannot exceed 4 distinct colors' };
+  }
+
+  // Calculate total value (each tile including joker is worth targetValue)
+  const totalValue = targetValue * tiles.length;
+
+  return {
+    isValid: true,
+    type: 'group',
+    value: totalValue,
+  };
+}
+
+/**
+ * Validates if a set of tiles forms a valid Rummikub Run.
+ * Run rules:
+ * - 3 or more tiles (up to 13).
+ * - Same color for all non-joker tiles.
+ * - Consecutive sequence of numbers (1 to 13). No wrapping.
+ */
+export function isValidRun(tiles: Tile[]): MeldValidationResult {
+  if (tiles.length < 3 || tiles.length > 13) {
+    return { isValid: false, type: 'invalid', value: 0, errorReason: 'Runs must contain between 3 and 13 tiles' };
+  }
+
+  const nonJokers = tiles.filter((t) => !t.isJoker);
+  const N = tiles.length;
+
+  if (nonJokers.length === 0) {
+    // All jokers, valid run starting at 1
+    const value = (N * (N + 1)) / 2;
+    return { isValid: true, type: 'run', value };
+  }
+
+  // All non-jokers must have the exact same color
+  const runColor = nonJokers[0].color;
+  const sameColor = nonJokers.every((t) => t.color === runColor);
+  if (!sameColor) {
+    return { isValid: false, type: 'invalid', value: 0, errorReason: 'Run tiles must be the same color' };
+  }
+
+  // Deduces contextual sequence startValue considering Jokers in array positions
+  let startValue: number | null = null;
+  const firstNonJokerIndex = tiles.findIndex((t) => !t.isJoker);
+
+  if (firstNonJokerIndex !== -1) {
+    const candidateStart = tiles[firstNonJokerIndex].value - firstNonJokerIndex;
+    let isPositionalMatch = true;
+
+    for (let i = 0; i < N; i++) {
+      if (!tiles[i].isJoker) {
+        if (tiles[i].value !== candidateStart + i) {
+          isPositionalMatch = false;
+          break;
+        }
+      }
+    }
+
+    if (isPositionalMatch && candidateStart >= 1 && candidateStart + N - 1 <= 13) {
+      startValue = candidateStart;
+    }
+  }
+
+  // Fallback for non-positional / sorted non-jokers
+  if (startValue === null) {
+    const sortedNonJokers = [...nonJokers].sort((a, b) => a.value - b.value);
+
+    // Check for duplicates in non-jokers
+    for (let i = 0; i < sortedNonJokers.length - 1; i++) {
+      if (sortedNonJokers[i].value === sortedNonJokers[i + 1].value) {
+        return { isValid: false, type: 'invalid', value: 0, errorReason: 'Run tiles cannot have duplicate numbers' };
+      }
+    }
+
+    const minVal = sortedNonJokers[0].value;
+    const maxVal = sortedNonJokers[sortedNonJokers.length - 1].value;
+    const span = maxVal - minVal + 1;
+
+    if (span > N) {
+      return { isValid: false, type: 'invalid', value: 0, errorReason: 'Numbers are not consecutive' };
+    }
+
+    const minPossibleStart = Math.max(1, maxVal - N + 1);
+    const maxPossibleStart = Math.min(13 - N + 1, minVal);
+
+    if (minPossibleStart > maxPossibleStart) {
+      return { isValid: false, type: 'invalid', value: 0, errorReason: 'Run sequence exceeds bounds (1-13)' };
+    }
+
+    startValue = minPossibleStart;
+  }
+
+  const totalValue = (N * (2 * startValue + N - 1)) / 2;
+
+  return {
+    isValid: true,
+    type: 'run',
+    value: totalValue,
+  };
+}
+
+/**
+ * Validates if tiles form a valid group OR valid run.
+ */
+export function isValidMeld(tiles: Tile[]): MeldValidationResult {
+  const groupRes = isValidGroup(tiles);
+  if (groupRes.isValid) return groupRes;
+
+  const runRes = isValidRun(tiles);
+  if (runRes.isValid) return runRes;
+
+  return {
+    isValid: false,
+    type: 'invalid',
+    value: 0,
+    errorReason: groupRes.errorReason || runRes.errorReason || 'Invalid tile combination',
+  };
+}
+
+/**
+ * Calculates the contextual point value of a meld, resolving Joker point values dynamically.
+ * - Group: Each tile (including Jokers) contributes the face value of the group's number.
+ * - Run: Each tile (including Jokers) contributes its exact sequence position value (1-13).
+ */
+export function getEffectiveMeldPointValue(tiles: Tile[]): number {
+  const validation = isValidMeld(tiles);
+  return validation.isValid ? validation.value : 0;
+}
+
+/**
+ * Calculates point value for a valid meld.
+ */
+export function calculateMeldValue(tiles: Tile[]): number {
+  return getEffectiveMeldPointValue(tiles);
+}
+
+/**
+ * Calculates total initial meld points across all melds played from hand during a turn.
+ */
+export function calculateInitialMeldPoints(playedMelds: Tile[][]): number {
+  return playedMelds.reduce((sum, meld) => sum + getEffectiveMeldPointValue(meld), 0);
+}
+
+/**
+ * Evaluates an entire table board state (array of melds).
+ * Returns validity of all melds and total board points.
+ */
+export function validateBoard(melds: Meld[]): {
+  allValid: boolean;
+  invalidMeldIds: string[];
+  totalPoints: number;
+} {
+  const invalidMeldIds: string[] = [];
+  let totalPoints = 0;
+
+  for (const meld of melds) {
+    const res = isValidMeld(meld.tiles);
+    if (!res.isValid) {
+      invalidMeldIds.push(meld.id);
+    } else {
+      totalPoints += res.value;
+    }
+  }
+
+  return {
+    allValid: invalidMeldIds.length === 0,
+    invalidMeldIds,
+    totalPoints,
+  };
+}
+
+/**
+ * Deduces effective numerical value of every tile in a valid Run (including Jokers),
+ * and returns the tiles sorted in strict ascending order (1-13).
+ */
+export function normalizeRun(tiles: Tile[]): Tile[] {
+  const runRes = isValidRun(tiles);
+  if (!runRes.isValid) return tiles;
+
+  const N = tiles.length;
+  const nonJokers = tiles.filter((t) => !t.isJoker);
+
+  if (nonJokers.length === 0) {
+    return tiles;
+  }
+
+  const sortedNonJokers = [...nonJokers].sort((a, b) => a.value - b.value);
+  const minVal = sortedNonJokers[0].value;
+  const maxVal = sortedNonJokers[sortedNonJokers.length - 1].value;
+
+  const minPossibleStart = Math.max(1, maxVal - N + 1);
+  const maxPossibleStart = Math.min(13 - N + 1, minVal);
+
+  let startValue = minPossibleStart;
+  if (minPossibleStart < maxPossibleStart) {
+    const firstNonJokerIdx = tiles.findIndex((t) => !t.isJoker);
+    const reversedTiles = [...tiles].reverse();
+    const lastNonJokerIdxFromEnd = reversedTiles.findIndex((t) => !t.isJoker);
+    const lastNonJokerIdx = tiles.length - 1 - lastNonJokerIdxFromEnd;
+
+    const leadingJokersCount = firstNonJokerIdx;
+    const trailingJokersCount = N - 1 - lastNonJokerIdx;
+
+    if (leadingJokersCount > 0 && minVal - leadingJokersCount >= 1) {
+      startValue = minVal - leadingJokersCount;
+    } else if (trailingJokersCount > 0 && maxVal + trailingJokersCount <= 13) {
+      startValue = maxVal - (N - 1) + trailingJokersCount;
+    } else {
+      startValue = minPossibleStart;
+    }
+
+    startValue = Math.max(minPossibleStart, Math.min(maxPossibleStart, startValue));
+  }
+
+  const assignedValues = Array.from({ length: N }, (_, i) => startValue + i);
+  const assignedTileMap = new Map<string, number>();
+
+  for (const t of nonJokers) {
+    assignedTileMap.set(t.id, t.value);
+  }
+
+  const usedValues = new Set(nonJokers.map((t) => t.value));
+  const remainingValues = assignedValues.filter((v) => !usedValues.has(v));
+
+  const jokers = tiles.filter((t) => t.isJoker);
+  jokers.forEach((jokerTile, idx) => {
+    assignedTileMap.set(jokerTile.id, remainingValues[idx] ?? startValue);
+  });
+
+  return [...tiles].sort((a, b) => {
+    const valA = assignedTileMap.get(a.id) ?? a.value;
+    const valB = assignedTileMap.get(b.id) ?? b.value;
+    return valA - valB;
+  });
+}
+
+/**
+ * Normalizes a Group meld by ordering tiles by color (red -> blue -> black -> yellow), then Jokers.
+ */
+export function normalizeGroup(tiles: Tile[]): Tile[] {
+  const colorOrder: Record<TileColor, number> = {
+    red: 0,
+    blue: 1,
+    black: 2,
+    yellow: 3,
+  };
+
+  return [...tiles].sort((a, b) => {
+    if (a.isJoker && !b.isJoker) return 1;
+    if (!a.isJoker && b.isJoker) return -1;
+    return colorOrder[a.color] - colorOrder[b.color];
+  });
+}
+
+/**
+ * Normalizes any valid meld (sorting Runs in ascending order and Groups by color order).
+ */
+export function normalizeMeld(tiles: Tile[]): Tile[] {
+  if (isValidRun(tiles).isValid) {
+    return normalizeRun(tiles);
+  }
+  if (isValidGroup(tiles).isValid) {
+    return normalizeGroup(tiles);
+  }
+  return tiles;
+}
+
+/**
+ * Applies the automatic end-of-turn normalization pass to all table melds.
+ */
+export function normalizeBoard(melds: Meld[]): Meld[] {
+  return melds.map((meld) => {
+    const normTiles = normalizeMeld(meld.tiles);
+    const valRes = isValidMeld(normTiles);
+    return {
+      ...meld,
+      tiles: normTiles,
+      isValid: valRes.isValid,
+      type: valRes.type,
+      value: valRes.value,
+      errorReason: valRes.errorReason,
+    };
+  });
+}
+
+
+
+/* =============================================================================
+ * FILE: src/hooks/useGameState.ts
+ * ============================================================================= */
+
+import { useState, useCallback, useEffect } from 'react';
+import type { Tile, Meld, Player, TurnSnapshot, GameStatus, SortMode, DragItem, HandTile } from '../types/game';
+import { createTilePool, shuffleTiles, sortHandColorThenNumber } from '../engine/tilePool';
+import { validateBoard, isValidMeld, calculateMeldValue, normalizeMeld, normalizeBoard } from '../engine/validator';
+import { executeAiTurn } from '../engine/ai';
+import { findPossibleMoves, type HintResult } from '../engine/hintSolver';
+import { soundEngine } from '../engine/audio';
+import confetti from 'canvas-confetti';
+
+export interface AutoSplitLink {
+  id: string;
+  autoTileId: string;
+  splitMeldAId: string;
+  splitMeldBId: string;
+  originalRackIndex: number;
+}
+
+interface CompletionResult {
+  pulledTiles: Tile[];
+  completedMeldTiles: Tile[];
+}
+
+function deepCopyTile(tile: Tile): Tile {
+  return { ...tile };
+}
+
+function deepCopyHandTile(ht: HandTile): HandTile {
+  return { tile: deepCopyTile(ht.tile), x: ht.x, y: ht.y };
+}
+
+function deepCopyMelds(melds: Meld[]): Meld[] {
+  return melds.map((meld) => ({
+    ...meld,
+    tiles: meld.tiles.map(deepCopyTile),
+  }));
+}
+
+/**
+ * Ensures tiles in hand are strictly auto-sorted by color then number
+ */
+function createSortedHandTiles(tiles: Tile[]): HandTile[] {
+  const sorted = sortHandColorThenNumber(tiles);
+  return sorted.map((tile, idx) => ({
+    tile: deepCopyTile(tile),
+    x: idx * 48,
+    y: 0,
+  }));
+}
+
+function findCompletingTilesForFragment(
+  fragment: Tile[],
+  handTiles: HandTile[]
+): CompletionResult | null {
+  if (fragment.length >= 3 && isValidMeld(fragment).isValid) {
+    return { pulledTiles: [], completedMeldTiles: normalizeMeld(fragment) };
+  }
+
+  const allHandTiles = handTiles.map((ht) => ht.tile);
+
+  // Try 1-tile completions first
+  for (let i = 0; i < allHandTiles.length; i++) {
+    const cand = allHandTiles[i];
+    const candidateSet = [...fragment, cand];
+    if (isValidMeld(candidateSet).isValid) {
+      return {
+        pulledTiles: [cand],
+        completedMeldTiles: normalizeMeld(candidateSet),
+      };
+    }
+  }
+
+  // Try 2-tile completions second
+  for (let i = 0; i < allHandTiles.length; i++) {
+    for (let j = i + 1; j < allHandTiles.length; j++) {
+      const cand1 = allHandTiles[i];
+      const cand2 = allHandTiles[j];
+      const candidateSet = [...fragment, cand1, cand2];
+      if (isValidMeld(candidateSet).isValid) {
+        return {
+          pulledTiles: [cand1, cand2],
+          completedMeldTiles: normalizeMeld(candidateSet),
+        };
+      }
+    }
+  }
+
+  // Try 3-tile completions third
+  for (let i = 0; i < allHandTiles.length; i++) {
+    for (let j = i + 1; j < allHandTiles.length; j++) {
+      for (let k = j + 1; k < allHandTiles.length; k++) {
+        const cand1 = allHandTiles[i];
+        const cand2 = allHandTiles[j];
+        const cand3 = allHandTiles[k];
+        const candidateSet = [...fragment, cand1, cand2, cand3];
+        if (isValidMeld(candidateSet).isValid) {
+          return {
+            pulledTiles: [cand1, cand2, cand3],
+            completedMeldTiles: normalizeMeld(candidateSet),
+          };
+        }
+      }
+    }
+  }
+
+  return null;
+}
+
+export function useGameState() {
+  const [tilePool, setTilePool] = useState<Tile[]>([]);
+  const [boardMelds, setBoardMelds] = useState<Meld[]>([]);
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [activePlayerIndex, setActivePlayerIndex] = useState<number>(0);
+  const [gameStatus, setGameStatus] = useState<GameStatus>('playing');
+  const [winner, setWinner] = useState<Player | null>(null);
+
+  const [turnSnapshot, setTurnSnapshot] = useState<TurnSnapshot | null>(null);
+  const [autoSplitLinks, setAutoSplitLinks] = useState<AutoSplitLink[]>([]);
+
+  // Event-driven bot move meld highlights state
+  const [highlightedMeldIds, setHighlightedMeldIds] = useState<string[]>([]);
+
+  // State tracking for newly drawn tile in hand
+  const [drawnTileId, setDrawnTileId] = useState<string | null>(null);
+
+  // Hint engine state
+  const [hintResult, setHintResult] = useState<HintResult | null>(null);
+  const [isHintOpen, setIsHintOpen] = useState<boolean>(false);
+
+  // Toggleable Tile Magnifier Preview State
+  const [isMagnifierEnabled, setIsMagnifierEnabled] = useState<boolean>(false);
+
+  const toggleMagnifier = useCallback(() => {
+    setIsMagnifierEnabled((prev) => !prev);
+  }, []);
+
+  const clearMeldHighlights = useCallback(() => {
+    setHighlightedMeldIds((prev) => (prev.length > 0 ? [] : prev));
+    setDrawnTileId((prev) => (prev !== null ? null : prev));
+  }, []);
+
+  // Global mousedown event listener for immediate dismissal of bot meld highlights and drawn tile highlight
+  useEffect(() => {
+    if (highlightedMeldIds.length === 0 && drawnTileId === null) return;
+
+    const handleGlobalMouseDown = () => {
+      clearMeldHighlights();
+    };
+
+    window.addEventListener('mousedown', handleGlobalMouseDown, { capture: true });
+    return () => {
+      window.removeEventListener('mousedown', handleGlobalMouseDown, { capture: true });
+    };
+  }, [highlightedMeldIds, drawnTileId, clearMeldHighlights]);
+
+  const [selectedTileIds, setSelectedTileIds] = useState<string[]>([]);
+  const [notification, setNotification] = useState<{ message: string; type: 'error' | 'success' | 'info' } | null>(null);
+  const [sortMode, setSortMode] = useState<SortMode>('none');
+  const [isAiThinking, setIsAiThinking] = useState<boolean>(false);
+  const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
+
+  const toggleSound = useCallback(() => {
+    const nextState = !soundEnabled;
+    setSoundEnabled(nextState);
+    soundEngine.setEnabled(nextState);
+  }, [soundEnabled]);
+
+  const showToast = useCallback((message: string, type: 'error' | 'success' | 'info' = 'info') => {
+    setNotification({ message, type });
+    if (type === 'error') {
+      soundEngine.playError();
+    }
+    setTimeout(() => {
+      setNotification((prev) => (prev?.message === message ? null : prev));
+    }, 4500);
+  }, []);
+
+  const setHumanHandTiles = useCallback((updater: (prev: HandTile[]) => HandTile[]) => {
+    setPlayers((prevPlayers) => {
+      const copy = [...prevPlayers];
+      if (copy[0]) {
+        const nextRawHand = updater(copy[0].handTiles || []);
+        const tilesOnly = nextRawHand.map((ht) => ht.tile);
+        const sortedHand = createSortedHandTiles(tilesOnly);
+
+        copy[0] = {
+          ...copy[0],
+          handTiles: sortedHand,
+          playerRacks: [sortedHand.map((ht) => ht.tile), []],
+          rack: sortedHand.map((ht) => ht.tile),
+        };
+      }
+      return copy;
+    });
+  }, []);
+
+  const startNewGame = useCallback(() => {
+    clearMeldHighlights();
+    const freshPool = shuffleTiles(createTilePool());
+
+    const humanHand = freshPool.slice(0, 14);
+    const aiHand = freshPool.slice(14, 28);
+    const remainingPool = freshPool.slice(28);
+
+    const initialHumanHandTiles = createSortedHandTiles(humanHand);
+    const initialAiHandTiles = createSortedHandTiles(aiHand);
+
+    const initialPlayers: Player[] = [
+      {
+        id: 'player_human',
+        name: 'Player',
+        isAi: false,
+        handTiles: initialHumanHandTiles,
+        playerRacks: [initialHumanHandTiles.map((ht) => ht.tile), []],
+        rack: initialHumanHandTiles.map((ht) => ht.tile),
+        hasInitialMeld: false,
+        score: 0,
+      },
+      {
+        id: 'player_ai_1',
+        name: 'Rummikub Bot',
+        isAi: true,
+        handTiles: initialAiHandTiles,
+        playerRacks: [initialAiHandTiles.map((ht) => ht.tile), []],
+        rack: initialAiHandTiles.map((ht) => ht.tile),
+        hasInitialMeld: false,
+        score: 0,
+      },
+    ];
+
+    setTilePool(remainingPool.map(deepCopyTile));
+    setBoardMelds([]);
+    setPlayers(initialPlayers);
+    setActivePlayerIndex(0);
+    setGameStatus('playing');
+    setWinner(null);
+    setSelectedTileIds([]);
+    setSortMode('none');
+    setAutoSplitLinks([]);
+    setHighlightedMeldIds([]);
+    setDrawnTileId(null);
+    setHintResult(null);
+    setIsHintOpen(false);
+
+    setTurnSnapshot({
+      boardMelds: [],
+      handTiles: initialHumanHandTiles.map(deepCopyHandTile),
+      playerRacks: [initialHumanHandTiles.map((ht) => ht.tile), []],
+      playerRack: initialHumanHandTiles.map((ht) => ht.tile),
+      hasInitialMeld: false,
+      poolCount: remainingPool.length,
+    });
+
+    showToast('New game started! 14 tiles arranged in auto-sorted hand tray.', 'info');
+  }, [showToast, clearMeldHighlights]);
+
+  useEffect(() => {
+    startNewGame();
+  }, [startNewGame]);
+
+  const activePlayer = players[activePlayerIndex] || null;
+  const humanPlayer = players[0] || null;
+  const isHumanTurn = activePlayer ? !activePlayer.isAi : false;
+
+  const refreshBoardMelds = useCallback((melds: Meld[]): Meld[] => {
+    return melds.map((meld) => {
+      const valRes = isValidMeld(meld.tiles);
+      return {
+        ...meld,
+        isValid: valRes.isValid,
+        type: valRes.type,
+        value: valRes.value,
+        errorReason: valRes.errorReason,
+      };
+    });
+  }, []);
+
+  const toggleTileSelection = useCallback((tileId: string) => {
+    clearMeldHighlights();
+    soundEngine.playTileSelect();
+    setSelectedTileIds((prev) =>
+      prev.includes(tileId) ? prev.filter((id) => id !== tileId) : [...prev, tileId]
+    );
+  }, [clearMeldHighlights]);
+
+  const clearSelection = useCallback(() => {
+    setSelectedTileIds([]);
+  }, []);
+
+  const sortRack = useCallback(
+    () => {
+      clearMeldHighlights();
+      if (!humanPlayer) return;
+      const tiles = humanPlayer.handTiles.map((ht) => ht.tile);
+      const sorted = createSortedHandTiles(tiles);
+      setHumanHandTiles(() => sorted);
+      soundEngine.playTileSelect();
+    },
+    [humanPlayer, setHumanHandTiles, clearMeldHighlights]
+  );
+
+  const clearToRack1 = useCallback(() => {
+    sortRack();
+  }, [sortRack]);
+
+  const resetTurn = useCallback(() => {
+    if (!turnSnapshot || !isHumanTurn) return;
+    clearMeldHighlights();
+
+    setBoardMelds(deepCopyMelds(turnSnapshot.boardMelds));
+    setHumanHandTiles(() => turnSnapshot.handTiles.map(deepCopyHandTile));
+    setSelectedTileIds([]);
+    setAutoSplitLinks([]);
+    soundEngine.playTileDrop();
+    showToast('Turn reset to start snapshot.', 'info');
+  }, [turnSnapshot, isHumanTurn, setHumanHandTiles, showToast, clearMeldHighlights]);
+
+  const createMeldFromSelection = useCallback(() => {
+    clearMeldHighlights();
+    if (selectedTileIds.length < 3) {
+      showToast('A meld requires at least 3 tiles.', 'error');
+      return;
+    }
+
+    if (!humanPlayer) return;
+
+    const tilesToMeld: Tile[] = [];
+    humanPlayer.handTiles.forEach((ht) => {
+      if (selectedTileIds.includes(ht.tile.id)) {
+        tilesToMeld.push(ht.tile);
+      }
+    });
+
+    boardMelds.forEach((meld) => {
+      meld.tiles.forEach((t) => {
+        if (selectedTileIds.includes(t.id)) {
+          tilesToMeld.push(t);
+        }
+      });
+    });
+
+    if (tilesToMeld.length !== selectedTileIds.length) {
+      showToast('Could not locate all selected tiles.', 'error');
+      return;
+    }
+
+    const valRes = isValidMeld(tilesToMeld);
+
+    setHumanHandTiles((prev) => prev.filter((ht) => !selectedTileIds.includes(ht.tile.id)));
+
+    const updatedBoardMelds = boardMelds
+      .map((meld) => ({
+        ...meld,
+        tiles: meld.tiles.filter((t) => !selectedTileIds.includes(t.id)),
+      }))
+      .filter((meld) => meld.tiles.length > 0);
+
+    const normTiles = normalizeMeld(tilesToMeld);
+    const newMeld: Meld = {
+      id: `meld_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      tiles: normTiles,
+      isValid: valRes.isValid,
+      type: valRes.type,
+      value: valRes.value,
+      errorReason: valRes.errorReason,
+    };
+
+    setBoardMelds(refreshBoardMelds([...updatedBoardMelds, newMeld]));
+    setSelectedTileIds([]);
+    soundEngine.playTileDrop();
+
+    if (!valRes.isValid) {
+      showToast(`Warning: Formed meld is invalid (${valRes.errorReason}).`, 'error');
+    }
+  }, [selectedTileIds, humanPlayer, boardMelds, setHumanHandTiles, refreshBoardMelds, showToast, clearMeldHighlights]);
+
+  // Drop onto Hand Tray (returns tile to auto-sorted hand)
+  const handleDropTileCanvas = useCallback(
+    (item: DragItem) => {
+      if (!humanPlayer || !isHumanTurn) return;
+      clearMeldHighlights();
+
+      if (item.source === 'board') {
+        const turnStartHandTileIds = new Set(turnSnapshot?.handTiles.map((ht) => ht.tile.id));
+        const autoLink = autoSplitLinks.find((l) => l.autoTileId === item.tileId);
+
+        if (!turnStartHandTileIds.has(item.tileId) && !autoLink) {
+          soundEngine.playError();
+          showToast('Cannot return board tiles to hand.', 'error');
+          return;
+        }
+
+        if (autoLink) {
+          const splitLinks = autoSplitLinks.filter(
+            (l) => l.splitMeldAId === autoLink.splitMeldAId && l.splitMeldBId === autoLink.splitMeldBId
+          );
+          const autoTileIdsForThisSplit = new Set(splitLinks.map((l) => l.autoTileId));
+
+          const autoTilesToReturn: Tile[] = [];
+          boardMelds.forEach((m) => {
+            if (m.id === autoLink.splitMeldAId || m.id === autoLink.splitMeldBId) {
+              m.tiles.forEach((t) => {
+                if (autoTileIdsForThisSplit.has(t.id) && t.id !== item.tileId) {
+                  autoTilesToReturn.push(t);
+                }
+              });
+            }
+          });
+
+          if (autoTilesToReturn.length > 0) {
+            setHumanHandTiles((prev) => {
+              const currentHandTiles = prev.map((ht) => ht.tile);
+              return createSortedHandTiles([...currentHandTiles, ...autoTilesToReturn]);
+            });
+          }
+
+          setAutoSplitLinks((prev) =>
+            prev.filter((l) => !(l.splitMeldAId === autoLink.splitMeldAId && l.splitMeldBId === autoLink.splitMeldBId))
+          );
+
+          const meldA = boardMelds.find((m) => m.id === autoLink.splitMeldAId);
+          const meldB = boardMelds.find((m) => m.id === autoLink.splitMeldBId);
+
+          if (meldA || meldB) {
+            const tilesA = meldA ? meldA.tiles.filter((t) => !autoTileIdsForThisSplit.has(t.id)) : [];
+            const tilesB = meldB ? meldB.tiles.filter((t) => !autoTileIdsForThisSplit.has(t.id)) : [];
+
+            const mergedTiles = normalizeMeld([...tilesA, ...tilesB]);
+
+            if (mergedTiles.length > 0) {
+              const mergedMeld: Meld = {
+                id: `meld_remerged_${Date.now()}_${Math.random().toString(36).substring(2, 5)}`,
+                tiles: mergedTiles,
+                isValid: isValidMeld(mergedTiles).isValid,
+                type: isValidMeld(mergedTiles).type,
+                value: calculateMeldValue(mergedTiles),
+              };
+
+              const nextMelds = boardMelds
+                .filter((m) => m.id !== autoLink.splitMeldAId && m.id !== autoLink.splitMeldBId)
+                .concat(mergedMeld);
+
+              setBoardMelds(refreshBoardMelds(nextMelds));
+              showToast('Re-merged split melds back into single set upon returning auto-attached tile.', 'info');
+            }
+          }
+        }
+      }
+
+      // Find tile to move
+      let tileToMove: Tile | null = null;
+      if (item.source === 'rack') {
+        const foundHt = humanPlayer.handTiles.find((ht) => ht.tile.id === item.tileId);
+        tileToMove = foundHt ? foundHt.tile : null;
+      } else if (item.source === 'board' && item.sourceMeldId) {
+        const sourceMeld = boardMelds.find((m) => m.id === item.sourceMeldId);
+        tileToMove = sourceMeld?.tiles.find((t) => t.id === item.tileId) || null;
+      }
+
+      if (!tileToMove) return;
+
+      if (item.source === 'board' && item.sourceMeldId) {
+        const nextBoardMelds = boardMelds
+          .map((m) => (m.id === item.sourceMeldId ? { ...m, tiles: m.tiles.filter((t) => t.id !== item.tileId) } : m))
+          .filter((m) => m.tiles.length > 0);
+        setBoardMelds(refreshBoardMelds(nextBoardMelds));
+      }
+
+      setHumanHandTiles((prev) => {
+        const existing = prev.filter((ht) => ht.tile.id !== tileToMove!.id).map((ht) => ht.tile);
+        return createSortedHandTiles([...existing, tileToMove!]);
+      });
+
+      soundEngine.playTileDrop();
+      setSelectedTileIds([]);
+    },
+    [humanPlayer, isHumanTurn, boardMelds, turnSnapshot, autoSplitLinks, setHumanHandTiles, refreshBoardMelds, showToast, clearMeldHighlights]
+  );
+
+  // Drop onto board melds or new melds
+  const handleDropTile = useCallback(
+    (
+      item: DragItem,
+      targetLocation: {
+        type: 'board-new' | 'board-meld' | 'rack-0' | 'rack-1' | 'rack';
+        meldId?: string;
+        targetIndex?: number;
+      }
+    ) => {
+      if (!humanPlayer || !isHumanTurn) return;
+      clearMeldHighlights();
+
+      let tileToMove: Tile | null = null;
+
+      if (item.source === 'rack') {
+        const foundHt = humanPlayer.handTiles.find((ht) => ht.tile.id === item.tileId);
+        tileToMove = foundHt ? foundHt.tile : null;
+      } else if (item.source === 'board' && item.sourceMeldId) {
+        const sourceMeld = boardMelds.find((m) => m.id === item.sourceMeldId);
+        tileToMove = sourceMeld?.tiles.find((t) => t.id === item.tileId) || null;
+      }
+
+      if (!tileToMove) return;
+
+      // Dynamic Drag Splitting & Multi-Tile Auto-Assist Engine
+      if (targetLocation.type === 'board-new' && item.source === 'board' && item.sourceMeldId) {
+        const sourceMeld = boardMelds.find((m) => m.id === item.sourceMeldId);
+        const sourceIdx = item.sourceIndex ?? 0;
+
+        if (sourceMeld && sourceMeld.tiles.length > 1 && sourceIdx > 0) {
+          let leftPiece = sourceMeld.tiles.slice(0, sourceIdx);
+          let rightPiece = sourceMeld.tiles.slice(sourceIdx);
+
+          let currentHand = humanPlayer.handTiles.map(deepCopyHandTile);
+          let newAutoLinks: AutoSplitLink[] = [];
+
+          const leftMeldId = `meld_split_left_${Date.now()}_${Math.random().toString(36).substring(2, 5)}`;
+          const rightMeldId = `meld_split_right_${Date.now()}_${Math.random().toString(36).substring(2, 5)}`;
+
+          const completionA = findCompletingTilesForFragment(leftPiece, currentHand);
+          if (!completionA) {
+            soundEngine.playError();
+            showToast('Invalid Split: Inadequate meld cannot be completed with tiles from hand.', 'error');
+            return;
+          }
+
+          leftPiece = completionA.completedMeldTiles;
+          for (const pulled of completionA.pulledTiles) {
+            currentHand = currentHand.filter((ht) => ht.tile.id !== pulled.id);
+            newAutoLinks.push({
+              id: `link_${Date.now()}_A_${pulled.id}`,
+              autoTileId: pulled.id,
+              splitMeldAId: leftMeldId,
+              splitMeldBId: rightMeldId,
+              originalRackIndex: 0,
+            });
+          }
+
+          const completionB = findCompletingTilesForFragment(rightPiece, currentHand);
+          if (!completionB) {
+            soundEngine.playError();
+            showToast('Invalid Split: Inadequate meld cannot be completed with tiles from hand.', 'error');
+            return;
+          }
+
+          rightPiece = completionB.completedMeldTiles;
+          for (const pulled of completionB.pulledTiles) {
+            currentHand = currentHand.filter((ht) => ht.tile.id !== pulled.id);
+            newAutoLinks.push({
+              id: `link_${Date.now()}_B_${pulled.id}`,
+              autoTileId: pulled.id,
+              splitMeldAId: leftMeldId,
+              splitMeldBId: rightMeldId,
+              originalRackIndex: 0,
+            });
+          }
+
+          if (newAutoLinks.length > 0) {
+            setHumanHandTiles(() => currentHand);
+            setAutoSplitLinks((prev) => [...prev, ...newAutoLinks]);
+          }
+
+          const meld1: Meld = {
+            id: leftMeldId,
+            tiles: leftPiece,
+            isValid: isValidMeld(leftPiece).isValid,
+            type: isValidMeld(leftPiece).type,
+            value: calculateMeldValue(leftPiece),
+          };
+
+          const meld2: Meld = {
+            id: rightMeldId,
+            tiles: rightPiece,
+            isValid: isValidMeld(rightPiece).isValid,
+            type: isValidMeld(rightPiece).type,
+            value: calculateMeldValue(rightPiece),
+          };
+
+          const updatedBoardMelds = boardMelds
+            .flatMap((m) => (m.id === item.sourceMeldId ? [meld1, meld2] : [m]))
+            .filter((m) => m.tiles.length > 0);
+
+          setBoardMelds(refreshBoardMelds(updatedBoardMelds));
+          soundEngine.playTileDrop();
+          setSelectedTileIds([]);
+
+          if (newAutoLinks.length > 0) {
+            showToast(
+              `Auto-assisted split! Moved ${newAutoLinks.length} matching tile(s) from hand to complete 3-tile meld(s).`,
+              'success'
+            );
+          }
+          return;
+        }
+      }
+
+      soundEngine.playTileDrop();
+
+      if (targetLocation.type === 'board-new') {
+        if (item.source === 'rack') {
+          setHumanHandTiles((prev) => prev.filter((ht) => ht.tile.id !== tileToMove!.id));
+        }
+
+        const cleanedMelds = boardMelds
+          .map((m) => (m.id === item.sourceMeldId ? { ...m, tiles: m.tiles.filter((t) => t.id !== item.tileId) } : m))
+          .filter((m) => m.tiles.length > 0);
+
+        const newMeld: Meld = {
+          id: `meld_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+          tiles: [tileToMove],
+          isValid: false,
+          type: 'invalid',
+          value: 0,
+          errorReason: 'Needs at least 3 tiles to be valid',
+        };
+
+        setBoardMelds(refreshBoardMelds([...cleanedMelds, newMeld]));
+      } else if (targetLocation.type === 'board-meld' && targetLocation.meldId) {
+        if (item.source === 'rack') {
+          setHumanHandTiles((prev) => prev.filter((ht) => ht.tile.id !== tileToMove!.id));
+        }
+
+        const nextMelds = boardMelds
+          .map((m) => {
+            let tiles = m.tiles;
+            if (m.id === item.sourceMeldId) {
+              tiles = tiles.filter((t) => t.id !== item.tileId);
+            }
+
+            if (m.id === targetLocation.meldId) {
+              const rawTiles = [...tiles, tileToMove!];
+              tiles = normalizeMeld(rawTiles);
+            }
+
+            return { ...m, tiles };
+          })
+          .filter((m) => m.tiles.length > 0);
+
+        setBoardMelds(refreshBoardMelds(nextMelds));
+      }
+
+      setSelectedTileIds([]);
+    },
+    [humanPlayer, isHumanTurn, boardMelds, turnSnapshot, autoSplitLinks, setHumanHandTiles, refreshBoardMelds, showToast, clearMeldHighlights]
+  );
+
+  const splitMeldAt = useCallback(
+    (meldId: string, splitIndex: number) => {
+      clearMeldHighlights();
+      const targetMeld = boardMelds.find((m) => m.id === meldId);
+      if (!targetMeld || splitIndex <= 0 || splitIndex >= targetMeld.tiles.length) return;
+
+      const firstHalf = normalizeMeld(targetMeld.tiles.slice(0, splitIndex));
+      const secondHalf = normalizeMeld(targetMeld.tiles.slice(splitIndex));
+
+      const meld1: Meld = {
+        id: `meld_split_1_${Date.now()}_${Math.random().toString(36).substring(2, 5)}`,
+        tiles: firstHalf,
+        isValid: isValidMeld(firstHalf).isValid,
+        type: isValidMeld(firstHalf).type,
+        value: calculateMeldValue(firstHalf),
+      };
+
+      const meld2: Meld = {
+        id: `meld_split_2_${Date.now()}_${Math.random().toString(36).substring(2, 5)}`,
+        tiles: secondHalf,
+        isValid: isValidMeld(secondHalf).isValid,
+        type: isValidMeld(secondHalf).type,
+        value: calculateMeldValue(secondHalf),
+      };
+
+      const updatedMelds = boardMelds
+        .flatMap((m) => (m.id === meldId ? [meld1, meld2] : [m]))
+        .filter((m) => m.tiles.length > 0);
+
+      setBoardMelds(refreshBoardMelds(updatedMelds));
+      soundEngine.playTileDrop();
+      showToast('Split meld into two sets.', 'info');
+    },
+    [boardMelds, refreshBoardMelds, showToast, clearMeldHighlights]
+  );
+
+  const getHint = useCallback(() => {
+    if (!isHumanTurn || !humanPlayer) return;
+    const handTiles = humanPlayer.handTiles.map((ht) => ht.tile);
+    const result = findPossibleMoves(handTiles, boardMelds, humanPlayer.hasInitialMeld);
+    setHintResult(result);
+    setIsHintOpen(true);
+    soundEngine.playTileSelect();
+  }, [isHumanTurn, humanPlayer, boardMelds]);
+
+  const closeHint = useCallback(() => {
+    setIsHintOpen(false);
+  }, []);
+
+  const selectSuggestedTiles = useCallback(
+    (tileIds: string[]) => {
+      setSelectedTileIds(tileIds);
+      soundEngine.playTileSelect();
+      showToast(`Selected ${tileIds.length} suggested tile(s) in hand.`, 'info');
+    },
+    [showToast]
+  );
+
+  const advanceTurn = useCallback(
+    (newBoard: Meld[], newPlayers: Player[], nextPool: Tile[]) => {
+      const cleanBoard = deepCopyMelds(newBoard);
+      const cleanPlayers = newPlayers.map((p) => ({
+        ...p,
+        handTiles: createSortedHandTiles(p.handTiles.map((ht) => ht.tile)),
+        playerRacks: [p.handTiles.map((ht) => ht.tile), []] as [Tile[], Tile[]],
+        rack: p.handTiles.map((ht) => ht.tile),
+      }));
+
+      setBoardMelds(cleanBoard);
+      setPlayers(cleanPlayers);
+      setTilePool(nextPool.map(deepCopyTile));
+      setAutoSplitLinks([]);
+
+      const nextIndex = (activePlayerIndex + 1) % cleanPlayers.length;
+      setActivePlayerIndex(nextIndex);
+
+      const nextPlayer = cleanPlayers[nextIndex];
+
+      setTurnSnapshot({
+        boardMelds: deepCopyMelds(cleanBoard),
+        handTiles: nextPlayer.handTiles.map(deepCopyHandTile),
+        playerRacks: [nextPlayer.handTiles.map((ht) => ht.tile), []],
+        playerRack: nextPlayer.handTiles.map((ht) => ht.tile),
+        hasInitialMeld: nextPlayer.hasInitialMeld,
+        poolCount: nextPool.length,
+      });
+
+      setSelectedTileIds([]);
+    },
+    [activePlayerIndex]
+  );
+
+  const drawTile = useCallback(() => {
+    if (!isHumanTurn || gameStatus === 'ended') return;
+    clearMeldHighlights();
+
+    if (tilePool.length === 0) {
+      showToast('Tile pool is empty! Passing turn.', 'info');
+      advanceTurn(turnSnapshot?.boardMelds || boardMelds, players, tilePool);
+      return;
+    }
+
+    let currentHand = humanPlayer ? humanPlayer.handTiles.map((ht) => ht.tile) : [];
+
+    const turnStartHand = turnSnapshot ? turnSnapshot.handTiles.map((ht) => ht.tile) : [];
+    const currentHandTileIds = new Set(currentHand.map((t) => t.id));
+    const uncommittedHandTiles = turnStartHand.filter((t) => !currentHandTileIds.has(t.id));
+
+    currentHand = [...currentHand, ...uncommittedHandTiles];
+
+    const drawnTile = deepCopyTile(tilePool[0]);
+    const remainingPool = tilePool.slice(1);
+    currentHand.push(drawnTile);
+
+    // Track drawn tile ID for visual highlight ring and "NEW" badge
+    setDrawnTileId(drawnTile.id);
+
+    const autoArrangedHand = createSortedHandTiles(currentHand);
+
+    const restoredBoard = turnSnapshot ? deepCopyMelds(turnSnapshot.boardMelds) : deepCopyMelds(boardMelds);
+
+    const updatedPlayers = players.map((p, idx) =>
+      idx === 0
+        ? {
+            ...p,
+            handTiles: autoArrangedHand,
+            playerRacks: [autoArrangedHand.map((ht) => ht.tile), []] as [Tile[], Tile[]],
+            rack: autoArrangedHand.map((ht) => ht.tile),
+          }
+        : p
+    );
+
+    setAutoSplitLinks([]);
+    soundEngine.playDraw();
+    showToast(`You drew a tile (${drawnTile.isJoker ? 'Joker' : `${drawnTile.color} ${drawnTile.value}`}).`, 'info');
+
+    advanceTurn(restoredBoard, updatedPlayers, remainingPool);
+  }, [isHumanTurn, gameStatus, tilePool, turnSnapshot, boardMelds, players, showToast, advanceTurn, clearMeldHighlights, humanPlayer]);
+
+  const endTurn = useCallback(() => {
+    if (!isHumanTurn || !turnSnapshot || gameStatus === 'ended') return;
+    clearMeldHighlights();
+
+    const human = players[0];
+
+    const boardValidation = validateBoard(boardMelds);
+    if (!boardValidation.allValid) {
+      showToast(
+        `Cannot end turn: There are invalid melds on the table (${boardValidation.invalidMeldIds.length} invalid).`,
+        'error'
+      );
+      return;
+    }
+
+    const startHandCount = turnSnapshot.handTiles.length;
+    const currentHandCount = human.handTiles.length;
+    const tilesPlayedCount = startHandCount - currentHandCount;
+
+    if (tilesPlayedCount <= 0) {
+      showToast('You must play at least 1 tile or Draw a tile to end turn.', 'error');
+      return;
+    }
+
+    if (!human.hasInitialMeld) {
+      const snapshotPoints = turnSnapshot.boardMelds.reduce((acc, m) => acc + (m.isValid ? m.value : 0), 0);
+      const currentPoints = boardValidation.totalPoints;
+      const turnPointsGained = currentPoints - snapshotPoints;
+
+      if (turnPointsGained < 30) {
+        showToast(
+          `Initial Meld Requirement: You need at least 30 points of new melds from your rack. (You achieved ${turnPointsGained} pts).`,
+          'error'
+        );
+        return;
+      }
+    }
+
+    const normalizedBoard = normalizeBoard(boardMelds);
+
+    const updatedPlayers = players.map((p, idx) =>
+      idx === 0
+        ? {
+            ...p,
+            handTiles: createSortedHandTiles(p.handTiles.map((ht) => ht.tile)),
+            playerRacks: [p.handTiles.map((ht) => ht.tile), []] as [Tile[], Tile[]],
+            rack: p.handTiles.map((ht) => ht.tile),
+            hasInitialMeld: true,
+          }
+        : p
+    );
+
+    if (human.handTiles.length === 0) {
+      setGameStatus('ended');
+      setWinner({ ...human, hasInitialMeld: true });
+      soundEngine.playWin();
+      confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
+      showToast('🎉 CONGRATULATIONS! You emptied your hand and won the game!', 'success');
+      return;
+    }
+
+    setAutoSplitLinks([]);
+    soundEngine.playSuccess();
+    showToast('Turn submitted successfully!', 'success');
+
+    advanceTurn(normalizedBoard, updatedPlayers, tilePool);
+  }, [isHumanTurn, turnSnapshot, gameStatus, players, boardMelds, showToast, advanceTurn, clearMeldHighlights]);
+
+  // AI turn automation with automatic end-of-turn normalization pass & event-driven bot move meld highlights
+  useEffect(() => {
+    if (gameStatus !== 'playing' || isHumanTurn) return;
+
+    const aiPlayerLocal = players[activePlayerIndex];
+    if (!aiPlayerLocal || !aiPlayerLocal.isAi) return;
+
+    setIsAiThinking(true);
+
+    const timer = setTimeout(() => {
+      const preBoardMeldMap = new Map(boardMelds.map((m) => [m.id, JSON.stringify(m.tiles.map((t) => t.id))]));
+
+      const aiResult = executeAiTurn(aiPlayerLocal, boardMelds, tilePool);
+      const normalizedAiBoard = normalizeBoard(aiResult.newBoardMelds);
+
+      const botMeldIds: string[] = [];
+      for (const meld of normalizedAiBoard) {
+        const preSig = preBoardMeldMap.get(meld.id);
+        const currentSig = JSON.stringify(meld.tiles.map((t) => t.id));
+        if (!preSig || preSig !== currentSig) {
+          botMeldIds.push(meld.id);
+        }
+      }
+
+      if (botMeldIds.length > 0) {
+        setHighlightedMeldIds(botMeldIds);
+      }
+
+      showToast(aiResult.message, 'info');
+
+      const updatedPlayers = players.map((p, idx) => {
+        if (idx === activePlayerIndex) {
+          const playedAny = aiResult.playedTilesCount > 0;
+          const aiHandTiles = createSortedHandTiles(aiResult.newAiRack);
+          return {
+            ...p,
+            handTiles: aiHandTiles,
+            playerRacks: [aiResult.newAiRack.map(deepCopyTile), []] as [Tile[], Tile[]],
+            rack: aiResult.newAiRack.map(deepCopyTile),
+            hasInitialMeld: p.hasInitialMeld || (playedAny && !aiResult.drewTile),
+          };
+        }
+        return p;
+      });
+
+      const nextPool = aiResult.drewTile && tilePool.length > 0 ? tilePool.slice(1) : tilePool;
+
+      if (aiResult.newAiRack.length === 0) {
+        setGameStatus('ended');
+        setWinner(updatedPlayers[activePlayerIndex]);
+        soundEngine.playError();
+        showToast(`🤖 ${aiPlayerLocal.name} has played all tiles and won!`, 'info');
+        setIsAiThinking(false);
+        return;
+      }
+
+      setIsAiThinking(false);
+      advanceTurn(normalizedAiBoard, updatedPlayers, nextPool);
+    }, 1200);
+
+    return () => clearTimeout(timer);
+  }, [gameStatus, isHumanTurn, activePlayerIndex, players, boardMelds, tilePool, showToast, advanceTurn]);
+
+  return {
+    tilePool,
+    boardMelds,
+    players,
+    humanPlayer: players[0] || null,
+    aiPlayer: players[1] || null,
+    activePlayer,
+    activePlayerIndex,
+    isHumanTurn,
+    gameStatus,
+    winner,
+    selectedTileIds,
+    notification,
+    sortMode,
+    isAiThinking,
+    soundEnabled,
+    turnSnapshot,
+    autoSplitLinks,
+    highlightedMeldIds,
+    drawnTileId,
+    hintResult,
+    isHintOpen,
+    isMagnifierEnabled,
+
+    startNewGame,
+    toggleSound,
+    toggleMagnifier,
+    toggleTileSelection,
+    clearSelection,
+    sortRack,
+    clearToRack1,
+    resetTurn,
+    createMeldFromSelection,
+    handleDropTile,
+    handleDropTileCanvas,
+    splitMeldAt,
+    drawTile,
+    endTurn,
+    getHint,
+    closeHint,
+    selectSuggestedTiles,
+  };
+}
+
+
+
+/* =============================================================================
+ * FILE: src/hooks/usePwaInstall.ts
+ * ============================================================================= */
+
+import { useState, useEffect, useCallback } from 'react';
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed'; platform: string }>;
+}
+
+export function usePwaInstall() {
+  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [isInstallable, setIsInstallable] = useState<boolean>(false);
+  const [isStandalone, setIsStandalone] = useState<boolean>(false);
+  const [isDismissed, setIsDismissed] = useState<boolean>(false);
+
+  useEffect(() => {
+    // Detect if running as installed standalone app
+    const isStandaloneMode =
+      window.matchMedia('(display-mode: standalone)').matches ||
+      ('standalone' in navigator && (navigator as unknown as { standalone: boolean }).standalone === true);
+
+    setIsStandalone(isStandaloneMode);
+
+    const handleBeforeInstallPrompt = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e as BeforeInstallPromptEvent);
+      setIsInstallable(true);
+    };
+
+    const handleAppInstalled = () => {
+      setDeferredPrompt(null);
+      setIsInstallable(false);
+      setIsStandalone(true);
+      setIsDismissed(true);
+      console.log('Rummikub PWA successfully installed!');
+    };
+
+    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+    };
+  }, []);
+
+  const installPwa = useCallback(async () => {
+    // Immediately dismiss button after click
+    setIsDismissed(true);
+
+    if (!deferredPrompt) {
+      alert(
+        'To install Rummikub as a PWA app:\n\n' +
+        '1. Click the Install button/icon in your browser address bar.\n' +
+        '2. Or open Chrome menu (⋮) -> Cast, save and share -> Install Rummikub...'
+      );
+      return;
+    }
+
+    try {
+      deferredPrompt.prompt();
+      const choice = await deferredPrompt.userChoice;
+      if (choice.outcome === 'accepted') {
+        setIsInstallable(false);
+        setDeferredPrompt(null);
+      }
+    } catch {
+      // Ignore prompt errors
+    }
+  }, [deferredPrompt]);
+
+  return {
+    isInstallable: isInstallable && !isStandalone && !isDismissed,
+    installPwa,
+  };
+}
+
+
+
+/* =============================================================================
+ * FILE: src/hooks/useRummikub.ts
+ * ============================================================================= */
+
+import { useGameState } from './useGameState';
+
+export const useRummikub = useGameState;
+export default useGameState;
+
+
+
+/* =============================================================================
+ * FILE: src/index.css
+ * ============================================================================= */
+
+@import "tailwindcss";
+
+@layer base {
+  body {
+    @apply bg-slate-950 text-slate-100 min-h-screen font-sans antialiased selection:bg-amber-500/30 selection:text-amber-200 overflow-x-hidden;
+    background-image: 
+      radial-gradient(at 50% 0%, rgba(30, 41, 59, 0.7) 0px, transparent 75%),
+      radial-gradient(at 100% 100%, rgba(15, 23, 42, 0.8) 0px, transparent 50%),
+      radial-gradient(at 0% 100%, rgba(15, 23, 42, 0.8) 0px, transparent 50%);
+  }
+}
+
+/* Custom table felt background pattern */
+.bg-table-felt {
+  background-color: #0d2818;
+  background-image: 
+    radial-gradient(circle at 50% 50%, rgba(20, 83, 45, 0.4) 0%, rgba(5, 46, 22, 0.8) 100%),
+    repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.015) 0, rgba(255, 255, 255, 0.015) 1px, transparent 0, transparent 8px);
+}
+
+/* Wood rack finish */
+.bg-rack-wood {
+  background: linear-gradient(180deg, #3d2314 0%, #29160a 60%, #1c0e06 100%);
+  box-shadow: inset 0 2px 4px rgba(255, 255, 255, 0.15), inset 0 -4px 8px rgba(0, 0, 0, 0.6), 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+}
+
+/* Realistic Tile styling */
+.tile-shadow {
+  box-shadow: 
+    0 4px 6px -1px rgba(0, 0, 0, 0.3),
+    0 2px 4px -1px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.2);
+}
+
+.tile-hover {
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tile-hover:hover {
+  transform: translateY(-4px) scale(1.03);
+  box-shadow: 
+    0 10px 15px -3px rgba(0, 0, 0, 0.4),
+    0 4px 6px -2px rgba(0, 0, 0, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 1),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.2);
+}
+
+.tile-selected {
+  transform: translateY(-8px) scale(1.05);
+  box-shadow: 
+    0 0 0 3px #f59e0b,
+    0 14px 20px -4px rgba(245, 158, 11, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 1);
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.6);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.4);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.6);
+}
+
+/* Pulse animation for valid/invalid badges */
+@keyframes pulse-subtle {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(0.98); }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 2s infinite ease-in-out;
+}
+
+
+
+/* =============================================================================
+ * FILE: src/main.tsx
+ * ============================================================================= */
+
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.tsx'
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+)
+
+
+
+/* =============================================================================
+ * FILE: src/types/game.ts
+ * ============================================================================= */
+
+export type TileColor = 'red' | 'blue' | 'black' | 'yellow';
+
+export interface Tile {
+  id: string;
+  color: TileColor;
+  value: number; // 1-13 (0 for joker)
+  isJoker: boolean;
+}
+
+export interface HandTile {
+  tile: Tile;
+  x: number; // x coordinate in px relative to hand canvas
+  y: number; // y coordinate in px relative to hand canvas
+}
+
+export type MeldType = 'group' | 'run' | 'invalid';
+
+export interface MeldValidationResult {
+  isValid: boolean;
+  type: MeldType;
+  value: number;
+  errorReason?: string;
+  jokerRepresentations?: Array<{ tileId: string; color: TileColor; value: number }>;
+}
+
+export interface Meld {
+  id: string;
+  tiles: Tile[];
+  isValid: boolean;
+  type: MeldType;
+  value: number;
+  errorReason?: string;
+}
+
+export interface Player {
+  id: string;
+  name: string;
+  isAi: boolean;
+  handTiles: HandTile[]; // Free 2D canvas tile positions
+  playerRacks: [Tile[], Tile[]]; // Legacy rack support for compatibility
+  rack: Tile[]; // Flattened view of all tiles in hand
+  hasInitialMeld: boolean;
+  score: number;
+}
+
+export interface TurnSnapshot {
+  boardMelds: Meld[];
+  handTiles: HandTile[];
+  playerRacks: [Tile[], Tile[]];
+  playerRack: Tile[];
+  hasInitialMeld: boolean;
+  poolCount: number;
+}
+
+export type GameStatus = 'playing' | 'ended';
+
+export type SortMode = 'number' | 'color' | 'group' | 'none';
+
+export interface DragItem {
+  tileId: string;
+  source: 'rack' | 'board';
+  sourceRackIndex?: number;
+  sourceMeldId?: string;
+  sourceIndex?: number;
+  offsetX?: number;
+  offsetY?: number;
+}
+
+
+
+/* =============================================================================
+ * FILE: vite.config.ts
+ * ============================================================================= */
+
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
+import { viteSingleFile } from 'vite-plugin-singlefile';
+import path from 'path';
+
+// https://vite.dev/config/
+export default defineConfig({
+  base: './',
+  plugins: [react(), tailwindcss(), viteSingleFile()],
+  resolve: {
+    alias: {
+      '@': path.resolve(import.meta.dirname, './src'),
+    },
+  },
+});
+
+

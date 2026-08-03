@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGradMask" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+    <linearGradient id="tileGradMask" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fffbeb"/>
+      <stop offset="50%" stop-color="#fef3c7"/>
+      <stop offset="100%" stop-color="#fde68a"/>
+    </linearGradient>
+    <filter id="shadowMask" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="10" flood-color="#000000" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+
+  <!-- Full Bleed Background Canvas for Maskable Icon -->
+  <rect width="512" height="512" fill="url(#bgGradMask)"/>
+
+  <!-- Centered Scaled Content Area inside safe zone -->
+  <g transform="translate(40, 30)">
+    <!-- Left Tile (Red 7) -->
+    <g filter="url(#shadowMask)" transform="translate(60, 70)">
+      <rect width="150" height="240" rx="20" fill="url(#tileGradMask)" stroke="#d97706" stroke-width="4"/>
+      <circle cx="28" cy="30" r="9" fill="#ef4444"/>
+      <text x="75" y="165" font-family="system-ui, sans-serif" font-weight="900" font-size="105" fill="#dc2626" text-anchor="middle">7</text>
+      <rect x="18" y="210" width="114" height="8" rx="4" fill="#78350f" opacity="0.3"/>
+    </g>
+
+    <!-- Right Tile (Blue 8) -->
+    <g filter="url(#shadowMask)" transform="translate(220, 120)">
+      <rect width="150" height="240" rx="20" fill="url(#tileGradMask)" stroke="#d97706" stroke-width="4"/>
+      <circle cx="28" cy="30" r="9" fill="#3b82f6"/>
+      <text x="75" y="165" font-family="system-ui, sans-serif" font-weight="900" font-size="105" fill="#2563eb" text-anchor="middle">8</text>
+      <rect x="18" y="210" width="114" height="8" rx="4" fill="#78350f" opacity="0.3"/>
+    </g>
+
+    <!-- Star Sparkle Accent -->
+    <path d="M216 35 L224 53 L242 61 L224 69 L216 87 L208 69 L190 61 L208 53 Z" fill="#fbbf24"/>
+  </g>
+</svg>
