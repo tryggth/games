@@ -12,6 +12,7 @@ import { AlertCircle, CheckCircle2, Info } from 'lucide-react';
 import { clsx } from 'clsx';
 
 export function App() {
+  // PWA Auto-Update Verification Test Comment
   const [isRulesOpen, setIsRulesOpen] = useState(false);
   const { installPwa } = usePwaInstall();
 

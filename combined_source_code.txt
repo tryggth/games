@@ -1,6 +1,6 @@
 ================================================================================
  RUMMIKUB PRO - COMBINED SOURCE CODE BUNDLE
- Generated on: 2026-08-04T16:15:52.021Z
+ Generated on: 2026-08-04T16:18:42.466Z
  Total Source Files: 31
 ================================================================================
 
@@ -167,7 +167,7 @@
  * FILE: public/sw.js
  * ============================================================================= */
 
-const CACHE_NAME = 'rummikub-pwa-v1.0.10';
+const CACHE_NAME = 'rummikub-pwa-v1.0.1785860320095';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -462,6 +462,7 @@ import { AlertCircle, CheckCircle2, Info } from 'lucide-react';
 import { clsx } from 'clsx';
 
 export function App() {
+  // PWA Auto-Update Verification Test Comment
   const [isRulesOpen, setIsRulesOpen] = useState(false);
   const { installPwa } = usePwaInstall();
 
