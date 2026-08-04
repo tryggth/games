@@ -141,7 +141,6 @@ export function useGameState() {
   const boardMeldsRef = useRef(boardMelds);
   const committedBoardMeldsRef = useRef(committedBoardMelds);
   const tilePoolRef = useRef(tilePool);
-  const activePlayerIndexRef = useRef(activePlayerIndex);
   const turnSnapshotRef = useRef(turnSnapshot);
   const isInitializedRef = useRef(false);
 
@@ -165,11 +164,6 @@ export function useGameState() {
   const updateTilePool = useCallback((newPool: Tile[]) => {
     tilePoolRef.current = newPool;
     setTilePool(newPool);
-  }, []);
-
-  const updateActivePlayerIndex = useCallback((newIndex: number) => {
-    activePlayerIndexRef.current = newIndex;
-    setActivePlayerIndex(newIndex);
   }, []);
 
   const updateTurnSnapshot = useCallback((newSnapshot: TurnSnapshot | null) => {
@@ -278,7 +272,7 @@ export function useGameState() {
     updateCommittedBoardMelds([]);
     updateBoardMelds([]);
     updatePlayers(initialPlayers);
-    updateActivePlayerIndex(0);
+    setActivePlayerIndex(0);
     setGameStatus('playing');
     setWinner(null);
     setSelectedTileIds([]);
@@ -301,7 +295,7 @@ export function useGameState() {
     setDebugLog('Game started. Player turn (0 melds on board).');
 
     showToast('New game started! 14 tiles arranged in auto-sorted hand tray.', 'info');
-  }, [showToast, clearMeldHighlights, updateTilePool, updateBoardMelds, updateCommittedBoardMelds, updatePlayers, updateActivePlayerIndex, updateTurnSnapshot]);
+  }, [showToast, clearMeldHighlights, updateTilePool, updateBoardMelds, updateCommittedBoardMelds, updatePlayers, updateTurnSnapshot]);
 
   // Strict Mount Initialization: startNewGame is executed ONLY ONCE on initial mount
   useEffect(() => {
@@ -790,9 +784,8 @@ export function useGameState() {
       updateTilePool(nextPool.map(deepCopyTile));
       setAutoSplitLinks([]);
 
-      const currentActiveIndex = activePlayerIndexRef.current;
-      const nextIndex = (currentActiveIndex + 1) % cleanPlayers.length;
-      updateActivePlayerIndex(nextIndex);
+      const nextIndex = (activePlayerIndex + 1) % cleanPlayers.length;
+      setActivePlayerIndex(nextIndex);
 
       const nextPlayer = cleanPlayers[nextIndex];
 
@@ -812,7 +805,7 @@ export function useGameState() {
 
       setSelectedTileIds([]);
     },
-    [updateBoardMelds, updateCommittedBoardMelds, updatePlayers, updateTilePool, updateActivePlayerIndex, updateTurnSnapshot]
+    [activePlayerIndex, updateBoardMelds, updateCommittedBoardMelds, updatePlayers, updateTilePool, updateTurnSnapshot]
   );
 
   const drawTile = useCallback(() => {
@@ -952,8 +945,7 @@ export function useGameState() {
     if (gameStatus !== 'playing' || isHumanTurn) return;
 
     const currentPlayers = playersRef.current;
-    const currentAiIndex = activePlayerIndexRef.current;
-    const currentAiPlayer = currentPlayers[currentAiIndex];
+    const currentAiPlayer = currentPlayers[activePlayerIndex];
     if (!currentAiPlayer || !currentAiPlayer.isAi) return;
 
     setIsAiThinking(true);
@@ -962,8 +954,7 @@ export function useGameState() {
       const latestBoard = boardMeldsRef.current;
       const latestPool = tilePoolRef.current;
       const latestPlayers = playersRef.current;
-      const latestAiIndex = activePlayerIndexRef.current;
-      const latestAiPlayer = latestPlayers[latestAiIndex];
+      const latestAiPlayer = latestPlayers[activePlayerIndex];
 
       if (!latestAiPlayer || !latestAiPlayer.isAi) {
         setIsAiThinking(false);
@@ -991,7 +982,7 @@ export function useGameState() {
       showToast(aiResult.message, 'info');
 
       const updatedPlayers = latestPlayers.map((p, idx) => {
-        if (idx === latestAiIndex) {
+        if (idx === activePlayerIndex) {
           const playedAny = aiResult.playedTilesCount > 0;
           const aiHandTiles = createSortedHandTiles(aiResult.newAiRack);
           return {
@@ -1009,7 +1000,7 @@ export function useGameState() {
 
       if (aiResult.newAiRack.length === 0) {
         setGameStatus('ended');
-        setWinner(updatedPlayers[latestAiIndex]);
+        setWinner(updatedPlayers[activePlayerIndex]);
         soundEngine.playError();
         showToast(`🤖 ${latestAiPlayer.name} has played all tiles and won!`, 'info');
         setIsAiThinking(false);
