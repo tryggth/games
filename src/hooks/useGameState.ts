@@ -143,6 +143,7 @@ export function useGameState() {
   const tilePoolRef = useRef(tilePool);
   const activePlayerIndexRef = useRef(activePlayerIndex);
   const turnSnapshotRef = useRef(turnSnapshot);
+  const isInitializedRef = useRef(false);
 
   const updateBoardMelds = useCallback((newMelds: Meld[]) => {
     const clean = deepCopyMelds(newMelds);
@@ -302,8 +303,12 @@ export function useGameState() {
     showToast('New game started! 14 tiles arranged in auto-sorted hand tray.', 'info');
   }, [showToast, clearMeldHighlights, updateTilePool, updateBoardMelds, updateCommittedBoardMelds, updatePlayers, updateActivePlayerIndex, updateTurnSnapshot]);
 
+  // Strict Mount Initialization: startNewGame is executed ONLY ONCE on initial mount
   useEffect(() => {
-    startNewGame();
+    if (!isInitializedRef.current) {
+      isInitializedRef.current = true;
+      startNewGame();
+    }
   }, [startNewGame]);
 
   const activePlayer = players[activePlayerIndex] || null;
