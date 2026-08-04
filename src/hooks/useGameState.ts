@@ -820,7 +820,7 @@ export function useGameState() {
 
     if (currentPool.length === 0) {
       showToast('Tile pool is empty! Passing turn.', 'info');
-      advanceTurn(currentCommittedBoard, currentPlayers, currentPool, false);
+      advanceTurn(currentCommittedBoard, currentPlayers, currentPool, true);
       return;
     }
 
@@ -864,7 +864,7 @@ export function useGameState() {
     soundEngine.playDraw();
     showToast(`You drew a tile (${drawnTile.isJoker ? 'Joker' : `${drawnTile.color} ${drawnTile.value}`}).`, 'info');
 
-    advanceTurn(restoredBoard, updatedPlayers, remainingPool, false);
+    advanceTurn(restoredBoard, updatedPlayers, remainingPool, true);
   }, [isHumanTurn, gameStatus, showToast, advanceTurn, clearMeldHighlights]);
 
   const endTurn = useCallback(() => {
