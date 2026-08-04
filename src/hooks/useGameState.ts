@@ -107,7 +107,11 @@ function findCompletingTilesForFragment(
 
 export function useGameState() {
   const [tilePool, setTilePool] = useState<Tile[]>([]);
+  // Authoritative committed board state (melds permanently on the table from prior turns)
+  const [committedBoardMelds, setCommittedBoardMelds] = useState<Meld[]>([]);
+  // Current working board on the table (staged during active turn)
   const [boardMelds, setBoardMelds] = useState<Meld[]>([]);
+
   const [players, setPlayers] = useState<Player[]>([]);
   const [activePlayerIndex, setActivePlayerIndex] = useState<number>(0);
   const [gameStatus, setGameStatus] = useState<GameStatus>('playing');
@@ -135,15 +139,21 @@ export function useGameState() {
   // Synchronized state refs to prevent stale closure bugs in async timers / AI bot turns / turn transitions
   const playersRef = useRef(players);
   const boardMeldsRef = useRef(boardMelds);
+  const committedBoardMeldsRef = useRef(committedBoardMelds);
   const tilePoolRef = useRef(tilePool);
   const activePlayerIndexRef = useRef(activePlayerIndex);
   const turnSnapshotRef = useRef(turnSnapshot);
 
-  // Helper to update state AND refs synchronously
   const updateBoardMelds = useCallback((newMelds: Meld[]) => {
     const clean = deepCopyMelds(newMelds);
     boardMeldsRef.current = clean;
     setBoardMelds(clean);
+  }, []);
+
+  const updateCommittedBoardMelds = useCallback((newMelds: Meld[]) => {
+    const clean = deepCopyMelds(newMelds);
+    committedBoardMeldsRef.current = clean;
+    setCommittedBoardMelds(clean);
   }, []);
 
   const updatePlayers = useCallback((newPlayers: Player[]) => {
@@ -264,6 +274,7 @@ export function useGameState() {
     ];
 
     updateTilePool(remainingPool.map(deepCopyTile));
+    updateCommittedBoardMelds([]);
     updateBoardMelds([]);
     updatePlayers(initialPlayers);
     updateActivePlayerIndex(0);
@@ -289,7 +300,7 @@ export function useGameState() {
     setDebugLog('Game started. Player turn (0 melds on board).');
 
     showToast('New game started! 14 tiles arranged in auto-sorted hand tray.', 'info');
-  }, [showToast, clearMeldHighlights, updateTilePool, updateBoardMelds, updatePlayers, updateActivePlayerIndex, updateTurnSnapshot]);
+  }, [showToast, clearMeldHighlights, updateTilePool, updateBoardMelds, updateCommittedBoardMelds, updatePlayers, updateActivePlayerIndex, updateTurnSnapshot]);
 
   useEffect(() => {
     startNewGame();
@@ -754,7 +765,7 @@ export function useGameState() {
   );
 
   const advanceTurn = useCallback(
-    (newBoard: Meld[], newPlayers: Player[], nextPool: Tile[]) => {
+    (newBoard: Meld[], newPlayers: Player[], nextPool: Tile[], isCommittedSubmit: boolean = false) => {
       const cleanBoard = deepCopyMelds(newBoard);
       const cleanPlayers = newPlayers.map((p) => ({
         ...p,
@@ -762,6 +773,11 @@ export function useGameState() {
         playerRacks: [p.handTiles.map((ht) => ht.tile), []] as [Tile[], Tile[]],
         rack: p.handTiles.map((ht) => ht.tile),
       }));
+
+      // If this turn transition is a committed submission or bot move, update authoritative committed board
+      if (isCommittedSubmit) {
+        updateCommittedBoardMelds(cleanBoard);
+      }
 
       // Synchronous ref updates to prevent stale memory access across turns
       updateBoardMelds(cleanBoard);
@@ -791,14 +807,14 @@ export function useGameState() {
 
       setSelectedTileIds([]);
     },
-    [updateBoardMelds, updatePlayers, updateTilePool, updateActivePlayerIndex, updateTurnSnapshot]
+    [updateBoardMelds, updateCommittedBoardMelds, updatePlayers, updateTilePool, updateActivePlayerIndex, updateTurnSnapshot]
   );
 
   const drawTile = useCallback(() => {
     if (!isHumanTurn || gameStatus === 'ended') return;
     clearMeldHighlights();
 
-    const currentBoard = boardMeldsRef.current;
+    const currentCommittedBoard = committedBoardMeldsRef.current;
     const currentPool = tilePoolRef.current;
     const currentPlayers = playersRef.current;
     const snapshot = turnSnapshotRef.current;
@@ -806,30 +822,24 @@ export function useGameState() {
 
     if (currentPool.length === 0) {
       showToast('Tile pool is empty! Passing turn.', 'info');
-      advanceTurn(currentBoard, currentPlayers, currentPool);
+      advanceTurn(currentCommittedBoard, currentPlayers, currentPool, false);
       return;
     }
 
+    // Always restore board to the authoritative committedBoardMelds (melds committed on previous turns)
+    const restoredBoard = deepCopyMelds(currentCommittedBoard);
+
+    // Return any uncommitted tiles staged from hand during this turn back into hand
+    const turnStartHandTiles = snapshot ? snapshot.handTiles.map((ht) => ht.tile) : (human ? human.handTiles.map(ht => ht.tile) : []);
+    const committedBoardTileIds = new Set(currentCommittedBoard.flatMap((m) => m.tiles.map((t) => t.id)));
+
     let currentHand = human ? human.handTiles.map((ht) => ht.tile) : [];
-
-    const turnStartHandTiles = snapshot ? snapshot.handTiles.map((ht) => ht.tile) : [];
-    const turnStartBoardTileIds = new Set(
-      snapshot ? snapshot.boardMelds.flatMap((m) => m.tiles.map((t) => t.id)) : []
-    );
-
     const currentHandTileIds = new Set(currentHand.map((t) => t.id));
 
-    // Filter uncommitted hand tiles played onto table this turn (excluding tiles originally in table melds)
+    // Filter tiles in turnStartHand that are neither in currentHand nor in committedBoardTileIds
     const uncommittedHandTiles = turnStartHandTiles.filter(
-      (t) => !currentHandTileIds.has(t.id) && !turnStartBoardTileIds.has(t.id)
+      (t) => !currentHandTileIds.has(t.id) && !committedBoardTileIds.has(t.id)
     );
-
-    // If uncommitted hand tiles were played this turn, revert board back to snapshot.
-    // Otherwise, strictly preserve currentBoard (table melds already committed on prior turns).
-    const hasUncommittedMoves = uncommittedHandTiles.length > 0;
-    const restoredBoard = hasUncommittedMoves && snapshot
-      ? deepCopyMelds(snapshot.boardMelds)
-      : deepCopyMelds(currentBoard);
 
     currentHand = [...currentHand, ...uncommittedHandTiles];
 
@@ -856,7 +866,7 @@ export function useGameState() {
     soundEngine.playDraw();
     showToast(`You drew a tile (${drawnTile.isJoker ? 'Joker' : `${drawnTile.color} ${drawnTile.value}`}).`, 'info');
 
-    advanceTurn(restoredBoard, updatedPlayers, remainingPool);
+    advanceTurn(restoredBoard, updatedPlayers, remainingPool, false);
   }, [isHumanTurn, gameStatus, showToast, advanceTurn, clearMeldHighlights]);
 
   const endTurn = useCallback(() => {
@@ -928,7 +938,8 @@ export function useGameState() {
     soundEngine.playSuccess();
     showToast('Turn submitted successfully!', 'success');
 
-    advanceTurn(normalizedBoard, updatedPlayers, currentPool);
+    // Submit committed turn: updates committedBoardMelds permanently
+    advanceTurn(normalizedBoard, updatedPlayers, currentPool, true);
   }, [isHumanTurn, gameStatus, showToast, advanceTurn, clearMeldHighlights]);
 
   // AI turn automation using synchronized state refs to prevent stale closure bugs
@@ -1001,7 +1012,8 @@ export function useGameState() {
       }
 
       setIsAiThinking(false);
-      advanceTurn(normalizedAiBoard, updatedPlayers, nextPool);
+      // AI turn completes and commits board melds
+      advanceTurn(normalizedAiBoard, updatedPlayers, nextPool, true);
     }, 1200);
 
     return () => clearTimeout(timer);
@@ -1010,6 +1022,7 @@ export function useGameState() {
   return {
     tilePool,
     boardMelds,
+    committedBoardMelds,
     players,
     humanPlayer: players[0] || null,
     aiPlayer: players[1] || null,
