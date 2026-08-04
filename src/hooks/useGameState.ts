@@ -129,10 +129,11 @@ export function useGameState() {
   // Toggleable Tile Magnifier Preview State
   const [isMagnifierEnabled, setIsMagnifierEnabled] = useState<boolean>(false);
 
-  // Synchronized state refs to prevent stale closure bugs in async timers / AI bot turns
+  // Synchronized state refs to prevent stale closure bugs in async timers / AI bot turns / turn transitions
   const playersRef = useRef(players);
   const boardMeldsRef = useRef(boardMelds);
   const tilePoolRef = useRef(tilePool);
+  const activePlayerIndexRef = useRef(activePlayerIndex);
 
   useEffect(() => {
     playersRef.current = players;
@@ -145,6 +146,10 @@ export function useGameState() {
   useEffect(() => {
     tilePoolRef.current = tilePool;
   }, [tilePool]);
+
+  useEffect(() => {
+    activePlayerIndexRef.current = activePlayerIndex;
+  }, [activePlayerIndex]);
 
   const toggleMagnifier = useCallback(() => {
     setIsMagnifierEnabled((prev) => !prev);
@@ -248,6 +253,7 @@ export function useGameState() {
     setBoardMelds([]);
     setPlayers(initialPlayers);
     setActivePlayerIndex(0);
+    activePlayerIndexRef.current = 0;
     setGameStatus('playing');
     setWinner(null);
     setSelectedTileIds([]);
@@ -733,8 +739,11 @@ export function useGameState() {
       setTilePool(nextPool.map(deepCopyTile));
       setAutoSplitLinks([]);
 
-      const nextIndex = (activePlayerIndex + 1) % cleanPlayers.length;
+      // Strictly use current activePlayerIndexRef to calculate nextIndex reliably
+      const currentActiveIndex = activePlayerIndexRef.current;
+      const nextIndex = (currentActiveIndex + 1) % cleanPlayers.length;
       setActivePlayerIndex(nextIndex);
+      activePlayerIndexRef.current = nextIndex;
 
       const nextPlayer = cleanPlayers[nextIndex];
 
@@ -749,20 +758,25 @@ export function useGameState() {
 
       setSelectedTileIds([]);
     },
-    [activePlayerIndex]
+    []
   );
 
   const drawTile = useCallback(() => {
     if (!isHumanTurn || gameStatus === 'ended') return;
     clearMeldHighlights();
 
-    if (tilePool.length === 0) {
+    const currentBoard = boardMeldsRef.current;
+    const currentPool = tilePoolRef.current;
+    const currentPlayers = playersRef.current;
+    const human = currentPlayers[0];
+
+    if (currentPool.length === 0) {
       showToast('Tile pool is empty! Passing turn.', 'info');
-      advanceTurn(turnSnapshot?.boardMelds || boardMelds, players, tilePool);
+      advanceTurn(currentBoard, currentPlayers, currentPool);
       return;
     }
 
-    let currentHand = humanPlayer ? humanPlayer.handTiles.map((ht) => ht.tile) : [];
+    let currentHand = human ? human.handTiles.map((ht) => ht.tile) : [];
 
     const turnStartHandTiles = turnSnapshot ? turnSnapshot.handTiles.map((ht) => ht.tile) : [];
     const turnStartBoardTileIds = new Set(
@@ -771,25 +785,29 @@ export function useGameState() {
 
     const currentHandTileIds = new Set(currentHand.map((t) => t.id));
 
-    // Filter uncommitted hand tiles: must have been in turnStartHand AND not in currentHand AND not in turnStartBoardTileIds!
+    // Filter uncommitted hand tiles played onto table this turn (excluding tiles originally in table melds)
     const uncommittedHandTiles = turnStartHandTiles.filter(
       (t) => !currentHandTileIds.has(t.id) && !turnStartBoardTileIds.has(t.id)
     );
 
+    // If uncommitted hand tiles were played this turn, revert board back to turnSnapshot.
+    // Otherwise, strictly preserve currentBoard (table melds already committed on prior turns).
+    const hasUncommittedMoves = uncommittedHandTiles.length > 0;
+    const restoredBoard = hasUncommittedMoves && turnSnapshot
+      ? deepCopyMelds(turnSnapshot.boardMelds)
+      : deepCopyMelds(currentBoard);
+
     currentHand = [...currentHand, ...uncommittedHandTiles];
 
-    const drawnTile = deepCopyTile(tilePool[0]);
-    const remainingPool = tilePool.slice(1);
+    const drawnTile = deepCopyTile(currentPool[0]);
+    const remainingPool = currentPool.slice(1);
     currentHand.push(drawnTile);
 
-    // Track drawn tile ID for visual highlight ring and "NEW" badge
     setDrawnTileId(drawnTile.id);
 
     const autoArrangedHand = createSortedHandTiles(currentHand);
 
-    const restoredBoard = turnSnapshot ? deepCopyMelds(turnSnapshot.boardMelds) : deepCopyMelds(boardMelds);
-
-    const updatedPlayers = players.map((p, idx) =>
+    const updatedPlayers = currentPlayers.map((p, idx) =>
       idx === 0
         ? {
             ...p,
@@ -805,7 +823,7 @@ export function useGameState() {
     showToast(`You drew a tile (${drawnTile.isJoker ? 'Joker' : `${drawnTile.color} ${drawnTile.value}`}).`, 'info');
 
     advanceTurn(restoredBoard, updatedPlayers, remainingPool);
-  }, [isHumanTurn, gameStatus, tilePool, turnSnapshot, boardMelds, players, showToast, advanceTurn, clearMeldHighlights, humanPlayer]);
+  }, [isHumanTurn, gameStatus, turnSnapshot, showToast, advanceTurn, clearMeldHighlights]);
 
   const endTurn = useCallback(() => {
     if (!isHumanTurn || !turnSnapshot || gameStatus === 'ended') return;
@@ -880,7 +898,8 @@ export function useGameState() {
     if (gameStatus !== 'playing' || isHumanTurn) return;
 
     const currentPlayers = playersRef.current;
-    const currentAiPlayer = currentPlayers[activePlayerIndex];
+    const currentAiIndex = activePlayerIndexRef.current;
+    const currentAiPlayer = currentPlayers[currentAiIndex];
     if (!currentAiPlayer || !currentAiPlayer.isAi) return;
 
     setIsAiThinking(true);
@@ -889,7 +908,8 @@ export function useGameState() {
       const latestBoard = boardMeldsRef.current;
       const latestPool = tilePoolRef.current;
       const latestPlayers = playersRef.current;
-      const latestAiPlayer = latestPlayers[activePlayerIndex];
+      const latestAiIndex = activePlayerIndexRef.current;
+      const latestAiPlayer = latestPlayers[latestAiIndex];
 
       if (!latestAiPlayer || !latestAiPlayer.isAi) {
         setIsAiThinking(false);
@@ -917,7 +937,7 @@ export function useGameState() {
       showToast(aiResult.message, 'info');
 
       const updatedPlayers = latestPlayers.map((p, idx) => {
-        if (idx === activePlayerIndex) {
+        if (idx === latestAiIndex) {
           const playedAny = aiResult.playedTilesCount > 0;
           const aiHandTiles = createSortedHandTiles(aiResult.newAiRack);
           return {
@@ -935,7 +955,7 @@ export function useGameState() {
 
       if (aiResult.newAiRack.length === 0) {
         setGameStatus('ended');
-        setWinner(updatedPlayers[activePlayerIndex]);
+        setWinner(updatedPlayers[latestAiIndex]);
         soundEngine.playError();
         showToast(`🤖 ${latestAiPlayer.name} has played all tiles and won!`, 'info');
         setIsAiThinking(false);
