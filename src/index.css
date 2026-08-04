@@ -1,6 +1,9 @@
 @import "tailwindcss";
 
 @layer base {
+  html {
+    font-size: 18.67px; /* +2 font points larger baseline (12pt -> 14pt) */
+  }
   body {
     @apply bg-slate-950 text-slate-100 min-h-screen font-sans antialiased selection:bg-amber-500/30 selection:text-amber-200 overflow-x-hidden;
     background-image: 

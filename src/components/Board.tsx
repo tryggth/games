@@ -13,7 +13,7 @@ interface BoardProps {
   onDropTile: (
     item: DragItem,
     targetLocation: {
-      type: 'board-new' | 'board-meld' | 'rack-0' | 'rack-1' | 'rack';
+      type: 'board-new' | 'board-meld' | 'rack' | 'hand';
       meldId?: string;
       targetIndex?: number;
     }

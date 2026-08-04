@@ -29,6 +29,14 @@ export const TurnControls: React.FC<TurnControlsProps> = ({
   const initialMeldSatisfied = hasInitialMeld || turnPointsGained >= 30;
   const canEndTurn = hasPlayedTiles && isBoardValid && initialMeldSatisfied;
 
+  // Determine button text when End Turn is disabled
+  let disabledReasonText = 'Invalid Melds';
+  if (!initialMeldSatisfied) {
+    disabledReasonText = `Invalid Melds (Need 30+ Pts: ${turnPointsGained}/30)`;
+  } else if (!isBoardValid) {
+    disabledReasonText = 'Invalid Melds';
+  }
+
   return (
     <div className="w-full bg-slate-900/90 backdrop-blur-md rounded-2xl border border-slate-800 p-4 shadow-xl flex flex-wrap items-center justify-between gap-4">
       {/* Bot Thinking & Player Status Indicator */}
@@ -65,79 +73,50 @@ export const TurnControls: React.FC<TurnControlsProps> = ({
         )}
       </div>
 
-      {/* Dynamic Action Buttons */}
+      {/* Mutually Exclusive Single Action Button Container */}
       <div className="flex items-center gap-3">
-        {/* Draw Tile & Pass Button (Always available to draw/pass turn) */}
-        <button
-          onClick={onDrawTile}
-          disabled={!isHumanTurn || isAiThinking}
-          className={clsx(
-            'px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition border shadow-lg cursor-pointer transform hover:scale-105 active:scale-95',
-            isHumanTurn && !isAiThinking
-              ? 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white border-cyan-400 shadow-blue-500/20'
-              : 'bg-slate-800/40 text-slate-600 border-slate-800 cursor-not-allowed'
-          )}
-          title={
-            hasPlayedTiles
-              ? 'Revert uncommitted board moves, draw 1 tile from pool, and pass turn'
-              : `Draw 1 tile from pool (${poolCount} left) and pass turn`
-          }
-        >
-          <Plus className="w-4 h-4 text-cyan-300" />
-          <span>Draw Tile & Pass (+1)</span>
-        </button>
-
-        {/* End Turn Action / Warning Button */}
-        {hasPlayedTiles && (
-          canEndTurn ? (
-            /* Valid End Turn: Glowing Emerald */
-            <button
-              onClick={onEndTurn}
-              disabled={!isHumanTurn || isAiThinking}
-              className={clsx(
-                'px-6 py-2.5 rounded-xl font-extrabold text-xs flex items-center gap-2 transition border shadow-xl cursor-pointer transform hover:scale-105 active:scale-95 animate-pulse',
-                isHumanTurn && !isAiThinking
-                  ? 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 border-emerald-300 shadow-emerald-500/40 ring-2 ring-emerald-400/60'
-                  : 'bg-slate-800/40 text-slate-600 border-slate-800 cursor-not-allowed'
-              )}
-              title="Submit turn and pass to opponent"
-            >
-              <Play className="w-4 h-4 fill-current text-slate-950" />
-              <span>End Turn</span>
-            </button>
-          ) : !initialMeldSatisfied ? (
-            /* Initial Meld Requirement Not Met */
-            <button
-              onClick={onEndTurn}
-              disabled={!isHumanTurn || isAiThinking}
-              className={clsx(
-                'px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition border shadow-md',
-                isHumanTurn && !isAiThinking
-                  ? 'bg-amber-950/80 hover:bg-amber-900 text-amber-300 border-amber-600/80 cursor-pointer'
-                  : 'bg-slate-800/40 text-slate-600 border-slate-800 cursor-not-allowed'
-              )}
-              title={`Initial meld requires 30+ points from hand (currently ${turnPointsGained} pts)`}
-            >
-              <AlertTriangle className="w-4 h-4 text-amber-400" />
-              <span>End Turn (Need 30+ Pts: {turnPointsGained}/30)</span>
-            </button>
-          ) : (
-            /* Board Melds Invalid */
-            <button
-              onClick={onEndTurn}
-              disabled={!isHumanTurn || isAiThinking}
-              className={clsx(
-                'px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition border shadow-md',
-                isHumanTurn && !isAiThinking
-                  ? 'bg-rose-950/80 hover:bg-rose-900 text-rose-300 border-rose-600/80 cursor-pointer'
-                  : 'bg-slate-800/40 text-slate-600 border-slate-800 cursor-not-allowed'
-              )}
-              title="Click to check invalid melds on the table"
-            >
-              <AlertTriangle className="w-4 h-4 text-rose-400" />
-              <span>End Turn (Fix Invalid Melds)</span>
-            </button>
-          )
+        {!hasPlayedTiles ? (
+          /* CASE 1: No tiles added from hand during current turn -> Show Draw Tile & Pass (ENABLED) */
+          <button
+            onClick={onDrawTile}
+            disabled={!isHumanTurn || isAiThinking}
+            className={clsx(
+              'px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition border shadow-lg cursor-pointer transform hover:scale-105 active:scale-95',
+              isHumanTurn && !isAiThinking
+                ? 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white border-cyan-400 shadow-blue-500/20'
+                : 'bg-slate-800/40 text-slate-600 border-slate-800 cursor-not-allowed'
+            )}
+            title={`Draw 1 tile from pool (${poolCount} left) and pass turn`}
+          >
+            <Plus className="w-4 h-4 text-cyan-300" />
+            <span>Draw Tile & Pass (+1)</span>
+          </button>
+        ) : canEndTurn ? (
+          /* CASE 2A: Tiles added from hand & all melds valid -> Show End Turn (ENABLED) */
+          <button
+            onClick={onEndTurn}
+            disabled={!isHumanTurn || isAiThinking}
+            className={clsx(
+              'px-6 py-2.5 rounded-xl font-extrabold text-xs flex items-center gap-2 transition border shadow-xl cursor-pointer transform hover:scale-105 active:scale-95 animate-pulse',
+              isHumanTurn && !isAiThinking
+                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 border-emerald-300 shadow-emerald-500/40 ring-2 ring-emerald-400/60'
+                : 'bg-slate-800/40 text-slate-600 border-slate-800 cursor-not-allowed'
+            )}
+            title="Submit turn and pass to opponent"
+          >
+            <Play className="w-4 h-4 fill-current text-slate-950" />
+            <span>End Turn</span>
+          </button>
+        ) : (
+          /* CASE 2B: Tiles added from hand but invalid melds or unmet initial meld -> Show Invalid Melds (DISABLED) */
+          <button
+            disabled={true}
+            className="px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition border shadow-md bg-slate-800/60 text-rose-400/80 border-rose-900/40 cursor-not-allowed opacity-80"
+            title="Return uncommitted tiles to your hand tray or arrange them into valid melds to enable End Turn"
+          >
+            <AlertTriangle className="w-4 h-4 text-rose-400" />
+            <span>{disabledReasonText}</span>
+          </button>
         )}
       </div>
     </div>

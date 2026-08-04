@@ -1,8 +1,47 @@
 ================================================================================
  RUMMIKUB PRO - COMBINED SOURCE CODE BUNDLE
- Generated on: 2026-08-04T16:49:15.804Z
- Total Source Files: 31
+ Generated on: 2026-08-04T19:47:36.067Z
+ Total Source Files: 41
 ================================================================================
+
+
+/* =============================================================================
+ * FILE: README.md
+ * ============================================================================= */
+
+# React + TypeScript + Vite
+
+This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+
+Currently, two official plugins are available:
+
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+
+## React Compiler
+
+The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+
+## Expanding the Oxlint configuration
+
+If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
+
+```json
+{
+  "$schema": "./node_modules/oxlint/configuration_schema.json",
+  "plugins": ["react", "typescript", "oxc"],
+  "options": {
+    "typeAware": true
+  },
+  "rules": {
+    "react/rules-of-hooks": "error",
+    "react/only-export-components": ["warn", { "allowConstantExport": true }]
+  }
+}
+```
+
+See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+
 
 
 /* =============================================================================
@@ -103,6 +142,8 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.4",
+    "global-jsdom": "^29.0.0",
+    "jsdom": "^29.1.1",
     "oxlint": "^1.75.0",
     "tailwindcss": "^4.3.3",
     "typescript": "~6.0.2",
@@ -110,6 +151,44 @@
     "vite-plugin-singlefile": "^2.3.3"
   }
 }
+
+
+
+/* =============================================================================
+ * FILE: public/favicon.svg
+ * ============================================================================= */
+
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="46" fill="none" viewBox="0 0 48 46"><path fill="#863bff" d="M25.946 44.938c-.664.845-2.021.375-2.021-.698V33.937a2.26 2.26 0 0 0-2.262-2.262H10.287c-.92 0-1.456-1.04-.92-1.788l7.48-10.471c1.07-1.497 0-3.578-1.842-3.578H1.237c-.92 0-1.456-1.04-.92-1.788L10.013.474c.214-.297.556-.474.92-.474h28.894c.92 0 1.456 1.04.92 1.788l-7.48 10.471c-1.07 1.498 0 3.579 1.842 3.579h11.377c.943 0 1.473 1.088.89 1.83L25.947 44.94z" style="fill:#863bff;fill:color(display-p3 .5252 .23 1);fill-opacity:1"/><mask id="a" width="48" height="46" x="0" y="0" maskUnits="userSpaceOnUse" style="mask-type:alpha"><path fill="#000" d="M25.842 44.938c-.664.844-2.021.375-2.021-.698V33.937a2.26 2.26 0 0 0-2.262-2.262H10.183c-.92 0-1.456-1.04-.92-1.788l7.48-10.471c1.07-1.498 0-3.579-1.842-3.579H1.133c-.92 0-1.456-1.04-.92-1.787L9.91.473c.214-.297.556-.474.92-.474h28.894c.92 0 1.456 1.04.92 1.788l-7.48 10.471c-1.07 1.498 0 3.578 1.842 3.578h11.377c.943 0 1.473 1.088.89 1.832L25.843 44.94z" style="fill:#000;fill-opacity:1"/></mask><g mask="url(#a)"><g filter="url(#b)"><ellipse cx="5.508" cy="14.704" fill="#ede6ff" rx="5.508" ry="14.704" style="fill:#ede6ff;fill:color(display-p3 .9275 .9033 1);fill-opacity:1" transform="matrix(.00324 1 1 -.00324 -4.47 31.516)"/></g><g filter="url(#c)"><ellipse cx="10.399" cy="29.851" fill="#ede6ff" rx="10.399" ry="29.851" style="fill:#ede6ff;fill:color(display-p3 .9275 .9033 1);fill-opacity:1" transform="matrix(.00324 1 1 -.00324 -39.328 7.883)"/></g><g filter="url(#d)"><ellipse cx="5.508" cy="30.487" fill="#7e14ff" rx="5.508" ry="30.487" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(89.814 -25.913 -14.639)scale(1 -1)"/></g><g filter="url(#e)"><ellipse cx="5.508" cy="30.599" fill="#7e14ff" rx="5.508" ry="30.599" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(89.814 -32.644 -3.334)scale(1 -1)"/></g><g filter="url(#f)"><ellipse cx="5.508" cy="30.599" fill="#7e14ff" rx="5.508" ry="30.599" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="matrix(.00324 1 1 -.00324 -34.34 30.47)"/></g><g filter="url(#g)"><ellipse cx="14.072" cy="22.078" fill="#ede6ff" rx="14.072" ry="22.078" style="fill:#ede6ff;fill:color(display-p3 .9275 .9033 1);fill-opacity:1" transform="rotate(93.35 24.506 48.493)scale(-1 1)"/></g><g filter="url(#h)"><ellipse cx="3.47" cy="21.501" fill="#7e14ff" rx="3.47" ry="21.501" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(89.009 28.708 47.59)scale(-1 1)"/></g><g filter="url(#i)"><ellipse cx="3.47" cy="21.501" fill="#7e14ff" rx="3.47" ry="21.501" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(89.009 28.708 47.59)scale(-1 1)"/></g><g filter="url(#j)"><ellipse cx=".387" cy="8.972" fill="#7e14ff" rx="4.407" ry="29.108" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(39.51 .387 8.972)"/></g><g filter="url(#k)"><ellipse cx="47.523" cy="-6.092" fill="#7e14ff" rx="4.407" ry="29.108" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(37.892 47.523 -6.092)"/></g><g filter="url(#l)"><ellipse cx="41.412" cy="6.333" fill="#47bfff" rx="5.971" ry="9.665" style="fill:#47bfff;fill:color(display-p3 .2799 .748 1);fill-opacity:1" transform="rotate(37.892 41.412 6.333)"/></g><g filter="url(#m)"><ellipse cx="-1.879" cy="38.332" fill="#7e14ff" rx="4.407" ry="29.108" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(37.892 -1.88 38.332)"/></g><g filter="url(#n)"><ellipse cx="-1.879" cy="38.332" fill="#7e14ff" rx="4.407" ry="29.108" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(37.892 -1.88 38.332)"/></g><g filter="url(#o)"><ellipse cx="35.651" cy="29.907" fill="#7e14ff" rx="4.407" ry="29.108" style="fill:#7e14ff;fill:color(display-p3 .4922 .0767 1);fill-opacity:1" transform="rotate(37.892 35.651 29.907)"/></g><g filter="url(#p)"><ellipse cx="38.418" cy="32.4" fill="#47bfff" rx="5.971" ry="15.297" style="fill:#47bfff;fill:color(display-p3 .2799 .748 1);fill-opacity:1" transform="rotate(37.892 38.418 32.4)"/></g></g><defs><filter id="b" width="60.045" height="41.654" x="-19.77" y="16.149" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="7.659"/></filter><filter id="c" width="90.34" height="51.437" x="-54.613" y="-7.533" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="7.659"/></filter><filter id="d" width="79.355" height="29.4" x="-49.64" y="2.03" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="e" width="79.579" height="29.4" x="-45.045" y="20.029" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="f" width="79.579" height="29.4" x="-43.513" y="21.178" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="g" width="74.749" height="58.852" x="15.756" y="-17.901" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="7.659"/></filter><filter id="h" width="61.377" height="25.362" x="23.548" y="2.284" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="i" width="61.377" height="25.362" x="23.548" y="2.284" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="j" width="56.045" height="63.649" x="-27.636" y="-22.853" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="k" width="54.814" height="64.646" x="20.116" y="-38.415" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="l" width="33.541" height="35.313" x="24.641" y="-11.323" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="m" width="54.814" height="64.646" x="-29.286" y="6.009" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="n" width="54.814" height="64.646" x="-29.286" y="6.009" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="o" width="54.814" height="64.646" x="8.244" y="-2.416" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter><filter id="p" width="39.409" height="43.623" x="18.713" y="10.588" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse"><feFlood flood-opacity="0" result="BackgroundImageFix"/><feBlend in="SourceGraphic" in2="BackgroundImageFix" result="shape"/><feGaussianBlur result="effect1_foregroundBlur_2002_17158" stdDeviation="4.596"/></filter></defs></svg>
+
+
+/* =============================================================================
+ * FILE: public/icons.svg
+ * ============================================================================= */
+
+<svg xmlns="http://www.w3.org/2000/svg">
+  <symbol id="bluesky-icon" viewBox="0 0 16 17">
+    <g clip-path="url(#bluesky-clip)"><path fill="#08060d" d="M7.75 7.735c-.693-1.348-2.58-3.86-4.334-5.097-1.68-1.187-2.32-.981-2.74-.79C.188 2.065.1 2.812.1 3.251s.241 3.602.398 4.13c.52 1.744 2.367 2.333 4.07 2.145-2.495.37-4.71 1.278-1.805 4.512 3.196 3.309 4.38-.71 4.987-2.746.608 2.036 1.307 5.91 4.93 2.746 2.72-2.746.747-4.143-1.747-4.512 1.702.189 3.55-.4 4.07-2.145.156-.528.397-3.691.397-4.13s-.088-1.186-.575-1.406c-.42-.19-1.06-.395-2.741.79-1.755 1.24-3.64 3.752-4.334 5.099"/></g>
+    <defs><clipPath id="bluesky-clip"><path fill="#fff" d="M.1.85h15.3v15.3H.1z"/></clipPath></defs>
+  </symbol>
+  <symbol id="discord-icon" viewBox="0 0 20 19">
+    <path fill="#08060d" d="M16.224 3.768a14.5 14.5 0 0 0-3.67-1.153c-.158.286-.343.67-.47.976a13.5 13.5 0 0 0-4.067 0c-.128-.306-.317-.69-.476-.976A14.4 14.4 0 0 0 3.868 3.77C1.546 7.28.916 10.703 1.231 14.077a14.7 14.7 0 0 0 4.5 2.306q.545-.748.965-1.587a9.5 9.5 0 0 1-1.518-.74q.191-.14.372-.293c2.927 1.369 6.107 1.369 8.999 0q.183.152.372.294-.723.437-1.52.74.418.838.963 1.588a14.6 14.6 0 0 0 4.504-2.308c.37-3.911-.63-7.302-2.644-10.309m-9.13 8.234c-.878 0-1.599-.82-1.599-1.82 0-.998.705-1.82 1.6-1.82.894 0 1.614.82 1.599 1.82.001 1-.705 1.82-1.6 1.82m5.91 0c-.878 0-1.599-.82-1.599-1.82 0-.998.705-1.82 1.6-1.82.893 0 1.614.82 1.599 1.82 0 1-.706 1.82-1.6 1.82"/>
+  </symbol>
+  <symbol id="documentation-icon" viewBox="0 0 21 20">
+    <path fill="none" stroke="#aa3bff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.35" d="m15.5 13.333 1.533 1.322c.645.555.967.833.967 1.178s-.322.623-.967 1.179L15.5 18.333m-3.333-5-1.534 1.322c-.644.555-.966.833-.966 1.178s.322.623.966 1.179l1.534 1.321"/>
+    <path fill="none" stroke="#aa3bff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.35" d="M17.167 10.836v-4.32c0-1.41 0-2.117-.224-2.68-.359-.906-1.118-1.621-2.08-1.96-.599-.21-1.349-.21-2.848-.21-2.623 0-3.935 0-4.983.369-1.684.591-3.013 1.842-3.641 3.428C3 6.449 3 7.684 3 10.154v2.122c0 2.558 0 3.838.706 4.726q.306.383.713.671c.76.536 1.79.64 3.581.66"/>
+    <path fill="none" stroke="#aa3bff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.35" d="M3 10a2.78 2.78 0 0 1 2.778-2.778c.555 0 1.209.097 1.748-.047.48-.129.854-.503.982-.982.145-.54.048-1.194.048-1.749a2.78 2.78 0 0 1 2.777-2.777"/>
+  </symbol>
+  <symbol id="github-icon" viewBox="0 0 19 19">
+    <path fill="#08060d" fill-rule="evenodd" d="M9.356 1.85C5.05 1.85 1.57 5.356 1.57 9.694a7.84 7.84 0 0 0 5.324 7.44c.387.079.528-.168.528-.376 0-.182-.013-.805-.013-1.454-2.165.467-2.616-.935-2.616-.935-.349-.91-.864-1.143-.864-1.143-.71-.48.051-.48.051-.48.787.051 1.2.805 1.2.805.695 1.194 1.817.857 2.268.649.064-.507.27-.857.49-1.052-1.728-.182-3.545-.857-3.545-3.87 0-.857.31-1.558.8-2.104-.078-.195-.349-1 .077-2.078 0 0 .657-.208 2.14.805a7.5 7.5 0 0 1 1.946-.26c.657 0 1.328.092 1.946.26 1.483-1.013 2.14-.805 2.14-.805.426 1.078.155 1.883.078 2.078.502.546.799 1.247.799 2.104 0 3.013-1.818 3.675-3.558 3.87.284.247.528.714.528 1.454 0 1.052-.012 1.896-.012 2.156 0 .208.142.455.528.377a7.84 7.84 0 0 0 5.324-7.441c.013-4.338-3.48-7.844-7.773-7.844" clip-rule="evenodd"/>
+  </symbol>
+  <symbol id="social-icon" viewBox="0 0 20 20">
+    <path fill="none" stroke="#aa3bff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.35" d="M12.5 6.667a4.167 4.167 0 1 0-8.334 0 4.167 4.167 0 0 0 8.334 0"/>
+    <path fill="none" stroke="#aa3bff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.35" d="M2.5 16.667a5.833 5.833 0 0 1 8.75-5.053m3.837.474.513 1.035c.07.144.257.282.414.309l.93.155c.596.1.736.536.307.965l-.723.73a.64.64 0 0 0-.152.531l.207.903c.164.715-.213.991-.84.618l-.872-.52a.63.63 0 0 0-.577 0l-.872.52c-.624.373-1.003.094-.84-.618l.207-.903a.64.64 0 0 0-.152-.532l-.723-.729c-.426-.43-.289-.864.306-.964l.93-.156a.64.64 0 0 0 .412-.31l.513-1.034c.28-.562.735-.562 1.012 0"/>
+  </symbol>
+  <symbol id="x-icon" viewBox="0 0 19 19">
+    <path fill="#08060d" fill-rule="evenodd" d="M1.893 1.98c.052.072 1.245 1.769 2.653 3.77l2.892 4.114c.183.261.333.48.333.486s-.068.089-.152.183l-.522.593-.765.867-3.597 4.087c-.375.426-.734.834-.798.905a1 1 0 0 0-.118.148c0 .01.236.017.664.017h.663l.729-.83c.4-.457.796-.906.879-.999a692 692 0 0 0 1.794-2.038c.034-.037.301-.34.594-.675l.551-.624.345-.392a7 7 0 0 1 .34-.374c.006 0 .93 1.306 2.052 2.903l2.084 2.965.045.063h2.275c1.87 0 2.273-.003 2.266-.021-.008-.02-1.098-1.572-3.894-5.547-2.013-2.862-2.28-3.246-2.273-3.266.008-.019.282-.332 2.085-2.38l2-2.274 1.567-1.782c.022-.028-.016-.03-.65-.03h-.674l-.3.342a871 871 0 0 1-1.782 2.025c-.067.075-.405.458-.75.852a100 100 0 0 1-.803.91c-.148.172-.299.344-.99 1.127-.304.343-.32.358-.345.327-.015-.019-.904-1.282-1.976-2.808L6.365 1.85H1.8zm1.782.91 8.078 11.294c.772 1.08 1.413 1.973 1.425 1.984.016.017.241.02 1.05.017l1.03-.004-2.694-3.766L7.796 5.75 5.722 2.852l-1.039-.004-1.039-.004z" clip-rule="evenodd"/>
+  </symbol>
+</svg>
 
 
 
@@ -164,10 +243,150 @@
 
 
 /* =============================================================================
+ * FILE: public/pwa-192x192.svg
+ * ============================================================================= */
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+    <linearGradient id="tileGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fffbeb"/>
+      <stop offset="50%" stop-color="#fef3c7"/>
+      <stop offset="100%" stop-color="#fde68a"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="6" flood-color="#000000" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="192" height="192" rx="36" fill="url(#bgGrad)"/>
+  <rect width="184" height="184" x="4" y="4" rx="32" fill="none" stroke="#f59e0b" stroke-opacity="0.3" stroke-width="2"/>
+
+  <!-- Left Tile (Red 7) -->
+  <g filter="url(#shadow)" transform="translate(32, 34)">
+    <rect width="64" height="100" rx="10" fill="url(#tileGrad)" stroke="#d97706" stroke-width="2"/>
+    <circle cx="12" cy="14" r="4" fill="#ef4444"/>
+    <text x="32" y="68" font-family="system-ui, sans-serif" font-weight="900" font-size="44" fill="#dc2626" text-anchor="middle">7</text>
+    <rect x="8" y="86" width="48" height="4" rx="2" fill="#78350f" opacity="0.3"/>
+  </g>
+
+  <!-- Right Tile (Blue 8) -->
+  <g filter="url(#shadow)" transform="translate(96, 56)">
+    <rect width="64" height="100" rx="10" fill="url(#tileGrad)" stroke="#d97706" stroke-width="2"/>
+    <circle cx="12" cy="14" r="4" fill="#3b82f6"/>
+    <text x="32" y="68" font-family="system-ui, sans-serif" font-weight="900" font-size="44" fill="#2563eb" text-anchor="middle">8</text>
+    <rect x="8" y="86" width="48" height="4" rx="2" fill="#78350f" opacity="0.3"/>
+  </g>
+
+  <!-- Star Sparkle Accent -->
+  <path d="M96 20 L100 28 L108 32 L100 36 L96 44 L92 36 L84 32 L92 28 Z" fill="#fbbf24"/>
+</svg>
+
+
+
+/* =============================================================================
+ * FILE: public/pwa-512x512.svg
+ * ============================================================================= */
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad512" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+    <linearGradient id="tileGrad512" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fffbeb"/>
+      <stop offset="50%" stop-color="#fef3c7"/>
+      <stop offset="100%" stop-color="#fde68a"/>
+    </linearGradient>
+    <filter id="shadow512" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="16" stdDeviation="12" flood-color="#000000" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="512" height="512" rx="96" fill="url(#bgGrad512)"/>
+  <rect width="496" height="496" x="8" y="8" rx="88" fill="none" stroke="#f59e0b" stroke-opacity="0.3" stroke-width="4"/>
+
+  <!-- Left Tile (Red 7) -->
+  <g filter="url(#shadow512)" transform="translate(86, 92)">
+    <rect width="170" height="270" rx="24" fill="url(#tileGrad512)" stroke="#d97706" stroke-width="5"/>
+    <circle cx="32" cy="36" r="10" fill="#ef4444"/>
+    <text x="85" y="185" font-family="system-ui, sans-serif" font-weight="900" font-size="120" fill="#dc2626" text-anchor="middle">7</text>
+    <rect x="20" y="235" width="130" height="10" rx="5" fill="#78350f" opacity="0.3"/>
+  </g>
+
+  <!-- Right Tile (Blue 8) -->
+  <g filter="url(#shadow512)" transform="translate(256, 150)">
+    <rect width="170" height="270" rx="24" fill="url(#tileGrad512)" stroke="#d97706" stroke-width="5"/>
+    <circle cx="32" cy="36" r="10" fill="#3b82f6"/>
+    <text x="85" y="185" font-family="system-ui, sans-serif" font-weight="900" font-size="120" fill="#2563eb" text-anchor="middle">8</text>
+    <rect x="20" y="235" width="130" height="10" rx="5" fill="#78350f" opacity="0.3"/>
+  </g>
+
+  <!-- Star Sparkle Accent -->
+  <path d="M256 50 L266 72 L290 82 L266 92 L256 114 L246 92 L222 82 L246 72 Z" fill="#fbbf24"/>
+</svg>
+
+
+
+/* =============================================================================
+ * FILE: public/pwa-maskable.svg
+ * ============================================================================= */
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGradMask" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#020617"/>
+    </linearGradient>
+    <linearGradient id="tileGradMask" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#fffbeb"/>
+      <stop offset="50%" stop-color="#fef3c7"/>
+      <stop offset="100%" stop-color="#fde68a"/>
+    </linearGradient>
+    <filter id="shadowMask" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="10" flood-color="#000000" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+
+  <!-- Full Bleed Background Canvas for Maskable Icon -->
+  <rect width="512" height="512" fill="url(#bgGradMask)"/>
+
+  <!-- Centered Scaled Content Area inside safe zone -->
+  <g transform="translate(40, 30)">
+    <!-- Left Tile (Red 7) -->
+    <g filter="url(#shadowMask)" transform="translate(60, 70)">
+      <rect width="150" height="240" rx="20" fill="url(#tileGradMask)" stroke="#d97706" stroke-width="4"/>
+      <circle cx="28" cy="30" r="9" fill="#ef4444"/>
+      <text x="75" y="165" font-family="system-ui, sans-serif" font-weight="900" font-size="105" fill="#dc2626" text-anchor="middle">7</text>
+      <rect x="18" y="210" width="114" height="8" rx="4" fill="#78350f" opacity="0.3"/>
+    </g>
+
+    <!-- Right Tile (Blue 8) -->
+    <g filter="url(#shadowMask)" transform="translate(220, 120)">
+      <rect width="150" height="240" rx="20" fill="url(#tileGradMask)" stroke="#d97706" stroke-width="4"/>
+      <circle cx="28" cy="30" r="9" fill="#3b82f6"/>
+      <text x="75" y="165" font-family="system-ui, sans-serif" font-weight="900" font-size="105" fill="#2563eb" text-anchor="middle">8</text>
+      <rect x="18" y="210" width="114" height="8" rx="4" fill="#78350f" opacity="0.3"/>
+    </g>
+
+    <!-- Star Sparkle Accent -->
+    <path d="M216 35 L224 53 L242 61 L224 69 L216 87 L208 69 L190 61 L208 53 Z" fill="#fbbf24"/>
+  </g>
+</svg>
+
+
+
+/* =============================================================================
  * FILE: public/sw.js
  * ============================================================================= */
 
-const CACHE_NAME = 'rummikub-pwa-v1.0.1785862153459';
+const CACHE_NAME = 'rummikub-pwa-v1.0.1785872836976';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -479,6 +698,7 @@ export function App() {
     soundEnabled,
     highlightedMeldIds,
     drawnTileId,
+    botLastMoveMessage,
     debugLog,
     hintResult,
     isHintOpen,
@@ -501,7 +721,7 @@ export function App() {
   } = useGameState();
 
   const tilesPlayedCount = turnSnapshot
-    ? turnSnapshot.handTiles.length - (humanPlayer?.handTiles?.length || 0)
+    ? turnSnapshot.hand.length - (humanPlayer?.hand?.length || 0)
     : 0;
 
   const isBoardValid = boardMelds.every((m) => m.isValid);
@@ -541,6 +761,7 @@ export function App() {
         isHumanTurn={isHumanTurn}
         soundEnabled={soundEnabled}
         isMagnifierEnabled={isMagnifierEnabled}
+        botLastMoveMessage={botLastMoveMessage}
         onToggleSound={toggleSound}
         onToggleMagnifier={toggleMagnifier}
         onOpenRules={() => setIsRulesOpen(true)}
@@ -593,7 +814,7 @@ export function App() {
       {/* Debug Diagnostic Status Bar */}
       <div className="w-full bg-slate-900/90 border-t border-slate-800 px-4 py-1 flex items-center justify-between text-[11px] font-mono text-slate-400 z-40">
         <span className="truncate max-w-[70%]">🔍 {debugLog}</span>
-        <span className="text-amber-300">Board Melds: {boardMelds.length} | Hand: {humanPlayer?.handTiles?.length || 0} tiles</span>
+        <span className="text-amber-300">Board Melds: {boardMelds.length} | Hand: {humanPlayer?.hand?.length || 0} tiles</span>
       </div>
 
       {/* Move Suggestions Hint Modal */}
@@ -618,65 +839,6 @@ export default App;
 
 
 /* =============================================================================
- * FILE: src/assets/hero.png
- * ============================================================================= */
-
-�PNG
-
-   IHDR  W  i   ���  �PLTE   ���~v�~v�pdu���������dZl���}u����~v�����������~v����w�\̀x����~w����������Q�}v�~v����V�~v����x��F����R����TNZ�~����g^p|u�OHU�x�I�YQ^���������|v�˱�}v�Z�|�x�xC�����x��a԰��\-�g�m�|Ċ��f4�}u�B�LEQ���q5��a�h�iׁHǟc�k�V(��X�r!ܯo�}.�m7��M�O��_�t۴}�[�o3����q�V�Y%�o�Q�Q�s0�fጅ�E�@9FX�J�h,äh�pE��H�:	�B�O��<�=��_ڋ5�r�O��d\j~:�g`mË�8	��H�:	�w�4{�O�~F��m�P�>
-�=
-��TϏS�@��[�LćM��I�}v��Q�4
-u�m��w�]�x>�{E��YΓW�w?��Kܘ[�v@�;|q7��g�a�iބB�G�A��N�U�0p}?ԅJ�~B��_�[(��_߮t�v:��Rܡf�Yɡe�d-�j5�D�p<�L��r��I�T�p9�v1�a-����^�Z�S �U%�K��D�Q�m�f�L��e�C��?�bތO�_�T�X"�Ì�|>ŝc�e4��V�k2�k5�J��o�D�D΁DƔU�N�t�:�]%�P��k�}�v9΄I�F��P�}�L�,gG~�J�_!��[�g,�ɔ��r��M̦c�p/�}+�h'�u7�{�n1�i ԰�����0�B   |tRNS ��p#� ��T�;é���*`YJA�C�d� �S#�20�>� �|c�A��߻���s��|u�o^Y_]���?�٤?�Ǯ���}d�kecۢ8��¬�s�����������Т����Ð�}4  /:IDATx���[��0�a�	!�DH���:m�HTQ%��f_�knݛ�� �6�tV`E��g �0�0c��S�٫��r�������l����6����u��-�Uvc'����n�т?��� �4�x�PS��у�x�[��� �.i[���DX�͏��S���>�\��d{��Ճ�,�mn�E����
-���H���Wؘ0x��'{b������W�X�`�3X�7�-21����`'��Ԅ��ݪ�G�?"�����V�`�pM�B#����9���J�=L�5��(Z]��(mW�>٬�`��K�Y��jϱ��Y擂s�IϳO��"X?��T.�K+mI��Oa���=��Cs�D�y)a�8�a.1[H��J`F����1K
-Z�`^^�{̆)O0�|�R}���[<Z�
-�Q߇�[��5���i��tt7p|iK@/a�I�v���s��J`-�c�9٬����׺�,I1ـ<6[,�� :����z/V~ѱK�t|�� ��]=��U��j{�>�"�|�f�Yqz�)��h�@n�K���|�H�k��R��?FXԐ+3#�V�����1�(FX�[���$���0}Ո�V�bxn�	�{�����@��V1�ʹ^G*iѪr��4�Am"f�
-g�%xfoO�z���>�@��:R�z�XWL��S&q7p�M���:g�U*Z��^��|+i�ꍵ��bs�W�@�o�]v[���0��n�1��@�k���!|��_B�UVRź��|���������%��� ��V�`�k��;fZh��5K������>{�H=��/*tEѪ�3�x{�gŬ����yR����xO�	ST��e��哮�9v�{�ڏ��]:,���w�*m	cղ��^MQچ�.�h����p��åXh��?r�.+T����E6���i�M."fO��T��K<�]���K��1�h�Z�`�??b�	z���D@?1���=�ʔW}�QK��a<2������m���u�8���8�Xu��%��[ěD�b3o0O2D@��O����.`ӫ�����A�����evM��R`T֭��p2�j���]�X�xfuKz^�.8��&-c��T�����[���Ղ4���6ÞJS�բ����QGV��5�!u4a#�k�ڭ�f�J[WPG�����b�&�,jꪺ�v|)����	A2U��Jv���Me�|�A���ᩯ5u��hE�6_������E/bMC����%gd��q�xk�X萡�����-[u!,�[n�ȩ�Yv����,;cy��P@]�U�)�O�z�j�C�î�c�.��Y�3�aoY։�;daLD�zU�j���a8n�{�ׁF*�{����xJ;��:#.�N���{�_)Y��3�X־�r�{�B�蠺��7�-�:�����?���������/	������}�w�kw
-��1��,����e���l�=�����$��\V9O�1�N�J����5��~ r�@6b�8*յ!ˮ�r;c�#���ݿi޹���٫�fo�*�ґ�[���CZ�klmӞ�I����==���i��g<��Qx��g}�֕|V+5�5%��Ƕ3�c{7�;����ZD�eȩv���VX�]��U�l2)b�DDz����'�T6�x1�̅k#e寇U�t߭O�YD9��evɗ�ڛҳ	-+��|��5����n��^��l�`�Q�����n�����O�\�EI�"��x`ծ׏���eD^��D�{̝av����ׇ�K�Wa�b�.�\��a�VR���o'�ؔ �K��t1���{.��F��)����b��J~4� �JT r���>�E��,d�S��J��KW(f�,�5>k��R�8
-�������@�d.���B��È�0���{���V�wS)Z�}�k�ɬcY{/����u v�]��[�����w��f�[� �+��X+$$3�[�e���En@2�Q�|PXUtK�c���ڊ^ڲX�������&�F��s�
-vy�]	�I ���0�2� d�yB��0�!�\{����]Lmk[`���Znǚ�}4��nI[�eӺV9�
-11�x�*40a��Ƥ���64�aUvu�c�M5�
-������xk[������`!i���<�}CQ���1�͓#�@<A���r,q��u����@���D�R���ZۙW�lLX�����|P3uϩ�5\6����`�dX(M�x����O	a4�ֈ��>om�f)���x]մހ�
-6�x]q���Щ���n6v����n�rL]�)��2�Ҟ��0М�s�8�[��&���k�M0��_4AL���C����g�M���Z�QPbi��Oa=̾�іe3z~�:�O���2m�_�A�䩁yB��2k�M+�n�V��~�M�C����̏|'����������̊���[[;��@u��ޣum2��@��=7�����$u5��=6+y����&=�:Vq��,t$�q��j�����t���Λ���#�YV>ih`{��{'璝�c��\����ӽ�ilJTX����y �+� `��T2��{=�i�+^��2[���'�I NZc�hԴb�����e�b9׶�b:%�h#K�wUU[�^w[�1����#gAz�L���`pB�^Ko���wN5i�,px��c:�S�om1�t��$�Q��K�sI��w6�IDQ>�2|�������&�� lp �$U2:�A�	��)"�FMX�ʭ+����]�c�O0čw4j�`<̝;-򬚒��x8��3�V�(���pe������dm�"�\��6�!)�6P/��m`0���QA�^�ŷ�������ϕ_��<�;�9�n`���|����mU��uFt�TٕV9.�Pw
-�����k_�4��Е	U�w
-s�w����曑�U[��b���6�m����ΑYS�AD~d՚����yh��[���.�Y��R�� CZ�]9�6 S��I�B~h�Y8Dƚ�n�a����S�-�J�[���s�.U-�kSp��ӎ�dYr��o=�������Z9��I��P�3F��'T�e[����� �x��+S��U�_`��A�SZ&���ucG�6�MY����z�\��(�%�}�d�É�p�s}hYL���u�Q�j�,��q#i��岼U���J�)�J~8me���?�ڳZ̀2�nAD�vm�/�>��,b�U$��Ԭ�t��Jj ��b��Ӭy6[Yn��N��732UR��'�-��pӬ#VG�ɪ��d��buIv�)A ����uں���@�F��I�Δ�t/Dr�>�َ#VE[MFA ;	�z�m��X��b�X�(`q4~#���.V7͚ͳ����V4u���O�Bڦ��6�t��s_��Q#s�I�?������-�h8	��d
-7j����a�#ֹ��3� ���Њ�lڏiV.8m��/ƭ,�A����@4�H�ɴ��T�1b�x~���f�S��.�j���\����\���|x �(�eS�'�A��U�a�"Wm ?΅o��,8�V~�-�s��u5���Cm�a.�Ī�/Ѓ���o��~���p�^��{�ѓm ?ѫ�������X������G �TR_��wO��m[�.�V�V���g���o*���,��ޘ��b�I� ��H��R�  zu��A��k�3ab�V'jjG�%��	b+Q�� �}�kx5���r��PVX�$�;�����֦d�)B�:��[��G��%�x���*u����u5�P�)5�b_b�������/��,�WQb=nT 8h�����躮hQ
-zu��S?r��
-�l�`Y���7��l{�{g��,�||V�4���EX.V����/4���A�z�ճ�����6��a9�t��Y�c��~�m�o/�S	�?��_�?z�n����޳d1��_-u���(�/�ݿkSQ���V� ox�>�K!��:h
-Qj���D$��/ĩ8��!"�"����dPi#c�G#�-��B����ڸ���֓�������\�9��6�Հռ;09|b���2����_2�LZ�v�g�g�<�3z���5�x�֙?��������pz���-wW�F�_9PKkN���(����|d��u_q�1ݓ쮉�L�l��D3{+�y=3fl����������n�#T�=j�h�{+�@�����Ļ �u�8��VA�%���\4�tX�vn4�/֝5k �
-C7�y�j=�Xn	磽���S��[̞a�h֠] �C��1��2Ҍ58W�+��f�F��g�1�؇#���aow�
-;��9��b��:�H�ZS�w]mu��_z����nboY�5�s-�k����x��g؝e�B�f���,ѶJv͵ݹ�HpG�Q��A�4rh���[�5P6��֗S�q��D<,�k�W�z�#�čF��Z*�vb4�o�@�}챠��^.ק)� ����c�u��V��;�H�ΖP
-���uGt�	F�1X(o ����\�b�ن�j�:�HOW�r�K��ॱ~]�r��6(o���ӻl���-��y �#,ז�K�͕���	��B�D��ZH%(ٍa��niUKO	O�j�F�7`��p�XAsm�<�8��|�v-1M�2���|���Oj����	O���Jp��T�W�q*�=N�3K])uW��W�k�	,�Y�k�u�<��+����X������V���-����@�>I��n4�ݡ�G�qOr^����"fњ��xaIki[���+JJY|�C�uƄju���b���V�5�]KYT��;�X�8��ag��ta��X���XI�!^��HDb#�N�V[�p8s\3c8L�cΠ͐��z�i��嶣�C���^�c�x���4�.�I~�����9?k���c��������R0>g���
-�V�?/�����A'^�b/�1���V#�,2��)���^��3���A�}G�GR�#O�;+c�<��  .9X����[���==�`���F`pG�A��K�����p�x>oB� � )�$`�t���C|�f���3��!T0��ᧅ�0B��`���㸕8m�ru�Slpg%p��P����N>l�������t��C�z��Wr�\|�@(�ou�z]|V~Z��4����nx�!T`���#�9C5͎�-���՜߆���!��P��P6^Jt�:�(�֠jn�{��BD�>��SqG�7�d�>yɵ�=&<�;�E0�.��01��ǲ֘t���
-	1ZTf�M�=z���2j,���]�)�9��\k;%v��\��ʙ��5"@�� �qh�!&���&�����ʔ�J�?:p{��^�� P�H�4������76eH��%��7�jw�����0����N�\tN$���6��A[�N�C��]L\�4h�`���gN.�0dȎ�ܥ�K_��jι�l���yQtyA�1�����@G�^O��5���b:q��j�Q��[�U�g�68�dhd��c�R�Ӄ�;{��z�_c�!�� ��@'���<��˵s�ŻEcg�ǀ�y5���\�ɣ��8=;ؗO�آ!���i���R��ԷfgȦ��C��.A��+�ʑ�];פ�Ԙ/��x#d�bj�5W�4��i��~K�����*�
-��l��.x�z$Rl6�}0'[��GY�B��wJ��-�� �nV�B��M��}Np)����0�?`4���+6�3׈�]�o
-�[�r��n��4�T�
-���O��K���lχ忴���T����(�i��F�h�j�{��QӹO��b$}��>h�N��L:�J�"�b�J�;���:M}���cv}.�l�c�%����n�(��m#�q������Qh�+���T*��w�?�b�sq��.y�� )�������JR�Uf���aLC�5s���bC�2����o� �ڒ�"��^Ӳ��?h���ݔ |<�5����͞��r"%$bkL��l�-�j�1��hRU��� ��X=�wN}�����&��{��I�ЫF�2�S�]*�s�� g�A�P3r������	�X"u$-���l��(��{{�P5MeHI��=��w����j6wU	iR���T�oYw*p7�r)Ҋ
-B:���g�I�	]�r�v{!r�&���Ŭ�i��L�4� �F�4��F�����޲�*�T@�$��$����W<��{�X,��τ��һV�$ؔ�S�m��.����l̘b��7�Q���GUUMڪ�Ju��c��l�E5.�s6'�䤽��#��{�T,�<��������NV�}�R~��A0����e�<��X��(�ǄV��,�Q�MEiﳩ�� �%�Ҽ�|�������hRJ�S��{G��V��x��D��i�H"!�������_�e^Jp�ǎ�/8�t*}7����K����*U5ն9�w�a.�G9�Cj��Iɖ�������[Ҋ�xI�9X1�[�ٽh�?��N�}�UA����R��e�U��z]��o�W%��h/M����!�_�;��8�����>���x� "�8#Dq߄!� ��5#�XuO��s�[���Zt�`���jK#���o�����vڷ�7��|��v{4���յƆL������4X���tK'���w���\]����ڜ#�.�nS�#���$��K+R�L�T:�c�Z����9?A�/`v����v�5`��N�)�Sמ<ִ�fY!j٘���]��O����zN��U��l�#xb�`RKj����4[fv�a<߶�'��"���4�P�w��?^֊��'ٔ�0��Ƚ����Z��ye�T� �����T_�9pr����3�����`��]�9d��-�üW�_�;׭�/?֒QhJ|�#X���%gw���`��ɉ�R�+�W�t���
-��N�x� U:Vz�<7g1���n��l�0����ͩ�k�?y�����a��0b^-��W��O��U�����6Ǩ�k�[&ԯiH�[҇�~���h�1 ��[��8�n>w���Ѓ}p��˗�I�'�B(���E�J�����f������7���\�6�+ >׉U�i��'WAIP.?�qoȟ��{�!;�9��t&����cj5_�p�ub�}��f�Q�|���E��2��	�����X�c��:GuH�8����u��}ǎev��3W���_*�?�6����A�E��c�x�1�P��go��M����y�!����j���Ӯ����B����S����3�O����b���r�\޽��X�5+$�<!��@%d�4*$�����m�}�j���5*l�WT�a��0L/�Y�%�ʼ9�şU�!�>?ؕٻ�b���h����)<,b����wwu��A��ߤm�E���D0d[:�\�-Ř���0�O��M=X2�ş��%/ʥMG�E�A)�8���'�Gⲱ�(j�}wY�fu���W�]W�	?<i|RBp�D`�Hb���d���q;5�[���n=J�ӏ�_�\,|	�pP��� aJ=Bi�["��"7VwhFt�7���O�8yhW X�K�0��V_�z�f	���Ǉ��X���u(-_{�q1YL��e!쁡�
-`���5�zK�H��]�t�zw�;��k��KڪQ����b�(C��u �#lY?0 ���������P��h%>���O��V�|"�%�����2W����=�f�H��08c\�b�)���C� ��Z���[����D@,ߣ�gI*Œz��+�%Hhy\2.l�<�zwy`�ڵ�Ϊs��F��[�HQ�U�	�B(�X�~�,�����n*$�dE����"P�� P� �%������U���&�A���;L��<����D �lo0��l[q�h�"�6cZ��vbc-	�r�#,)��U�� aKS�D.�����}i�v��]��Ugmv�ge�)��ۍJ]���aTy�����?��Y�"ؓEO!��J\)8=�Г���_���?��;�|��sӄ��7˒y�����K��u��v�+�(����e�Tf�2BI��= ����/�tYN�������_�q��~g��6�Uϙٷ�f��Opՠޓ�{$cL�犻B�*�r4����y���
-b�b����(�o��|#�2��{u⟝��}�t�y~����k��םs�ܫ��w�a�\<?��W$�Mk��<ۣ��)��I��׸x$h�����	���<u�ի����6c�߹���ۨ޻i�W���Ͻo�\(y�}�� t�.�@-7�l���1%�.] A��c����o��O��s7رn.�?�����9�˨�ɫ;w�|���ͪ�����~��S!>5*�Vnl��߀y*!��-����z�wy��x��\''qA���X�EA��Ny�6Dh��bգU���+���]��(�M�z�
--�4��V��7N�l���#�'�'��;f>`����hi��Ǐ��p[�aFD�P�����g��+�μ�8��g�\����v�eJ���}�*!7�f�KG/�[[�j�j��M(��5Bb�YAF\�3�<���u0��ȫ{��|��2g��)�5��g�G�ˆ��ג��um=����\.��U_�
-���q�O�
-Gi^$"�.�������s�b���
-�����fCw�E�~Y/��d�+ ��Y����-��V�2��پ� UR�L�(ǈG�k�n�ˬ\�/�O��]0v�|n:N�1������ix�o/��_&r���'���Xj�ێ��*B8s�J�\Pf���@��g^ֿ���4���I��8fѝ6Ɠ�e�dG.�E	ɮX�ƬbJIdφ�.4K"E�#�1�Er�"
-�-��GN���;{㥪���:2]w����*bq�w������j㲯E$[��2V��pR��  [ۜ>�{��=�n�jk��T�
-�4����w�hN����5��r���Q��jf7h�roɄ\|�U"�bS!B��6j�6��) S�-ίeWr��p�մ0N>�OG�nZ[�` �:s���7��DdI�f'I���oȥ�K;�J+�0�A�YMSk��!,x����V����'q�p=�?=��=�ۭ<9_�imͦ3�=Ej�%����s�ݣ�g$��9Q
-+�6G�TT�?|�y�4�R�-4��<�]��?��ξ��@����:n��������3݄Bm����Ffwi�z�+S��� �%�~H�<|UBa���a
-$hZ��K�^ʵ 9��Ք�[o��Vo�=�
-���d>�'���
-�]�:����]��0�����~@�EAP�xCguvʐX�!i֤��/`i>[���G5�Bi���l�(�%g�����'�;�>�A���'�����ͧ���^v�$���(��ۼ�|�������v2���z ӬY�������j��3Im��[�9ĵ �:����۳�w�����y����p�5���	o#Q���������aD�������ε� Z�ȳF���n?��z����
-�6���3��$����o� ��~Z �6��)A:�>b�\)6�"#uw:5���}��y<c[��%��aL�ޛxR��W�����g���X��e뷘��6C�&M��H�}��Q�#L�&Vr8�絆����\��5�2���`'�g`%6Q�i5�4��^��|>L>f�О�@��[}W-d��Qʈ*�u�Cj9=b����������g���c�^��[�a��%	���X^6pҸ�'[��
-x�[��-��E�&��
- D���f�G��+ؘB`��yѹ����[�S�z4r���Q���WZ�3g��5������e5t�fA<��)DVRuNʙ�N+��T�E�LK�0�As�#���]��$�cSx�K� �8��Q���ǃ�j|��d<�=�xd���غ�K�Hx�Q�X��FH��(f�>���S���܅j�X�z ��cS�&ʍ���V��״e����sK�X���*q:�%N"���ZqC��E.W�97����p{Q�ȕ��=}�����$k&$��@{��7��մ�d�K���9�zeU�fP*��OU�0�e9�ϊy��]��\��p���q�Jy�ѵ�{u�����o=(���{�������|���v�U����Vʁ���s5ձ����$eU�>�ˢ,�o�9��,�r7�'x\�w̠,���U8�~�3lM���g���<��^�0�ީ�YdU�y������8��^������윻��0����8�(N�� ���88H� �$�6$J
-5K�&�Gɠ\>���.]�.".�����<>thׇ����M�����e�$�@��A²l)���{�.lo�[�CC�N)VG�8�o�"���{s����,[۸��=��Z�6�-��Q�~��h�Y��r��׺�j�^���mUF6�1PJ%��O������n����2Z�a'�	;��?t���@9�U��[C��!����%���'��W�~�#�?C�/-���\�l�m�B��/7�7���	CM�F����*��ց�{��p�����9����i��d���<�N���z]bK����[w�<y�p5�گ?��ӵ��(��"�c:�i|��p�z�y��wg"	9g�}ad�B��##��	�`���h�괫�ܹ��!�b��ww7�_�OY�n�7���Mf[I0�鉤�wo=ؾ�]���u|�R���J  4F�aB�vKq"`�81�����l}N�c\�5V�OZO!��O��׳C����%rp�iI��av	�cy^n��6�q���!4�Vhc!���$�@6(t�)��j$]}����e�:��WϮ�����^��m�9kj�9��,����b�>h7y��um�H�V�F!`�(�JZ��P����@rJV��������̏x��o*Z��D�<�>��X�-6��e*��:h�sTP�'� �j�D@T�B���E=OS���u��8'/u�B���M�_Ю�.����Iϝ�w߮��
-���L�R����piB@�%a܋��#,'�s�Ma��M�\���g=�pRc�+v�mrLZt����.6�:챷I��g\�0 ��o�&0ƛr.��yܭ���M��
-��`�og�����U�n��MWnV_�~�=��4�Ć�7��@�q �;��U�҅s��@��M:t�Z��N!}~ǿ��W���]����j�K��͚nJ�mT8 $�rB�V�-����4-sW�uYt�E���m����.Gp��z-����x^m�4((���Y64�� + \9+�0@�BU#4�1y�הu뎋����~&�{Sz����
-�F����1aeC��$"@�VCc ,o�`�"�AE����S�}���5m�q�v.W�|�8y<N)��5p�`��0�~B�*��Х��H��J�%-�<ۮX� �'���-��m���s�<نF�!  ϊ�V�@Ҳ�e �8�-r[P��S�������#`Pw���}�b���P�HEi�mK �lc� 1؈ �@��)G?y_��m����6wǢC����'��ɉj���{�:��G %��t��uL��p�_�V���k���.��ian0V��ŭ�,�9e���ȁ[F�P<�e��f���Y�+��ߢc�%�k����`�l$@����,����"H5Goihcz����h�Z�v���b��%1V����J:8�IH�s�"bZh��֯�=�k7�51Rܛ�C�m�m 7 (����Zv��/�?Xߵoƨ1=�q�2ur nB��*u�2۩�X��Ѡ"(,3���n!��ʇH����G�qc�R�G��<k�͇���
-�� ��"�$Po	=�c�!�1B���z�7{X���, y!PA%C�葆	s�婪z	��9���i1�mv�/��t�cL,��� ���,�y�j��
-��9�%��Ie:�n�%x����z,�Q5)P����k��M��;i���1;�߮�nw�C��^��lt�*7�    IEND�B`�
-
-
-/* =============================================================================
  * FILE: src/assets/react.svg
  * ============================================================================= */
 
@@ -698,7 +860,7 @@ x�[��-��E�&��
 import React, { useState, useRef, useEffect } from 'react';
 import type { Meld, DragItem } from '../types/game';
 import { TileComponent } from './TileComponent';
-import { CheckCircle2, XCircle, PlusCircle, Bot, ChevronDown } from 'lucide-react';
+import { CheckCircle2, XCircle, PlusCircle, Bot, ChevronDown, Lock } from 'lucide-react';
 import { clsx } from 'clsx';
 
 interface BoardProps {
@@ -710,7 +872,7 @@ interface BoardProps {
   onDropTile: (
     item: DragItem,
     targetLocation: {
-      type: 'board-new' | 'board-meld' | 'rack-0' | 'rack-1' | 'rack';
+      type: 'board-new' | 'board-meld' | 'rack' | 'hand';
       meldId?: string;
       targetIndex?: number;
     }
@@ -806,6 +968,13 @@ const MeldContainer: React.FC<{
             <span className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-300 bg-rose-500/20 px-2 py-0.5 rounded-md border border-rose-500/30">
               <XCircle className="w-3 h-3 text-rose-400" />
               <span className="max-w-[150px] truncate">{meld.errorReason || 'Invalid'}</span>
+            </span>
+          )}
+
+          {meld.isCommitted && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-cyan-300 bg-cyan-500/20 px-1.5 py-0.5 rounded-md border border-cyan-500/30">
+              <Lock className="w-3 h-3 text-cyan-400" />
+              <span>Locked Meld</span>
             </span>
           )}
 
@@ -1018,7 +1187,7 @@ export default Board;
  * ============================================================================= */
 
 import React from 'react';
-import type { Player, DragItem, HandTile, Tile } from '../types/game';
+import type { Player, DragItem, Tile } from '../types/game';
 import { TileComponent } from './TileComponent';
 import { Sparkles, X } from 'lucide-react';
 
@@ -1045,7 +1214,7 @@ export const Hand: React.FC<HandProps> = ({
   onDropTileCanvas,
   isHumanTurn,
 }) => {
-  const handTiles: HandTile[] = humanPlayer?.handTiles || [];
+  const hand: Tile[] = humanPlayer?.hand || [];
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -1082,7 +1251,7 @@ export const Hand: React.FC<HandProps> = ({
           <span className="text-sm font-bold text-amber-200 uppercase tracking-wide flex items-center gap-2">
             Player Hand Tray{' '}
             <span className="text-xs px-2 py-0.5 rounded-full bg-amber-950/80 text-amber-400 border border-amber-800/40 font-mono">
-              {handTiles.length} tiles (Auto-Sorted)
+              {hand.length} tiles (Auto-Sorted)
             </span>
           </span>
 
@@ -1119,32 +1288,31 @@ export const Hand: React.FC<HandProps> = ({
 
       {/* Auto-Sorted Flex Wrap Hand Tiles Container */}
       <div className="w-full min-h-[72px] max-h-44 md:max-h-52 overflow-y-auto pt-2.5 pb-1 pr-1 z-10 flex flex-wrap gap-2.5 items-start content-start">
-        {handTiles.length === 0 ? (
+        {hand.length === 0 ? (
           <div className="w-full h-full flex items-center justify-center text-amber-500/30 text-xs font-mono">
             [Your hand tray is empty! You played all your tiles.]
           </div>
         ) : (
-          handTiles.map((ht, idx) => {
-            const prevTile = idx > 0 ? handTiles[idx - 1].tile : null;
-            const currTile = ht.tile;
+          hand.map((tile, idx) => {
+            const prevTile = idx > 0 ? hand[idx - 1] : null;
             const getGroupKey = (t: Tile) => (t.isJoker ? 'joker' : t.color);
-            const isNewGroup = prevTile !== null && getGroupKey(currTile) !== getGroupKey(prevTile);
+            const isNewGroup = prevTile !== null && getGroupKey(tile) !== getGroupKey(prevTile);
 
             return (
-              <React.Fragment key={ht.tile.id}>
+              <React.Fragment key={tile.id}>
                 {isNewGroup && (
                   <div
-                    key={`spacer-${ht.tile.id}`}
+                    key={`spacer-${tile.id}`}
                     className="w-11 h-16 pointer-events-none flex-shrink-0"
                     aria-hidden="true"
                   />
                 )}
                 <TileComponent
-                  tile={ht.tile}
-                  isSelected={selectedTileIds.includes(ht.tile.id)}
-                  isDrawnTile={ht.tile.id === drawnTileId}
+                  tile={tile}
+                  isSelected={selectedTileIds.includes(tile.id)}
+                  isDrawnTile={tile.id === drawnTileId}
                   isMagnifierEnabled={isMagnifierEnabled}
-                  onClick={() => isHumanTurn && onToggleTileSelection(ht.tile.id)}
+                  onClick={() => isHumanTurn && onToggleTileSelection(tile.id)}
                   source="rack"
                   size="md"
                 />
@@ -1165,7 +1333,7 @@ export const Hand: React.FC<HandProps> = ({
 
 import React from 'react';
 import type { Player } from '../types/game';
-import { Volume2, VolumeX, HelpCircle, RefreshCw, Layers, ShieldCheck, ShieldAlert, Lightbulb, Download, Bot, Search, Sparkles } from 'lucide-react';
+import { Volume2, VolumeX, HelpCircle, RefreshCw, Layers, ShieldAlert, Lightbulb, Download, Bot, Search, Sparkles } from 'lucide-react';
 import { clsx } from 'clsx';
 
 interface HeaderProps {
@@ -1176,6 +1344,7 @@ interface HeaderProps {
   isHumanTurn: boolean;
   soundEnabled: boolean;
   isMagnifierEnabled: boolean;
+  botLastMoveMessage?: string | null;
   onToggleSound: () => void;
   onToggleMagnifier: () => void;
   onOpenRules: () => void;
@@ -1184,7 +1353,7 @@ interface HeaderProps {
   onInstallApp?: () => void;
 }
 
-const appVersion = import.meta.env.VITE_APP_VERSION || 'v1.0.0';
+const appVersion = (import.meta as any).env?.VITE_APP_VERSION || 'v1.0.0';
 
 export const Header: React.FC<HeaderProps> = ({
   poolCount,
@@ -1194,6 +1363,7 @@ export const Header: React.FC<HeaderProps> = ({
   isHumanTurn,
   soundEnabled,
   isMagnifierEnabled,
+  botLastMoveMessage,
   onToggleSound,
   onToggleMagnifier,
   onOpenRules,
@@ -1201,7 +1371,7 @@ export const Header: React.FC<HeaderProps> = ({
   onGetHint,
   onInstallApp,
 }) => {
-  const aiTileCount = aiPlayer?.handTiles?.length ?? 14;
+  const aiTileCount = aiPlayer?.hand?.length ?? 14;
 
   return (
     <header className="w-full bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 py-3 shadow-xl sticky top-0 z-30">
@@ -1236,6 +1406,15 @@ export const Header: React.FC<HeaderProps> = ({
             <span className="font-bold font-mono text-amber-300">{aiTileCount} tiles</span>
           </div>
 
+          {/* Persistent Bot Last Move Status Banner at Top of Window */}
+          {botLastMoveMessage && (
+            <div className="flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 rounded-lg text-xs font-semibold shadow-sm text-amber-300">
+              <Bot className="w-4 h-4 text-amber-400" />
+              <span className="text-slate-400">Bot's Last Turn:</span>
+              <span className="font-bold text-amber-200">{botLastMoveMessage}</span>
+            </div>
+          )}
+
           <div
             className={clsx(
               'flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-semibold shadow-sm transition-all',
@@ -1248,26 +1427,12 @@ export const Header: React.FC<HeaderProps> = ({
             <span>Turn: {activePlayer?.name || 'Loading...'}</span>
           </div>
 
-          <div
-            className={clsx(
-              'hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium',
-              humanPlayer?.hasInitialMeld
-                ? 'bg-emerald-950/40 border-emerald-800/50 text-emerald-300'
-                : 'bg-amber-950/40 border-amber-800/50 text-amber-300'
-            )}
-          >
-            {humanPlayer?.hasInitialMeld ? (
-              <>
-                <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                <span>Initial Meld Done</span>
-              </>
-            ) : (
-              <>
-                <ShieldAlert className="w-4 h-4 text-amber-400" />
-                <span>Initial Meld Required (&ge; 30 pts)</span>
-              </>
-            )}
-          </div>
+          {!humanPlayer?.hasInitialMeld && (
+            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium bg-amber-950/40 border-amber-800/50 text-amber-300">
+              <ShieldAlert className="w-4 h-4 text-amber-400" />
+              <span>Initial Meld Required (&ge; 30 pts)</span>
+            </div>
+          )}
         </div>
 
         {/* Action & Settings Buttons */}
@@ -1647,7 +1812,6 @@ interface TileComponentProps {
   isMagnifierEnabled?: boolean;
   onClick?: () => void;
   source: 'rack' | 'board';
-  sourceRackIndex?: number;
   sourceMeldId?: string;
   sourceIndex?: number;
   size?: 'sm' | 'md' | 'lg';
@@ -1685,7 +1849,6 @@ export const TileComponent: React.FC<TileComponentProps> = ({
   isMagnifierEnabled = false,
   onClick,
   source,
-  sourceRackIndex,
   sourceMeldId,
   sourceIndex,
   size = 'md',
@@ -1696,15 +1859,11 @@ export const TileComponent: React.FC<TileComponentProps> = ({
 
   const handleDragStart = (e: React.DragEvent) => {
     setHoverPos(null);
-    const rect = e.currentTarget.getBoundingClientRect();
     const dragItem: DragItem = {
       tileId: tile.id,
       source,
-      sourceRackIndex,
       sourceMeldId,
       sourceIndex,
-      offsetX: e.clientX - rect.left,
-      offsetY: e.clientY - rect.top,
     };
     e.dataTransfer.setData('application/json', JSON.stringify(dragItem));
     e.dataTransfer.effectAllowed = 'move';
@@ -1743,9 +1902,9 @@ export const TileComponent: React.FC<TileComponentProps> = ({
   };
 
   const sizeClasses = {
-    sm: 'w-8 h-12 text-base rounded-md',
-    md: 'w-11 h-16 text-xl rounded-lg',
-    lg: 'w-14 h-20 text-2xl rounded-xl',
+    sm: 'w-8.5 h-12.5 text-lg rounded-md',
+    md: 'w-11.5 h-16.5 text-2xl rounded-lg',
+    lg: 'w-14.5 h-20.5 text-3xl rounded-xl',
   }[size];
 
   const colorConfig = colorStyles[tile.color];
@@ -1766,7 +1925,10 @@ export const TileComponent: React.FC<TileComponentProps> = ({
           'bg-gradient-to-b from-amber-50 via-amber-100 to-amber-200 border border-amber-300/80',
           'tile-shadow tile-hover transition-all duration-150 transform',
           sizeClasses,
-          isSelected && 'tile-selected -translate-y-2 ring-2 ring-amber-400 z-10',
+          isSelected &&
+            (source === 'rack'
+              ? 'tile-selected -translate-y-2 ring-2 ring-amber-400 z-10'
+              : 'ring-2 ring-amber-400 z-10'),
           isDrawnTile &&
             'ring-4 ring-amber-400 ring-offset-2 ring-offset-slate-950 scale-105 z-20 shadow-xl shadow-amber-500/50 animate-pulse',
           isRecentlyPlaced &&
@@ -1777,14 +1939,14 @@ export const TileComponent: React.FC<TileComponentProps> = ({
       >
         {/* Drawn Tile Highlight "NEW" Badge */}
         {isDrawnTile && (
-          <span className="absolute -top-2.5 -right-2.5 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 text-[9px] font-extrabold px-1.5 py-0.5 rounded-full shadow-lg border border-amber-300 animate-bounce z-30">
+          <span className="absolute -top-2.5 -right-2.5 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 text-[11px] font-extrabold px-1.5 py-0.5 rounded-full shadow-lg border border-amber-300 animate-bounce z-30">
             NEW
           </span>
         )}
 
         {/* Bot Placement Highlight Badge */}
         {isRecentlyPlaced && (
-          <span className="absolute -top-2 -right-2 w-4 h-4 bg-cyan-500 text-slate-950 rounded-full font-bold text-[9px] flex items-center justify-center shadow-lg animate-bounce border border-cyan-300 z-30">
+          <span className="absolute -top-2 -right-2 w-4 h-4 bg-cyan-500 text-slate-950 rounded-full font-bold text-[11px] flex items-center justify-center shadow-lg animate-bounce border border-cyan-300 z-30">
             <Bot className="w-2.5 h-2.5" />
           </span>
         )}
@@ -1804,14 +1966,14 @@ export const TileComponent: React.FC<TileComponentProps> = ({
               tile.color === 'yellow' && 'bg-amber-500'
             )}
           />
-          <span className="text-[9px] font-mono opacity-50 select-none">R</span>
+          <span className="text-[11px] font-mono opacity-50 select-none">R</span>
         </div>
 
         <div className="flex-1 flex items-center justify-center font-bold tracking-tight">
           {tile.isJoker ? (
             <div className="flex flex-col items-center text-amber-600 animate-pulse">
               <Sparkles className="w-5 h-5" />
-              <span className="text-[10px] uppercase font-semibold">Joker</span>
+              <span className="text-[12px] uppercase font-semibold">Joker</span>
             </div>
           ) : (
             <span className="drop-shadow-sm">{tile.value}</span>
@@ -1902,6 +2064,14 @@ export const TurnControls: React.FC<TurnControlsProps> = ({
   const initialMeldSatisfied = hasInitialMeld || turnPointsGained >= 30;
   const canEndTurn = hasPlayedTiles && isBoardValid && initialMeldSatisfied;
 
+  // Determine button text when End Turn is disabled
+  let disabledReasonText = 'Invalid Melds';
+  if (!initialMeldSatisfied) {
+    disabledReasonText = `Invalid Melds (Need 30+ Pts: ${turnPointsGained}/30)`;
+  } else if (!isBoardValid) {
+    disabledReasonText = 'Invalid Melds';
+  }
+
   return (
     <div className="w-full bg-slate-900/90 backdrop-blur-md rounded-2xl border border-slate-800 p-4 shadow-xl flex flex-wrap items-center justify-between gap-4">
       {/* Bot Thinking & Player Status Indicator */}
@@ -1938,79 +2108,50 @@ export const TurnControls: React.FC<TurnControlsProps> = ({
         )}
       </div>
 
-      {/* Dynamic Action Buttons */}
+      {/* Mutually Exclusive Single Action Button Container */}
       <div className="flex items-center gap-3">
-        {/* Draw Tile & Pass Button (Always available to draw/pass turn) */}
-        <button
-          onClick={onDrawTile}
-          disabled={!isHumanTurn || isAiThinking}
-          className={clsx(
-            'px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition border shadow-lg cursor-pointer transform hover:scale-105 active:scale-95',
-            isHumanTurn && !isAiThinking
-              ? 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white border-cyan-400 shadow-blue-500/20'
-              : 'bg-slate-800/40 text-slate-600 border-slate-800 cursor-not-allowed'
-          )}
-          title={
-            hasPlayedTiles
-              ? 'Revert uncommitted board moves, draw 1 tile from pool, and pass turn'
-              : `Draw 1 tile from pool (${poolCount} left) and pass turn`
-          }
-        >
-          <Plus className="w-4 h-4 text-cyan-300" />
-          <span>Draw Tile & Pass (+1)</span>
-        </button>
-
-        {/* End Turn Action / Warning Button */}
-        {hasPlayedTiles && (
-          canEndTurn ? (
-            /* Valid End Turn: Glowing Emerald */
-            <button
-              onClick={onEndTurn}
-              disabled={!isHumanTurn || isAiThinking}
-              className={clsx(
-                'px-6 py-2.5 rounded-xl font-extrabold text-xs flex items-center gap-2 transition border shadow-xl cursor-pointer transform hover:scale-105 active:scale-95 animate-pulse',
-                isHumanTurn && !isAiThinking
-                  ? 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 border-emerald-300 shadow-emerald-500/40 ring-2 ring-emerald-400/60'
-                  : 'bg-slate-800/40 text-slate-600 border-slate-800 cursor-not-allowed'
-              )}
-              title="Submit turn and pass to opponent"
-            >
-              <Play className="w-4 h-4 fill-current text-slate-950" />
-              <span>End Turn</span>
-            </button>
-          ) : !initialMeldSatisfied ? (
-            /* Initial Meld Requirement Not Met */
-            <button
-              onClick={onEndTurn}
-              disabled={!isHumanTurn || isAiThinking}
-              className={clsx(
-                'px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition border shadow-md',
-                isHumanTurn && !isAiThinking
-                  ? 'bg-amber-950/80 hover:bg-amber-900 text-amber-300 border-amber-600/80 cursor-pointer'
-                  : 'bg-slate-800/40 text-slate-600 border-slate-800 cursor-not-allowed'
-              )}
-              title={`Initial meld requires 30+ points from hand (currently ${turnPointsGained} pts)`}
-            >
-              <AlertTriangle className="w-4 h-4 text-amber-400" />
-              <span>End Turn (Need 30+ Pts: {turnPointsGained}/30)</span>
-            </button>
-          ) : (
-            /* Board Melds Invalid */
-            <button
-              onClick={onEndTurn}
-              disabled={!isHumanTurn || isAiThinking}
-              className={clsx(
-                'px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition border shadow-md',
-                isHumanTurn && !isAiThinking
-                  ? 'bg-rose-950/80 hover:bg-rose-900 text-rose-300 border-rose-600/80 cursor-pointer'
-                  : 'bg-slate-800/40 text-slate-600 border-slate-800 cursor-not-allowed'
-              )}
-              title="Click to check invalid melds on the table"
-            >
-              <AlertTriangle className="w-4 h-4 text-rose-400" />
-              <span>End Turn (Fix Invalid Melds)</span>
-            </button>
-          )
+        {!hasPlayedTiles ? (
+          /* CASE 1: No tiles added from hand during current turn -> Show Draw Tile & Pass (ENABLED) */
+          <button
+            onClick={onDrawTile}
+            disabled={!isHumanTurn || isAiThinking}
+            className={clsx(
+              'px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition border shadow-lg cursor-pointer transform hover:scale-105 active:scale-95',
+              isHumanTurn && !isAiThinking
+                ? 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white border-cyan-400 shadow-blue-500/20'
+                : 'bg-slate-800/40 text-slate-600 border-slate-800 cursor-not-allowed'
+            )}
+            title={`Draw 1 tile from pool (${poolCount} left) and pass turn`}
+          >
+            <Plus className="w-4 h-4 text-cyan-300" />
+            <span>Draw Tile & Pass (+1)</span>
+          </button>
+        ) : canEndTurn ? (
+          /* CASE 2A: Tiles added from hand & all melds valid -> Show End Turn (ENABLED) */
+          <button
+            onClick={onEndTurn}
+            disabled={!isHumanTurn || isAiThinking}
+            className={clsx(
+              'px-6 py-2.5 rounded-xl font-extrabold text-xs flex items-center gap-2 transition border shadow-xl cursor-pointer transform hover:scale-105 active:scale-95 animate-pulse',
+              isHumanTurn && !isAiThinking
+                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 border-emerald-300 shadow-emerald-500/40 ring-2 ring-emerald-400/60'
+                : 'bg-slate-800/40 text-slate-600 border-slate-800 cursor-not-allowed'
+            )}
+            title="Submit turn and pass to opponent"
+          >
+            <Play className="w-4 h-4 fill-current text-slate-950" />
+            <span>End Turn</span>
+          </button>
+        ) : (
+          /* CASE 2B: Tiles added from hand but invalid melds or unmet initial meld -> Show Invalid Melds (DISABLED) */
+          <button
+            disabled={true}
+            className="px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition border shadow-md bg-slate-800/60 text-rose-400/80 border-rose-900/40 cursor-not-allowed opacity-80"
+            title="Return uncommitted tiles to your hand tray or arrange them into valid melds to enable End Turn"
+          >
+            <AlertTriangle className="w-4 h-4 text-rose-400" />
+            <span>{disabledReasonText}</span>
+          </button>
         )}
       </div>
     </div>
@@ -2079,7 +2220,7 @@ import { isValidMeld, calculateMeldValue } from './validator';
 
 export interface AiMoveResult {
   newBoardMelds: Meld[];
-  newAiRack: Tile[];
+  newAiHand: Tile[];
   drewTile: boolean;
   playedTilesCount: number;
   message: string;
@@ -2088,12 +2229,12 @@ export interface AiMoveResult {
 /**
  * Searches for all possible valid melds from a set of tiles.
  */
-export function findPossibleMeldsFromRack(rack: Tile[]): Tile[][] {
+export function findPossibleMeldsFromHand(hand: Tile[]): Tile[][] {
   const validMelds: Tile[][] = [];
-  const n = rack.length;
+  const n = hand.length;
 
   for (let len = 3; len <= Math.min(n, 6); len++) {
-    const subsets = getSubsetsOfLength(rack, len);
+    const subsets = getSubsetsOfLength(hand, len);
     for (const subset of subsets) {
       const valRes = isValidMeld(subset);
       if (valRes.isValid) {
@@ -2133,15 +2274,15 @@ export function executeAiTurn(
   boardMelds: Meld[],
   tilePool: Tile[]
 ): AiMoveResult {
-  const rack = [...aiPlayer.rack];
+  const hand = [...aiPlayer.hand];
 
-  const possibleMelds = findPossibleMeldsFromRack(rack);
+  const possibleMelds = findPossibleMeldsFromHand(hand);
 
   if (!aiPlayer.hasInitialMeld) {
     for (const meldCandidate of possibleMelds) {
       const val = calculateMeldValue(meldCandidate);
       if (val >= 30) {
-        const remainingRack = rack.filter((t) => !meldCandidate.some((mt) => mt.id === t.id));
+        const remainingHand = hand.filter((t) => !meldCandidate.some((mt) => mt.id === t.id));
         const newMeld: Meld = {
           id: `meld_ai_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
           tiles: meldCandidate,
@@ -2152,7 +2293,7 @@ export function executeAiTurn(
 
         return {
           newBoardMelds: [...boardMelds, newMeld],
-          newAiRack: remainingRack,
+          newAiHand: remainingHand,
           drewTile: false,
           playedTilesCount: meldCandidate.length,
           message: `${aiPlayer.name} made initial meld with ${val} points!`,
@@ -2166,7 +2307,7 @@ export function executeAiTurn(
   if (possibleMelds.length > 0) {
     possibleMelds.sort((a, b) => calculateMeldValue(b) - calculateMeldValue(a));
     const bestMeld = possibleMelds[0];
-    const remainingRack = rack.filter((t) => !bestMeld.some((mt) => mt.id === t.id));
+    const remainingHand = hand.filter((t) => !bestMeld.some((mt) => mt.id === t.id));
     const val = calculateMeldValue(bestMeld);
 
     const newMeld: Meld = {
@@ -2179,7 +2320,7 @@ export function executeAiTurn(
 
     return {
       newBoardMelds: [...boardMelds, newMeld],
-      newAiRack: remainingRack,
+      newAiHand: remainingHand,
       drewTile: false,
       playedTilesCount: bestMeld.length,
       message: `${aiPlayer.name} played a meld of ${bestMeld.length} tiles!`,
@@ -2188,11 +2329,11 @@ export function executeAiTurn(
 
   for (let mIdx = 0; mIdx < boardMelds.length; mIdx++) {
     const targetMeld = boardMelds[mIdx];
-    for (let rIdx = 0; rIdx < rack.length; rIdx++) {
-      const tileToTry = rack[rIdx];
+    for (let rIdx = 0; rIdx < hand.length; rIdx++) {
+      const tileToTry = hand[rIdx];
       const candidateAtStart = [tileToTry, ...targetMeld.tiles];
       if (isValidMeld(candidateAtStart).isValid) {
-        const remainingRack = rack.filter((t) => t.id !== tileToTry.id);
+        const remainingHand = hand.filter((t) => t.id !== tileToTry.id);
         const updatedMelds = [...boardMelds];
         updatedMelds[mIdx] = {
           ...targetMeld,
@@ -2203,7 +2344,7 @@ export function executeAiTurn(
         };
         return {
           newBoardMelds: updatedMelds,
-          newAiRack: remainingRack,
+          newAiHand: remainingHand,
           drewTile: false,
           playedTilesCount: 1,
           message: `${aiPlayer.name} added a tile to table meld!`,
@@ -2212,7 +2353,7 @@ export function executeAiTurn(
 
       const candidateAtEnd = [...targetMeld.tiles, tileToTry];
       if (isValidMeld(candidateAtEnd).isValid) {
-        const remainingRack = rack.filter((t) => t.id !== tileToTry.id);
+        const remainingHand = hand.filter((t) => t.id !== tileToTry.id);
         const updatedMelds = [...boardMelds];
         updatedMelds[mIdx] = {
           ...targetMeld,
@@ -2223,7 +2364,7 @@ export function executeAiTurn(
         };
         return {
           newBoardMelds: updatedMelds,
-          newAiRack: remainingRack,
+          newAiHand: remainingHand,
           drewTile: false,
           playedTilesCount: 1,
           message: `${aiPlayer.name} added a tile to table meld!`,
@@ -2239,7 +2380,7 @@ function handleAiDraw(aiPlayer: Player, boardMelds: Meld[], tilePool: Tile[]): A
   if (tilePool.length === 0) {
     return {
       newBoardMelds: boardMelds,
-      newAiRack: aiPlayer.rack,
+      newAiHand: aiPlayer.hand,
       drewTile: true,
       playedTilesCount: 0,
       message: `${aiPlayer.name} passed (pool empty).`,
@@ -2249,7 +2390,7 @@ function handleAiDraw(aiPlayer: Player, boardMelds: Meld[], tilePool: Tile[]): A
   const drawnTile = tilePool[0];
   return {
     newBoardMelds: boardMelds,
-    newAiRack: [...aiPlayer.rack, drawnTile],
+    newAiHand: [...aiPlayer.hand, drawnTile],
     drewTile: true,
     playedTilesCount: 0,
     message: `${aiPlayer.name} drew 1 tile from the pool.`,
@@ -2478,6 +2619,32 @@ export interface HintResult {
 }
 
 /**
+ * Helper to produce a clear, human-readable description of an existing table meld.
+ * Examples:
+ * - "Group of 11s [BLACK, BLUE, YELLOW]"
+ * - "Run of RED [8, 9, 10]"
+ */
+export function formatMeldDescription(meld: Meld): string {
+  const norm = normalizeMeld(meld.tiles);
+  if (norm.length === 0) return 'empty meld';
+
+  const isRun = isValidMeld(norm).type === 'run';
+
+  if (isRun) {
+    const nonJoker = norm.find((t) => !t.isJoker);
+    const colorStr = nonJoker ? nonJoker.color.toUpperCase() : 'MIXED';
+    const valuesStr = norm.map((t) => (t.isJoker ? 'Joker' : t.value)).join(', ');
+    return `Run of ${colorStr} [${valuesStr}]`;
+  } else {
+    // Group of same values across different colors
+    const nonJoker = norm.find((t) => !t.isJoker);
+    const valStr = nonJoker ? `${nonJoker.value}s` : 'Jokers';
+    const colorsStr = norm.map((t) => (t.isJoker ? 'Joker' : t.color.toUpperCase())).join(', ');
+    return `Group of ${valStr} [${colorsStr}]`;
+  }
+}
+
+/**
  * Validates that every resulting meld fragment contains at least 3 tiles and forms a valid Group or Run.
  */
 function validateResultingMelds(resultingMelds: Tile[][]): boolean {
@@ -2494,19 +2661,19 @@ function validateResultingMelds(resultingMelds: Tile[][]): boolean {
  * 3. Point values for table moves reflect ONLY the net contributed points played from hand.
  */
 export function findPossibleMoves(
-  handTiles: Tile[],
+  hand: Tile[],
   boardMelds: Meld[],
   hasInitialMeld: boolean
 ): HintResult {
   const moves: HintMove[] = [];
   const moveDescriptions = new Set<string>();
 
-  const n = handTiles.length;
+  const n = hand.length;
 
   // 1. Search for New Melds from Hand (subsets of length 3..6)
   if (n >= 3) {
     for (let len = 3; len <= Math.min(n, 6); len++) {
-      const subsets = getSubsetsOfLength(handTiles, len);
+      const subsets = getSubsetsOfLength(hand, len);
       for (const subset of subsets) {
         const valRes = isValidMeld(subset);
         if (valRes.isValid) {
@@ -2552,13 +2719,16 @@ export function findPossibleMoves(
     if (!meld.isValid) continue;
 
     const baseMeldValue = getEffectiveMeldPointValue(meld.tiles);
+    const meldDesc = formatMeldDescription(meld);
 
-    for (const ht of handTiles) {
+    for (const ht of hand) {
+      const tileName = `${ht.color.toUpperCase()} ${ht.isJoker ? 'Joker' : ht.value}`;
+
       // Test prepending to meld
       const prependSet = [ht, ...meld.tiles];
       if (isValidMeld(prependSet).isValid) {
         const netPoints = getEffectiveMeldPointValue(prependSet) - baseMeldValue;
-        const desc = `Attach ${ht.color.toUpperCase()} ${ht.isJoker ? 'Joker' : ht.value} to start of table meld (+${netPoints} pts)`;
+        const desc = `Attach ${tileName} from hand to start of ${meldDesc} (+${netPoints} pts)`;
         if (!moveDescriptions.has(desc)) {
           moveDescriptions.add(desc);
           moves.push({
@@ -2577,7 +2747,7 @@ export function findPossibleMoves(
       const appendSet = [...meld.tiles, ht];
       if (isValidMeld(appendSet).isValid) {
         const netPoints = getEffectiveMeldPointValue(appendSet) - baseMeldValue;
-        const desc = `Attach ${ht.color.toUpperCase()} ${ht.isJoker ? 'Joker' : ht.value} to end of table meld (+${netPoints} pts)`;
+        const desc = `Attach ${tileName} from hand to end of ${meldDesc} (+${netPoints} pts)`;
         if (!moveDescriptions.has(desc)) {
           moveDescriptions.add(desc);
           moves.push({
@@ -2598,20 +2768,24 @@ export function findPossibleMoves(
   for (const meld of boardMelds) {
     if (!meld.isValid || meld.tiles.length < 4) continue;
 
+    const meldDesc = formatMeldDescription(meld);
+
     for (let i = 1; i < meld.tiles.length; i++) {
       const left = meld.tiles.slice(0, i);
       const right = meld.tiles.slice(i);
       const baseLeftValue = getEffectiveMeldPointValue(left);
       const baseRightValue = getEffectiveMeldPointValue(right);
 
-      for (const ht of handTiles) {
+      for (const ht of hand) {
+        const tileName = `${ht.color.toUpperCase()} ${ht.isJoker ? 'Joker' : ht.value}`;
+
         // Case A: Attach hand tile to left fragment
         const leftPrepend = [ht, ...left];
         const leftAppend = [...left, ht];
 
         if (validateResultingMelds([leftPrepend, right])) {
           const netPoints = getEffectiveMeldPointValue(leftPrepend) - baseLeftValue;
-          const desc = `Split table meld and attach ${ht.color.toUpperCase()} ${ht.isJoker ? 'Joker' : ht.value} from hand (+${netPoints} pts)`;
+          const desc = `Split ${meldDesc} and attach ${tileName} from hand (+${netPoints} pts)`;
           if (!moveDescriptions.has(desc)) {
             moveDescriptions.add(desc);
             moves.push({
@@ -2628,7 +2802,7 @@ export function findPossibleMoves(
 
         if (validateResultingMelds([leftAppend, right])) {
           const netPoints = getEffectiveMeldPointValue(leftAppend) - baseLeftValue;
-          const desc = `Split table meld and attach ${ht.color.toUpperCase()} ${ht.isJoker ? 'Joker' : ht.value} from hand (+${netPoints} pts)`;
+          const desc = `Split ${meldDesc} and attach ${tileName} from hand (+${netPoints} pts)`;
           if (!moveDescriptions.has(desc)) {
             moveDescriptions.add(desc);
             moves.push({
@@ -2649,7 +2823,7 @@ export function findPossibleMoves(
 
         if (validateResultingMelds([left, rightPrepend])) {
           const netPoints = getEffectiveMeldPointValue(rightPrepend) - baseRightValue;
-          const desc = `Split table meld and attach ${ht.color.toUpperCase()} ${ht.isJoker ? 'Joker' : ht.value} from hand (+${netPoints} pts)`;
+          const desc = `Split ${meldDesc} and attach ${tileName} from hand (+${netPoints} pts)`;
           if (!moveDescriptions.has(desc)) {
             moveDescriptions.add(desc);
             moves.push({
@@ -2666,7 +2840,7 @@ export function findPossibleMoves(
 
         if (validateResultingMelds([left, rightAppend])) {
           const netPoints = getEffectiveMeldPointValue(rightAppend) - baseRightValue;
-          const desc = `Split table meld and attach ${ht.color.toUpperCase()} ${ht.isJoker ? 'Joker' : ht.value} from hand (+${netPoints} pts)`;
+          const desc = `Split ${meldDesc} and attach ${tileName} from hand (+${netPoints} pts)`;
           if (!moveDescriptions.has(desc)) {
             moveDescriptions.add(desc);
             moves.push({
@@ -2713,10 +2887,578 @@ function getSubsetsOfLength<T>(arr: T[], len: number): T[][] {
 
 
 /* =============================================================================
+ * FILE: src/engine/moveEngine.ts
+ * ============================================================================= */
+
+import type { Tile, Meld, Player, TurnSnapshot, GameStatus, DragItem } from '../types/game';
+import { generateTilePool, deepCopyTile, deepCopyMelds } from './tilePool';
+import { isValidMeld, normalizeMeld, normalizeBoard, validateBoard } from './validator';
+import { executeAiTurn } from './ai';
+
+export interface CoreGameState {
+  tilePool: Tile[];
+  boardMelds: Meld[];
+  committedBoardMelds: Meld[];
+  players: Player[];
+  activePlayerIndex: number;
+  gameStatus: GameStatus;
+  winner: Player | null;
+  turnSnapshot: TurnSnapshot | null;
+  autoSplitLinks: Array<{ fromId: string; toId: string }>;
+  botLastMoveMessage: string | null;
+  debugLog: string;
+}
+
+export interface MoveResult {
+  nextState: CoreGameState;
+  soundEffect?: 'draw' | 'drop' | 'success' | 'error' | 'win';
+  toastMessage?: { text: string; type: 'info' | 'success' | 'error' };
+  drawnTileId?: string;
+  selectedTileIds?: string[];
+}
+
+/**
+ * Pure helper to sort hand tiles into logical groups/runs (by color, then value).
+ */
+export function createSortedHand(tiles: Tile[]): Tile[] {
+  const colorOrder: Record<string, number> = { red: 0, blue: 1, black: 2, yellow: 3 };
+  return [...tiles].sort((a, b) => {
+    if (a.isJoker && !b.isJoker) return 1;
+    if (!a.isJoker && b.isJoker) return -1;
+    if (a.color !== b.color) return colorOrder[a.color] - colorOrder[b.color];
+    return a.value - b.value;
+  });
+}
+
+/**
+ * Initializes a new game state.
+ */
+export function initNewGame(): CoreGameState {
+  const fullPool = generateTilePool();
+  const humanHand = createSortedHand(fullPool.slice(0, 14).map(deepCopyTile));
+  const aiHand = createSortedHand(fullPool.slice(14, 28).map(deepCopyTile));
+  const remainingPool = fullPool.slice(28).map(deepCopyTile);
+
+  const humanPlayer: Player = {
+    id: 'player_human',
+    name: 'Player',
+    isAi: false,
+    hand: humanHand,
+    hasInitialMeld: false,
+    score: 0,
+  };
+
+  const aiPlayer: Player = {
+    id: 'player_ai_1',
+    name: 'Rummikub Bot',
+    isAi: true,
+    hand: aiHand,
+    hasInitialMeld: false,
+    score: 0,
+  };
+
+  const initialPlayers = [humanPlayer, aiPlayer];
+
+  const snapshot: TurnSnapshot = {
+    boardMelds: [],
+    hand: humanHand.map(deepCopyTile),
+    hasInitialMeld: false,
+    poolCount: remainingPool.length,
+  };
+
+  return {
+    tilePool: remainingPool,
+    boardMelds: [],
+    committedBoardMelds: [],
+    players: initialPlayers,
+    activePlayerIndex: 0,
+    gameStatus: 'playing',
+    winner: null,
+    turnSnapshot: snapshot,
+    autoSplitLinks: [],
+    botLastMoveMessage: null,
+    debugLog: 'Game started. 14 tiles dealt to each player.',
+  };
+}
+
+/**
+ * Pure turn advancement engine function.
+ */
+export function advanceTurn(
+  state: CoreGameState,
+  newBoard: Meld[],
+  newPlayers: Player[],
+  nextPool: Tile[],
+  isCommittedSubmit: boolean = false
+): CoreGameState {
+  const cleanBoard = deepCopyMelds(newBoard).map((m) =>
+    isCommittedSubmit && m.isValid ? { ...m, isCommitted: true } : m
+  );
+
+  const cleanPlayers = newPlayers.map((p) => ({
+    ...p,
+    hand: createSortedHand(p.hand.map(deepCopyTile)),
+  }));
+
+  const nextCommittedBoard = isCommittedSubmit ? deepCopyMelds(cleanBoard) : state.committedBoardMelds;
+
+  const nextIndex = (state.activePlayerIndex + 1) % cleanPlayers.length;
+  const nextPlayer = cleanPlayers[nextIndex];
+
+  const newSnapshot: TurnSnapshot = {
+    boardMelds: deepCopyMelds(cleanBoard),
+    hand: nextPlayer.hand.map(deepCopyTile),
+    hasInitialMeld: nextPlayer.hasInitialMeld,
+    poolCount: nextPool.length,
+  };
+
+  const logMsg = `Advanced turn to ${nextPlayer.name} (Index: ${nextIndex}). Board Melds: ${cleanBoard.length}.`;
+
+  return {
+    ...state,
+    tilePool: nextPool.map(deepCopyTile),
+    boardMelds: cleanBoard,
+    committedBoardMelds: nextCommittedBoard,
+    players: cleanPlayers,
+    activePlayerIndex: nextIndex,
+    turnSnapshot: newSnapshot,
+    autoSplitLinks: [],
+    debugLog: logMsg,
+  };
+}
+
+/**
+ * Pure handler for tile drop operations.
+ */
+export function executeDropTile(
+  state: CoreGameState,
+  item: DragItem,
+  targetLocation: {
+    type: 'board-new' | 'board-meld' | 'rack' | 'hand';
+    meldId?: string;
+    targetIndex?: number;
+  }
+): MoveResult {
+  if (state.activePlayerIndex !== 0 || state.gameStatus === 'ended') {
+    return { nextState: state };
+  }
+
+  const human = state.players[0];
+  let currentHand = [...human.hand];
+  let currentBoard = deepCopyMelds(state.boardMelds);
+  let movedTile: Tile | null = null;
+
+  // Step 1: Remove tile from source location
+  if (item.source === 'rack' || item.source === ('hand' as any)) {
+    const idx = currentHand.findIndex((t) => t.id === item.tileId);
+    if (idx !== -1) {
+      movedTile = currentHand[idx];
+      currentHand.splice(idx, 1);
+    }
+  } else if (item.source === 'board' && item.sourceMeldId) {
+    const sourceMeldIdx = currentBoard.findIndex((m) => m.id === item.sourceMeldId);
+    if (sourceMeldIdx !== -1) {
+      const sourceMeld = currentBoard[sourceMeldIdx];
+      const tileIdx = sourceMeld.tiles.findIndex((t) => t.id === item.tileId);
+      if (tileIdx !== -1) {
+        movedTile = sourceMeld.tiles[tileIdx];
+        sourceMeld.tiles.splice(tileIdx, 1);
+
+        // Update validity of remaining source meld
+        const valRes = isValidMeld(sourceMeld.tiles);
+        sourceMeld.isValid = valRes.isValid;
+        sourceMeld.type = valRes.type;
+        sourceMeld.value = valRes.value;
+        sourceMeld.errorReason = valRes.errorReason;
+      }
+    }
+  }
+
+  if (!movedTile) {
+    return { nextState: state };
+  }
+
+  // Step 2: Add tile to target location
+  if (targetLocation.type === 'board-new') {
+    const newMeld: Meld = {
+      id: `meld_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+      tiles: [movedTile],
+      isValid: false,
+      type: 'invalid',
+      value: 0,
+      errorReason: 'A meld requires at least 3 tiles',
+    };
+    currentBoard.push(newMeld);
+  } else if (targetLocation.type === 'board-meld' && targetLocation.meldId) {
+    const targetMeldIdx = currentBoard.findIndex((m) => m.id === targetLocation.meldId);
+    if (targetMeldIdx !== -1) {
+      const targetMeld = currentBoard[targetMeldIdx];
+      targetMeld.tiles.push(movedTile);
+      targetMeld.tiles = normalizeMeld(targetMeld.tiles);
+      const valRes = isValidMeld(targetMeld.tiles);
+      targetMeld.isValid = valRes.isValid;
+      targetMeld.type = valRes.type;
+      targetMeld.value = valRes.value;
+      targetMeld.errorReason = valRes.errorReason;
+    } else {
+      currentHand.push(movedTile);
+    }
+  } else if (targetLocation.type === 'rack' || targetLocation.type === 'hand') {
+    currentHand.push(movedTile);
+  }
+
+  // Step 3: Cleanup empty melds from board
+  currentBoard = currentBoard.filter((m) => m.tiles.length > 0);
+
+  const updatedPlayers = state.players.map((p, idx) =>
+    idx === 0 ? { ...p, hand: createSortedHand(currentHand) } : p
+  );
+
+  return {
+    nextState: {
+      ...state,
+      boardMelds: currentBoard,
+      players: updatedPlayers,
+    },
+    soundEffect: 'drop',
+  };
+}
+
+/**
+ * Pure handler to create a new meld from selected tiles.
+ */
+export function executeCreateMeldFromSelection(
+  state: CoreGameState,
+  selectedTileIds: string[]
+): MoveResult {
+  if (selectedTileIds.length < 3) {
+    return {
+      nextState: state,
+      soundEffect: 'error',
+      toastMessage: { text: 'A meld requires at least 3 tiles.', type: 'error' },
+    };
+  }
+
+  const human = state.players[0];
+  let currentHand = [...human.hand];
+  let currentBoard = deepCopyMelds(state.boardMelds);
+  const selectedTiles: Tile[] = [];
+
+  // Gather selected tiles from hand
+  currentHand = currentHand.filter((t) => {
+    if (selectedTileIds.includes(t.id)) {
+      selectedTiles.push(t);
+      return false;
+    }
+    return true;
+  });
+
+  // Gather selected tiles from board melds
+  currentBoard.forEach((meld) => {
+    meld.tiles = meld.tiles.filter((t) => {
+      if (selectedTileIds.includes(t.id)) {
+        selectedTiles.push(t);
+        return false;
+      }
+      return true;
+    });
+  });
+
+  // Clean up empty melds
+  currentBoard = currentBoard.filter((m) => m.tiles.length > 0);
+
+  // Validate the new meld
+  const normTiles = normalizeMeld(selectedTiles);
+  const valRes = isValidMeld(normTiles);
+  const newMeld: Meld = {
+    id: `meld_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+    tiles: normTiles,
+    isValid: valRes.isValid,
+    type: valRes.type,
+    value: valRes.value,
+    errorReason: valRes.errorReason,
+  };
+
+  currentBoard.push(newMeld);
+
+  const updatedPlayers = state.players.map((p, idx) =>
+    idx === 0 ? { ...p, hand: createSortedHand(currentHand) } : p
+  );
+
+  return {
+    nextState: {
+      ...state,
+      boardMelds: currentBoard,
+      players: updatedPlayers,
+    },
+    soundEffect: 'drop',
+    selectedTileIds: [],
+  };
+}
+
+/**
+ * Pure handler to split an existing meld at a specific index.
+ */
+export function executeSplitMeldAt(
+  state: CoreGameState,
+  meldId: string,
+  splitIndex: number
+): MoveResult {
+  const currentBoard = deepCopyMelds(state.boardMelds);
+  const targetIdx = currentBoard.findIndex((m) => m.id === meldId);
+
+  if (targetIdx === -1) return { nextState: state };
+
+  const target = currentBoard[targetIdx];
+  if (splitIndex <= 0 || splitIndex >= target.tiles.length) return { nextState: state };
+
+  const leftTiles = target.tiles.slice(0, splitIndex);
+  const rightTiles = target.tiles.slice(splitIndex);
+
+  const leftVal = isValidMeld(leftTiles);
+  const rightVal = isValidMeld(rightTiles);
+
+  const leftMeld: Meld = {
+    id: target.id,
+    tiles: leftTiles,
+    isValid: leftVal.isValid,
+    type: leftVal.type,
+    value: leftVal.value,
+    errorReason: leftVal.errorReason,
+  };
+
+  const rightMeld: Meld = {
+    id: `meld_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+    tiles: rightTiles,
+    isValid: rightVal.isValid,
+    type: rightVal.type,
+    value: rightVal.value,
+    errorReason: rightVal.errorReason,
+  };
+
+  currentBoard.splice(targetIdx, 1, leftMeld, rightMeld);
+
+  return {
+    nextState: {
+      ...state,
+      boardMelds: currentBoard,
+    },
+    soundEffect: 'drop',
+  };
+}
+
+/**
+ * Pure handler for player drawing a tile.
+ */
+export function executeDrawTile(state: CoreGameState): MoveResult {
+  if (state.activePlayerIndex !== 0 || state.gameStatus === 'ended') {
+    return { nextState: state };
+  }
+
+  const human = state.players[0];
+  const currentPool = state.tilePool;
+  const committedBoard = state.committedBoardMelds;
+  const snapshot = state.turnSnapshot;
+
+  if (currentPool.length === 0) {
+    const nextState = advanceTurn(state, state.boardMelds, state.players, currentPool, true);
+    return {
+      nextState,
+      toastMessage: { text: 'Tile pool is empty! Passing turn.', type: 'info' },
+    };
+  }
+
+  // Restore board to authoritative committedBoardMelds (or valid melds if committed is empty)
+  const effectiveCommitted =
+    committedBoard.length > 0
+      ? committedBoard
+      : (human.hasInitialMeld ? state.boardMelds.filter((m) => m.isValid) : []);
+  const restoredBoard = deepCopyMelds(effectiveCommitted);
+
+  // Return any uncommitted staged tiles from board back into human hand
+  const turnStartHand = snapshot ? snapshot.hand : human.hand;
+  const committedTileIds = new Set(effectiveCommitted.flatMap((m) => m.tiles.map((t) => t.id)));
+
+  let currentHand = [...human.hand];
+  const currentHandTileIds = new Set(currentHand.map((t) => t.id));
+
+  const uncommittedHandTiles = turnStartHand.filter(
+    (t) => !currentHandTileIds.has(t.id) && !committedTileIds.has(t.id)
+  );
+
+  currentHand = [...currentHand, ...uncommittedHandTiles];
+
+  // Draw 1 tile from pool
+  const drawnTile = deepCopyTile(currentPool[0]);
+  const remainingPool = currentPool.slice(1);
+  currentHand.push(drawnTile);
+
+  const updatedPlayers = state.players.map((p, idx) =>
+    idx === 0 ? { ...p, hand: createSortedHand(currentHand) } : p
+  );
+
+  const tileName = drawnTile.isJoker ? 'Joker' : `${drawnTile.color} ${drawnTile.value}`;
+  const nextState = advanceTurn(state, restoredBoard, updatedPlayers, remainingPool, true);
+
+  return {
+    nextState,
+    soundEffect: 'draw',
+    toastMessage: { text: `You drew a tile (${tileName}).`, type: 'info' },
+    drawnTileId: drawnTile.id,
+  };
+}
+
+/**
+ * Pure handler for player submitting end turn.
+ */
+export function executeEndTurn(state: CoreGameState): MoveResult {
+  if (state.activePlayerIndex !== 0 || state.gameStatus === 'ended') {
+    return { nextState: state };
+  }
+
+  const human = state.players[0];
+  const snapshot = state.turnSnapshot;
+  const currentBoard = state.boardMelds;
+
+  if (!snapshot) return { nextState: state };
+
+  const boardValidation = validateBoard(currentBoard);
+  if (!boardValidation.allValid) {
+    return {
+      nextState: state,
+      soundEffect: 'error',
+      toastMessage: {
+        text: `Cannot end turn: There are invalid melds on the table (${boardValidation.invalidMeldIds.length} invalid).`,
+        type: 'error',
+      },
+    };
+  }
+
+  const startHandCount = snapshot.hand.length;
+  const currentHandCount = human.hand.length;
+  const tilesPlayedCount = startHandCount - currentHandCount;
+
+  if (tilesPlayedCount <= 0) {
+    return {
+      nextState: state,
+      soundEffect: 'error',
+      toastMessage: { text: 'You must play at least 1 tile or Draw a tile to end turn.', type: 'error' },
+    };
+  }
+
+  if (!human.hasInitialMeld) {
+    const snapshotPoints = snapshot.boardMelds.reduce((acc, m) => acc + (m.isValid ? m.value : 0), 0);
+    const currentPoints = boardValidation.totalPoints;
+    const turnPointsGained = currentPoints - snapshotPoints;
+
+    if (turnPointsGained < 30) {
+      return {
+        nextState: state,
+        soundEffect: 'error',
+        toastMessage: {
+          text: `Initial Meld Requirement: You need at least 30 points of new melds from your hand. (You achieved ${turnPointsGained} pts).`,
+          type: 'error',
+        },
+      };
+    }
+  }
+
+  const normalizedBoard = normalizeBoard(currentBoard);
+
+  const updatedPlayers = state.players.map((p, idx) =>
+    idx === 0
+      ? {
+          ...p,
+          hand: createSortedHand(p.hand),
+          hasInitialMeld: true,
+        }
+      : p
+  );
+
+  // Check win condition
+  if (updatedPlayers[0].hand.length === 0) {
+    const winState: CoreGameState = {
+      ...state,
+      gameStatus: 'ended',
+      winner: { ...updatedPlayers[0], hasInitialMeld: true },
+      boardMelds: normalizedBoard,
+      players: updatedPlayers,
+    };
+    return {
+      nextState: winState,
+      soundEffect: 'win',
+      toastMessage: { text: '🎉 CONGRATULATIONS! You emptied your hand and won the game!', type: 'success' },
+    };
+  }
+
+  const nextState = advanceTurn(state, normalizedBoard, updatedPlayers, state.tilePool, true);
+
+  return {
+    nextState,
+    soundEffect: 'success',
+    toastMessage: { text: 'Turn submitted successfully!', type: 'success' },
+  };
+}
+
+/**
+ * Pure handler for automated AI turn step.
+ */
+export function executeAiTurnStep(state: CoreGameState): MoveResult {
+  const currentAiPlayer = state.players[state.activePlayerIndex];
+  if (!currentAiPlayer || !currentAiPlayer.isAi) {
+    return { nextState: state };
+  }
+
+  const aiResult = executeAiTurn(currentAiPlayer, state.boardMelds, state.tilePool);
+  const normalizedAiBoard = normalizeBoard(aiResult.newBoardMelds);
+
+  const updatedPlayers = state.players.map((p, idx) => {
+    if (idx === state.activePlayerIndex) {
+      const playedAny = aiResult.playedTilesCount > 0;
+      return {
+        ...p,
+        hand: createSortedHand(aiResult.newAiHand),
+        hasInitialMeld: p.hasInitialMeld || (playedAny && !aiResult.drewTile),
+      };
+    }
+    return p;
+  });
+
+  const nextPool = aiResult.drewTile && state.tilePool.length > 0 ? state.tilePool.slice(1) : state.tilePool;
+
+  // Check AI win condition
+  if (aiResult.newAiHand.length === 0) {
+    const winState: CoreGameState = {
+      ...state,
+      gameStatus: 'ended',
+      winner: updatedPlayers[state.activePlayerIndex],
+      boardMelds: normalizedAiBoard,
+      players: updatedPlayers,
+    };
+    return {
+      nextState: winState,
+      soundEffect: 'error',
+      toastMessage: { text: `🤖 ${currentAiPlayer.name} has played all tiles and won!`, type: 'info' },
+    };
+  }
+
+  const nextState = advanceTurn(state, normalizedAiBoard, updatedPlayers, nextPool, true);
+
+  return {
+    nextState: {
+      ...nextState,
+      botLastMoveMessage: aiResult.message,
+    },
+  };
+}
+
+
+
+/* =============================================================================
  * FILE: src/engine/tilePool.ts
  * ============================================================================= */
 
-import type { Tile, TileColor } from '../types/game';
+import type { Tile, TileColor, Meld } from '../types/game';
 
 export const COLORS: TileColor[] = ['red', 'blue', 'black', 'yellow'];
 
@@ -2773,6 +3515,30 @@ export function shuffleTiles(tiles: Tile[]): Tile[] {
 }
 
 /**
+ * Generates a full, shuffled tile pool.
+ */
+export function generateTilePool(): Tile[] {
+  return shuffleTiles(createTilePool());
+}
+
+/**
+ * Deep copy helper for a single tile.
+ */
+export function deepCopyTile(tile: Tile): Tile {
+  return { ...tile };
+}
+
+/**
+ * Deep copy helper for an array of melds.
+ */
+export function deepCopyMelds(melds: Meld[]): Meld[] {
+  return melds.map((m) => ({
+    ...m,
+    tiles: m.tiles.map(deepCopyTile),
+  }));
+}
+
+/**
  * Sorts tiles by value (1-13), then by color.
  */
 export function sortTilesByValue(tiles: Tile[]): Tile[] {
@@ -2806,12 +3572,10 @@ const COLOR_ORDER: TileColor[] = ['red', 'blue', 'black', 'yellow'];
  */
 export function sortHandColorThenNumber(tiles: Tile[]): Tile[] {
   return [...tiles].sort((a, b) => {
-    // 1. Jokers always go to the end
     if (a.isJoker && !b.isJoker) return 1;
     if (!a.isJoker && b.isJoker) return -1;
     if (a.isJoker && b.isJoker) return 0;
 
-    // 2. Sort by color order
     const colorIndexA = COLOR_ORDER.indexOf(a.color);
     const colorIndexB = COLOR_ORDER.indexOf(b.color);
 
@@ -2819,7 +3583,6 @@ export function sortHandColorThenNumber(tiles: Tile[]): Tile[] {
       return colorIndexA - colorIndexB;
     }
 
-    // 3. Within same color, sort ascending by numerical value
     return a.value - b.value;
   });
 }
@@ -3166,757 +3929,175 @@ export function normalizeBoard(melds: Meld[]): Meld[] {
  * FILE: src/hooks/useGameState.ts
  * ============================================================================= */
 
-import { useState, useCallback, useEffect, useRef } from 'react';
-import type { Tile, Meld, Player, TurnSnapshot, GameStatus, SortMode, DragItem, HandTile } from '../types/game';
-import { createTilePool, shuffleTiles, sortHandColorThenNumber } from '../engine/tilePool';
-import { validateBoard, isValidMeld, calculateMeldValue, normalizeMeld, normalizeBoard } from '../engine/validator';
-import { executeAiTurn } from '../engine/ai';
-import { findPossibleMoves, type HintResult } from '../engine/hintSolver';
+import { useState, useCallback, useEffect } from 'react';
+import type { DragItem } from '../types/game';
 import { soundEngine } from '../engine/audio';
-import confetti from 'canvas-confetti';
+import { findPossibleMoves, type HintResult } from '../engine/hintSolver';
+import * as moveEngine from '../engine/moveEngine';
 
-export interface AutoSplitLink {
-  id: string;
-  autoTileId: string;
-  splitMeldAId: string;
-  splitMeldBId: string;
-  originalRackIndex: number;
-}
-
-interface CompletionResult {
-  pulledTiles: Tile[];
-  completedMeldTiles: Tile[];
-}
-
-function deepCopyTile(tile: Tile): Tile {
-  return { ...tile };
-}
-
-function deepCopyHandTile(ht: HandTile): HandTile {
-  return { tile: deepCopyTile(ht.tile), x: ht.x, y: ht.y };
-}
-
-function deepCopyMelds(melds: Meld[]): Meld[] {
-  return melds.map((meld) => ({
-    ...meld,
-    tiles: meld.tiles.map(deepCopyTile),
-  }));
-}
-
-/**
- * Ensures tiles in hand are strictly auto-sorted by color then number
- */
-function createSortedHandTiles(tiles: Tile[]): HandTile[] {
-  const sorted = sortHandColorThenNumber(tiles);
-  return sorted.map((tile, idx) => ({
-    tile: deepCopyTile(tile),
-    x: idx * 48,
-    y: 0,
-  }));
-}
-
-function findCompletingTilesForFragment(
-  fragment: Tile[],
-  handTiles: HandTile[]
-): CompletionResult | null {
-  if (fragment.length >= 3 && isValidMeld(fragment).isValid) {
-    return { pulledTiles: [], completedMeldTiles: normalizeMeld(fragment) };
-  }
-
-  const allHandTiles = handTiles.map((ht) => ht.tile);
-
-  // Try 1-tile completions first
-  for (let i = 0; i < allHandTiles.length; i++) {
-    const cand = allHandTiles[i];
-    const candidateSet = [...fragment, cand];
-    if (isValidMeld(candidateSet).isValid) {
-      return {
-        pulledTiles: [cand],
-        completedMeldTiles: normalizeMeld(candidateSet),
-      };
-    }
-  }
-
-  // Try 2-tile completions second
-  for (let i = 0; i < allHandTiles.length; i++) {
-    for (let j = i + 1; j < allHandTiles.length; j++) {
-      const cand1 = allHandTiles[i];
-      const cand2 = allHandTiles[j];
-      const candidateSet = [...fragment, cand1, cand2];
-      if (isValidMeld(candidateSet).isValid) {
-        return {
-          pulledTiles: [cand1, cand2],
-          completedMeldTiles: normalizeMeld(candidateSet),
-        };
-      }
-    }
-  }
-
-  // Try 3-tile completions third
-  for (let i = 0; i < allHandTiles.length; i++) {
-    for (let j = i + 1; j < allHandTiles.length; j++) {
-      for (let k = j + 1; k < allHandTiles.length; k++) {
-        const cand1 = allHandTiles[i];
-        const cand2 = allHandTiles[j];
-        const cand3 = allHandTiles[k];
-        const candidateSet = [...fragment, cand1, cand2, cand3];
-        if (isValidMeld(candidateSet).isValid) {
-          return {
-            pulledTiles: [cand1, cand2, cand3],
-            completedMeldTiles: normalizeMeld(candidateSet),
-          };
-        }
-      }
-    }
-  }
-
-  return null;
+export interface NotificationState {
+  message: string;
+  type: 'info' | 'success' | 'error';
 }
 
 export function useGameState() {
-  const [tilePool, setTilePool] = useState<Tile[]>([]);
-  // Authoritative committed board state (melds permanently on the table from prior turns)
-  const [committedBoardMelds, setCommittedBoardMelds] = useState<Meld[]>([]);
-  // Current working board on the table (staged during active turn)
-  const [boardMelds, setBoardMelds] = useState<Meld[]>([]);
+  // Core single state object eliminating stale closures & useRef synchronization loops
+  const [gameState, setGameState] = useState<moveEngine.CoreGameState>(() => moveEngine.initNewGame());
 
-  const [players, setPlayers] = useState<Player[]>([]);
-  const [activePlayerIndex, setActivePlayerIndex] = useState<number>(0);
-  const [gameStatus, setGameStatus] = useState<GameStatus>('playing');
-  const [winner, setWinner] = useState<Player | null>(null);
-
-  const [turnSnapshot, setTurnSnapshot] = useState<TurnSnapshot | null>(null);
-  const [autoSplitLinks, setAutoSplitLinks] = useState<AutoSplitLink[]>([]);
-
-  // Event-driven bot move meld highlights state
+  // Simple UI-specific transient state
+  const [selectedTileIds, setSelectedTileIds] = useState<string[]>([]);
   const [highlightedMeldIds, setHighlightedMeldIds] = useState<string[]>([]);
-
-  // State tracking for newly drawn tile in hand
   const [drawnTileId, setDrawnTileId] = useState<string | null>(null);
-
-  // Debug info state for runtime tracing
-  const [debugLog, setDebugLog] = useState<string>('Game initialized.');
-
-  // Hint engine state
+  const [notification, setNotification] = useState<NotificationState | null>(null);
+  const [isAiThinking, setIsAiThinking] = useState(false);
+  const [soundEnabled, setSoundEnabled] = useState(true);
+  const [isMagnifierEnabled, setIsMagnifierEnabled] = useState(false);
   const [hintResult, setHintResult] = useState<HintResult | null>(null);
-  const [isHintOpen, setIsHintOpen] = useState<boolean>(false);
+  const [isHintOpen, setIsHintOpen] = useState(false);
 
-  // Toggleable Tile Magnifier Preview State
-  const [isMagnifierEnabled, setIsMagnifierEnabled] = useState<boolean>(false);
+  // Derived state helpers
+  const humanPlayer = gameState.players[0] || null;
+  const aiPlayer = gameState.players[1] || null;
+  const activePlayer = gameState.players[gameState.activePlayerIndex] || null;
+  const isHumanTurn = gameState.activePlayerIndex === 0 && gameState.gameStatus === 'playing';
 
-  // Synchronized state refs to prevent stale closure bugs in async timers / AI bot turns / turn transitions
-  const playersRef = useRef(players);
-  const boardMeldsRef = useRef(boardMelds);
-  const committedBoardMeldsRef = useRef(committedBoardMelds);
-  const tilePoolRef = useRef(tilePool);
-  const turnSnapshotRef = useRef(turnSnapshot);
-  const isInitializedRef = useRef(false);
-
-  const updateBoardMelds = useCallback((newMelds: Meld[]) => {
-    const clean = deepCopyMelds(newMelds);
-    boardMeldsRef.current = clean;
-    setBoardMelds(clean);
+  const showToast = useCallback((message: string, type: 'info' | 'success' | 'error' = 'info') => {
+    setNotification({ message, type });
+    const timer = setTimeout(() => {
+      setNotification(null);
+    }, 4500);
+    return () => clearTimeout(timer);
   }, []);
 
-  const updateCommittedBoardMelds = useCallback((newMelds: Meld[]) => {
-    const clean = deepCopyMelds(newMelds);
-    committedBoardMeldsRef.current = clean;
-    setCommittedBoardMelds(clean);
+  const clearMeldHighlights = useCallback(() => {
+    setHighlightedMeldIds([]);
   }, []);
 
-  const updatePlayers = useCallback((newPlayers: Player[]) => {
-    playersRef.current = newPlayers;
-    setPlayers(newPlayers);
-  }, []);
+  const startNewGame = useCallback(() => {
+    clearMeldHighlights();
+    setSelectedTileIds([]);
+    setDrawnTileId(null);
+    setGameState(moveEngine.initNewGame());
+    soundEngine.playSuccess();
+    showToast('New game started! 14 tiles arranged in auto-sorted hand tray.', 'success');
+  }, [clearMeldHighlights, showToast]);
 
-  const updateTilePool = useCallback((newPool: Tile[]) => {
-    tilePoolRef.current = newPool;
-    setTilePool(newPool);
-  }, []);
-
-  const updateTurnSnapshot = useCallback((newSnapshot: TurnSnapshot | null) => {
-    turnSnapshotRef.current = newSnapshot;
-    setTurnSnapshot(newSnapshot);
+  const toggleSound = useCallback(() => {
+    setSoundEnabled((prev) => {
+      const next = !prev;
+      soundEngine.setEnabled(next);
+      return next;
+    });
   }, []);
 
   const toggleMagnifier = useCallback(() => {
     setIsMagnifierEnabled((prev) => !prev);
   }, []);
 
-  const clearMeldHighlights = useCallback(() => {
-    setHighlightedMeldIds((prev) => (prev.length > 0 ? [] : prev));
-    setDrawnTileId((prev) => (prev !== null ? null : prev));
-  }, []);
-
-  // Global mousedown event listener for immediate dismissal of bot meld highlights and drawn tile highlight
-  useEffect(() => {
-    if (highlightedMeldIds.length === 0 && drawnTileId === null) return;
-
-    const handleGlobalMouseDown = () => {
-      clearMeldHighlights();
-    };
-
-    window.addEventListener('mousedown', handleGlobalMouseDown, { capture: true });
-    return () => {
-      window.removeEventListener('mousedown', handleGlobalMouseDown, { capture: true });
-    };
-  }, [highlightedMeldIds, drawnTileId, clearMeldHighlights]);
-
-  const [selectedTileIds, setSelectedTileIds] = useState<string[]>([]);
-  const [notification, setNotification] = useState<{ message: string; type: 'error' | 'success' | 'info' } | null>(null);
-  const [sortMode, setSortMode] = useState<SortMode>('none');
-  const [isAiThinking, setIsAiThinking] = useState<boolean>(false);
-  const [soundEnabled, setSoundEnabled] = useState<boolean>(true);
-
-  const toggleSound = useCallback(() => {
-    const nextState = !soundEnabled;
-    setSoundEnabled(nextState);
-    soundEngine.setEnabled(nextState);
-  }, [soundEnabled]);
-
-  const showToast = useCallback((message: string, type: 'error' | 'success' | 'info' = 'info') => {
-    setNotification({ message, type });
-    if (type === 'error') {
-      soundEngine.playError();
-    }
-    setTimeout(() => {
-      setNotification((prev) => (prev?.message === message ? null : prev));
-    }, 4500);
-  }, []);
-
-  const setHumanHandTiles = useCallback((updater: (prev: HandTile[]) => HandTile[]) => {
-    const currentPlayers = playersRef.current;
-    const copy = [...currentPlayers];
-    if (copy[0]) {
-      const nextRawHand = updater(copy[0].handTiles || []);
-      const tilesOnly = nextRawHand.map((ht) => ht.tile);
-      const sortedHand = createSortedHandTiles(tilesOnly);
-
-      copy[0] = {
-        ...copy[0],
-        handTiles: sortedHand,
-        playerRacks: [sortedHand.map((ht) => ht.tile), []],
-        rack: sortedHand.map((ht) => ht.tile),
-      };
-    }
-    updatePlayers(copy);
-  }, [updatePlayers]);
-
-  const startNewGame = useCallback(() => {
-    clearMeldHighlights();
-    const freshPool = shuffleTiles(createTilePool());
-
-    const humanHand = freshPool.slice(0, 14);
-    const aiHand = freshPool.slice(14, 28);
-    const remainingPool = freshPool.slice(28);
-
-    const initialHumanHandTiles = createSortedHandTiles(humanHand);
-    const initialAiHandTiles = createSortedHandTiles(aiHand);
-
-    const initialPlayers: Player[] = [
-      {
-        id: 'player_human',
-        name: 'Player',
-        isAi: false,
-        handTiles: initialHumanHandTiles,
-        playerRacks: [initialHumanHandTiles.map((ht) => ht.tile), []],
-        rack: initialHumanHandTiles.map((ht) => ht.tile),
-        hasInitialMeld: false,
-        score: 0,
-      },
-      {
-        id: 'player_ai_1',
-        name: 'Rummikub Bot',
-        isAi: true,
-        handTiles: initialAiHandTiles,
-        playerRacks: [initialAiHandTiles.map((ht) => ht.tile), []],
-        rack: initialAiHandTiles.map((ht) => ht.tile),
-        hasInitialMeld: false,
-        score: 0,
-      },
-    ];
-
-    updateTilePool(remainingPool.map(deepCopyTile));
-    updateCommittedBoardMelds([]);
-    updateBoardMelds([]);
-    updatePlayers(initialPlayers);
-    setActivePlayerIndex(0);
-    setGameStatus('playing');
-    setWinner(null);
-    setSelectedTileIds([]);
-    setSortMode('none');
-    setAutoSplitLinks([]);
-    setHighlightedMeldIds([]);
-    setDrawnTileId(null);
-    setHintResult(null);
-    setIsHintOpen(false);
-
-    const initSnapshot: TurnSnapshot = {
-      boardMelds: [],
-      handTiles: initialHumanHandTiles.map(deepCopyHandTile),
-      playerRacks: [initialHumanHandTiles.map((ht) => ht.tile), []],
-      playerRack: initialHumanHandTiles.map((ht) => ht.tile),
-      hasInitialMeld: false,
-      poolCount: remainingPool.length,
-    };
-    updateTurnSnapshot(initSnapshot);
-    setDebugLog('Game started. Player turn (0 melds on board).');
-
-    showToast('New game started! 14 tiles arranged in auto-sorted hand tray.', 'info');
-  }, [showToast, clearMeldHighlights, updateTilePool, updateBoardMelds, updateCommittedBoardMelds, updatePlayers, updateTurnSnapshot]);
-
-  // Strict Mount Initialization: startNewGame is executed ONLY ONCE on initial mount
-  useEffect(() => {
-    if (!isInitializedRef.current) {
-      isInitializedRef.current = true;
-      startNewGame();
-    }
-  }, [startNewGame]);
-
-  const activePlayer = players[activePlayerIndex] || null;
-  const humanPlayer = players[0] || null;
-  const isHumanTurn = activePlayer ? !activePlayer.isAi : false;
-
-  const refreshBoardMelds = useCallback((melds: Meld[]): Meld[] => {
-    return melds.map((meld) => {
-      const valRes = isValidMeld(meld.tiles);
-      return {
-        ...meld,
-        isValid: valRes.isValid,
-        type: valRes.type,
-        value: valRes.value,
-        errorReason: valRes.errorReason,
-      };
+  const toggleTileSelection = useCallback((tileId: string) => {
+    setSelectedTileIds((prev) => {
+      if (prev.includes(tileId)) {
+        return prev.filter((id) => id !== tileId);
+      }
+      soundEngine.playTileSelect();
+      return [...prev, tileId];
     });
   }, []);
-
-  const toggleTileSelection = useCallback((tileId: string) => {
-    clearMeldHighlights();
-    soundEngine.playTileSelect();
-    setSelectedTileIds((prev) =>
-      prev.includes(tileId) ? prev.filter((id) => id !== tileId) : [...prev, tileId]
-    );
-  }, [clearMeldHighlights]);
 
   const clearSelection = useCallback(() => {
     setSelectedTileIds([]);
   }, []);
 
-  const sortRack = useCallback(
-    () => {
-      clearMeldHighlights();
-      if (!humanPlayer) return;
-      const tiles = humanPlayer.handTiles.map((ht) => ht.tile);
-      const sorted = createSortedHandTiles(tiles);
-      setHumanHandTiles(() => sorted);
-      soundEngine.playTileSelect();
-    },
-    [humanPlayer, setHumanHandTiles, clearMeldHighlights]
-  );
-
-  const clearToRack1 = useCallback(() => {
-    sortRack();
-  }, [sortRack]);
-
-  const resetTurn = useCallback(() => {
-    if (!turnSnapshotRef.current || !isHumanTurn) return;
-    clearMeldHighlights();
-
-    const snapshot = turnSnapshotRef.current;
-    updateBoardMelds(deepCopyMelds(snapshot.boardMelds));
-    setHumanHandTiles(() => snapshot.handTiles.map(deepCopyHandTile));
-    setSelectedTileIds([]);
-    setAutoSplitLinks([]);
-    soundEngine.playTileDrop();
-    showToast('Turn reset to start snapshot.', 'info');
-  }, [isHumanTurn, setHumanHandTiles, showToast, clearMeldHighlights, updateBoardMelds]);
-
-  const createMeldFromSelection = useCallback(() => {
-    clearMeldHighlights();
-    if (selectedTileIds.length < 3) {
-      showToast('A meld requires at least 3 tiles.', 'error');
-      return;
-    }
-
-    const currentHuman = playersRef.current[0];
-    const currentBoard = boardMeldsRef.current;
-    if (!currentHuman) return;
-
-    const tilesToMeld: Tile[] = [];
-    currentHuman.handTiles.forEach((ht) => {
-      if (selectedTileIds.includes(ht.tile.id)) {
-        tilesToMeld.push(ht.tile);
-      }
-    });
-
-    currentBoard.forEach((meld) => {
-      meld.tiles.forEach((t) => {
-        if (selectedTileIds.includes(t.id)) {
-          tilesToMeld.push(t);
-        }
-      });
-    });
-
-    if (tilesToMeld.length !== selectedTileIds.length) {
-      showToast('Could not locate all selected tiles.', 'error');
-      return;
-    }
-
-    const valRes = isValidMeld(tilesToMeld);
-
-    setHumanHandTiles((prev) => prev.filter((ht) => !selectedTileIds.includes(ht.tile.id)));
-
-    const updatedBoardMelds = currentBoard
-      .map((meld) => ({
-        ...meld,
-        tiles: meld.tiles.filter((t) => !selectedTileIds.includes(t.id)),
-      }))
-      .filter((meld) => meld.tiles.length > 0);
-
-    const normTiles = normalizeMeld(tilesToMeld);
-    const newMeld: Meld = {
-      id: `meld_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-      tiles: normTiles,
-      isValid: valRes.isValid,
-      type: valRes.type,
-      value: valRes.value,
-      errorReason: valRes.errorReason,
-    };
-
-    const nextMelds = refreshBoardMelds([...updatedBoardMelds, newMeld]);
-    updateBoardMelds(nextMelds);
-    setSelectedTileIds([]);
-    soundEngine.playTileDrop();
-
-    if (!valRes.isValid) {
-      showToast(`Warning: Formed meld is invalid (${valRes.errorReason}).`, 'error');
-    }
-  }, [selectedTileIds, setHumanHandTiles, refreshBoardMelds, showToast, clearMeldHighlights, updateBoardMelds]);
-
-  // Drop onto Hand Tray (returns tile to auto-sorted hand)
-  const handleDropTileCanvas = useCallback(
-    (item: DragItem) => {
-      const currentHuman = playersRef.current[0];
-      const currentBoard = boardMeldsRef.current;
-      const snapshot = turnSnapshotRef.current;
-
-      if (!currentHuman || !isHumanTurn) return;
-      clearMeldHighlights();
-
-      if (item.source === 'board') {
-        const turnStartHandTileIds = new Set(snapshot?.handTiles.map((ht) => ht.tile.id));
-        const autoLink = autoSplitLinks.find((l) => l.autoTileId === item.tileId);
-
-        if (!turnStartHandTileIds.has(item.tileId) && !autoLink) {
-          soundEngine.playError();
-          showToast('Cannot return board tiles to hand that were on the table before your turn.', 'error');
-          return;
-        }
-
-        if (autoLink) {
-          const splitLinks = autoSplitLinks.filter(
-            (l) => l.splitMeldAId === autoLink.splitMeldAId && l.splitMeldBId === autoLink.splitMeldBId
-          );
-          const autoTileIdsForThisSplit = new Set(splitLinks.map((l) => l.autoTileId));
-
-          const autoTilesToReturn: Tile[] = [];
-          currentBoard.forEach((m) => {
-            if (m.id === autoLink.splitMeldAId || m.id === autoLink.splitMeldBId) {
-              m.tiles.forEach((t) => {
-                if (autoTileIdsForThisSplit.has(t.id) && t.id !== item.tileId) {
-                  autoTilesToReturn.push(t);
-                }
-              });
-            }
-          });
-
-          if (autoTilesToReturn.length > 0) {
-            setHumanHandTiles((prev) => {
-              const currentHandTiles = prev.map((ht) => ht.tile);
-              return createSortedHandTiles([...currentHandTiles, ...autoTilesToReturn]);
-            });
-          }
-
-          setAutoSplitLinks((prev) =>
-            prev.filter((l) => !(l.splitMeldAId === autoLink.splitMeldAId && l.splitMeldBId === autoLink.splitMeldBId))
-          );
-
-          const meldA = currentBoard.find((m) => m.id === autoLink.splitMeldAId);
-          const meldB = currentBoard.find((m) => m.id === autoLink.splitMeldBId);
-
-          if (meldA || meldB) {
-            const tilesA = meldA ? meldA.tiles.filter((t) => !autoTileIdsForThisSplit.has(t.id)) : [];
-            const tilesB = meldB ? meldB.tiles.filter((t) => !autoTileIdsForThisSplit.has(t.id)) : [];
-
-            const mergedTiles = normalizeMeld([...tilesA, ...tilesB]);
-
-            if (mergedTiles.length > 0) {
-              const mergedMeld: Meld = {
-                id: `meld_remerged_${Date.now()}_${Math.random().toString(36).substring(2, 5)}`,
-                tiles: mergedTiles,
-                isValid: isValidMeld(mergedTiles).isValid,
-                type: isValidMeld(mergedTiles).type,
-                value: calculateMeldValue(mergedTiles),
-              };
-
-              const nextMelds = currentBoard
-                .filter((m) => m.id !== autoLink.splitMeldAId && m.id !== autoLink.splitMeldBId)
-                .concat(mergedMeld);
-
-              updateBoardMelds(refreshBoardMelds(nextMelds));
-              showToast('Re-merged split melds back into single set upon returning auto-attached tile.', 'info');
-            }
-          }
-        }
-      }
-
-      // Find tile to move
-      let tileToMove: Tile | null = null;
-      if (item.source === 'rack') {
-        const foundHt = currentHuman.handTiles.find((ht) => ht.tile.id === item.tileId);
-        tileToMove = foundHt ? foundHt.tile : null;
-      } else if (item.source === 'board' && item.sourceMeldId) {
-        const sourceMeld = currentBoard.find((m) => m.id === item.sourceMeldId);
-        tileToMove = sourceMeld?.tiles.find((t) => t.id === item.tileId) || null;
-      }
-
-      if (!tileToMove) return;
-
-      if (item.source === 'board' && item.sourceMeldId) {
-        const nextBoardMelds = currentBoard
-          .map((m) => (m.id === item.sourceMeldId ? { ...m, tiles: m.tiles.filter((t) => t.id !== item.tileId) } : m))
-          .filter((m) => m.tiles.length > 0);
-        updateBoardMelds(refreshBoardMelds(nextBoardMelds));
-      }
-
-      setHumanHandTiles((prev) => {
-        const existing = prev.filter((ht) => ht.tile.id !== tileToMove!.id).map((ht) => ht.tile);
-        return createSortedHandTiles([...existing, tileToMove!]);
-      });
-
-      soundEngine.playTileDrop();
-      setSelectedTileIds([]);
-    },
-    [isHumanTurn, autoSplitLinks, setHumanHandTiles, refreshBoardMelds, showToast, clearMeldHighlights, updateBoardMelds]
-  );
-
-  // Drop onto board melds or new melds
+  // UI move handlers dispatching pure moveEngine state transformations
   const handleDropTile = useCallback(
     (
       item: DragItem,
       targetLocation: {
-        type: 'board-new' | 'board-meld' | 'rack-0' | 'rack-1' | 'rack';
+        type: 'board-new' | 'board-meld' | 'rack' | 'hand';
         meldId?: string;
         targetIndex?: number;
       }
     ) => {
-      const currentHuman = playersRef.current[0];
-      const currentBoard = boardMeldsRef.current;
-
-      if (!currentHuman || !isHumanTurn) return;
       clearMeldHighlights();
-
-      let tileToMove: Tile | null = null;
-
-      if (item.source === 'rack') {
-        const foundHt = currentHuman.handTiles.find((ht) => ht.tile.id === item.tileId);
-        tileToMove = foundHt ? foundHt.tile : null;
-      } else if (item.source === 'board' && item.sourceMeldId) {
-        const sourceMeld = currentBoard.find((m) => m.id === item.sourceMeldId);
-        tileToMove = sourceMeld?.tiles.find((t) => t.id === item.tileId) || null;
-      }
-
-      if (!tileToMove) return;
-
-      // Dynamic Drag Splitting & Multi-Tile Auto-Assist Engine
-      if (targetLocation.type === 'board-new' && item.source === 'board' && item.sourceMeldId) {
-        const sourceMeld = currentBoard.find((m) => m.id === item.sourceMeldId);
-        const sourceIdx = item.sourceIndex ?? 0;
-
-        if (sourceMeld && sourceMeld.tiles.length > 1 && sourceIdx > 0) {
-          let leftPiece = sourceMeld.tiles.slice(0, sourceIdx);
-          let rightPiece = sourceMeld.tiles.slice(sourceIdx);
-
-          let currentHand = currentHuman.handTiles.map(deepCopyHandTile);
-          let newAutoLinks: AutoSplitLink[] = [];
-
-          const leftMeldId = `meld_split_left_${Date.now()}_${Math.random().toString(36).substring(2, 5)}`;
-          const rightMeldId = `meld_split_right_${Date.now()}_${Math.random().toString(36).substring(2, 5)}`;
-
-          const completionA = findCompletingTilesForFragment(leftPiece, currentHand);
-          if (!completionA) {
-            soundEngine.playError();
-            showToast('Invalid Split: Inadequate meld cannot be completed with tiles from hand.', 'error');
-            return;
-          }
-
-          leftPiece = completionA.completedMeldTiles;
-          for (const pulled of completionA.pulledTiles) {
-            currentHand = currentHand.filter((ht) => ht.tile.id !== pulled.id);
-            newAutoLinks.push({
-              id: `link_${Date.now()}_A_${pulled.id}`,
-              autoTileId: pulled.id,
-              splitMeldAId: leftMeldId,
-              splitMeldBId: rightMeldId,
-              originalRackIndex: 0,
-            });
-          }
-
-          const completionB = findCompletingTilesForFragment(rightPiece, currentHand);
-          if (!completionB) {
-            soundEngine.playError();
-            showToast('Invalid Split: Inadequate meld cannot be completed with tiles from hand.', 'error');
-            return;
-          }
-
-          rightPiece = completionB.completedMeldTiles;
-          for (const pulled of completionB.pulledTiles) {
-            currentHand = currentHand.filter((ht) => ht.tile.id !== pulled.id);
-            newAutoLinks.push({
-              id: `link_${Date.now()}_B_${pulled.id}`,
-              autoTileId: pulled.id,
-              splitMeldAId: leftMeldId,
-              splitMeldBId: rightMeldId,
-              originalRackIndex: 0,
-            });
-          }
-
-          if (newAutoLinks.length > 0) {
-            setHumanHandTiles(() => currentHand);
-            setAutoSplitLinks((prev) => [...prev, ...newAutoLinks]);
-          }
-
-          const meld1: Meld = {
-            id: leftMeldId,
-            tiles: leftPiece,
-            isValid: isValidMeld(leftPiece).isValid,
-            type: isValidMeld(leftPiece).type,
-            value: calculateMeldValue(leftPiece),
-          };
-
-          const meld2: Meld = {
-            id: rightMeldId,
-            tiles: rightPiece,
-            isValid: isValidMeld(rightPiece).isValid,
-            type: isValidMeld(rightPiece).type,
-            value: calculateMeldValue(rightPiece),
-          };
-
-          const updatedBoardMelds = currentBoard
-            .flatMap((m) => (m.id === item.sourceMeldId ? [meld1, meld2] : [m]))
-            .filter((m) => m.tiles.length > 0);
-
-          updateBoardMelds(refreshBoardMelds(updatedBoardMelds));
-          soundEngine.playTileDrop();
-          setSelectedTileIds([]);
-
-          if (newAutoLinks.length > 0) {
-            showToast(
-              `Auto-assisted split! Moved ${newAutoLinks.length} matching tile(s) from hand to complete 3-tile meld(s).`,
-              'success'
-            );
-          }
-          return;
-        }
-      }
-
-      soundEngine.playTileDrop();
-
-      if (targetLocation.type === 'board-new') {
-        if (item.source === 'rack') {
-          setHumanHandTiles((prev) => prev.filter((ht) => ht.tile.id !== tileToMove!.id));
-        }
-
-        const cleanedMelds = currentBoard
-          .map((m) => (m.id === item.sourceMeldId ? { ...m, tiles: m.tiles.filter((t) => t.id !== item.tileId) } : m))
-          .filter((m) => m.tiles.length > 0);
-
-        const newMeld: Meld = {
-          id: `meld_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
-          tiles: [tileToMove],
-          isValid: false,
-          type: 'invalid',
-          value: 0,
-          errorReason: 'Needs at least 3 tiles to be valid',
-        };
-
-        updateBoardMelds(refreshBoardMelds([...cleanedMelds, newMeld]));
-      } else if (targetLocation.type === 'board-meld' && targetLocation.meldId) {
-        if (item.source === 'rack') {
-          setHumanHandTiles((prev) => prev.filter((ht) => ht.tile.id !== tileToMove!.id));
-        }
-
-        const nextMelds = currentBoard
-          .map((m) => {
-            let tiles = m.tiles;
-            if (m.id === item.sourceMeldId) {
-              tiles = tiles.filter((t) => t.id !== item.tileId);
-            }
-
-            if (m.id === targetLocation.meldId) {
-              const rawTiles = [...tiles, tileToMove!];
-              tiles = normalizeMeld(rawTiles);
-            }
-
-            return { ...m, tiles };
-          })
-          .filter((m) => m.tiles.length > 0);
-
-        updateBoardMelds(refreshBoardMelds(nextMelds));
-      }
-
-      setSelectedTileIds([]);
+      setSelectedTileIds((prev) => prev.filter((id) => id !== item.tileId));
+      setGameState((prev) => {
+        const result = moveEngine.executeDropTile(prev, item, targetLocation);
+        if (result.soundEffect === 'drop') soundEngine.playTileDrop();
+        return result.nextState;
+      });
     },
-    [isHumanTurn, setHumanHandTiles, refreshBoardMelds, showToast, clearMeldHighlights, updateBoardMelds]
+    [clearMeldHighlights]
   );
+
+  const handleDropTileCanvas = useCallback(
+    (item: DragItem) => {
+      handleDropTile(item, { type: 'hand' });
+    },
+    [handleDropTile]
+  );
+
+  const createMeldFromSelection = useCallback(() => {
+    clearMeldHighlights();
+    setGameState((prev) => {
+      const result = moveEngine.executeCreateMeldFromSelection(prev, selectedTileIds);
+      if (result.toastMessage) {
+        showToast(result.toastMessage.text, result.toastMessage.type);
+      }
+      if (result.soundEffect === 'drop') soundEngine.playTileDrop();
+      if (result.soundEffect === 'error') soundEngine.playError();
+      if (result.selectedTileIds !== undefined) setSelectedTileIds(result.selectedTileIds);
+      return result.nextState;
+    });
+  }, [clearMeldHighlights, selectedTileIds, showToast]);
 
   const splitMeldAt = useCallback(
     (meldId: string, splitIndex: number) => {
       clearMeldHighlights();
-      const currentBoard = boardMeldsRef.current;
-      const targetMeld = currentBoard.find((m) => m.id === meldId);
-      if (!targetMeld || splitIndex <= 0 || splitIndex >= targetMeld.tiles.length) return;
-
-      const firstHalf = normalizeMeld(targetMeld.tiles.slice(0, splitIndex));
-      const secondHalf = normalizeMeld(targetMeld.tiles.slice(splitIndex));
-
-      const meld1: Meld = {
-        id: `meld_split_1_${Date.now()}_${Math.random().toString(36).substring(2, 5)}`,
-        tiles: firstHalf,
-        isValid: isValidMeld(firstHalf).isValid,
-        type: isValidMeld(firstHalf).type,
-        value: calculateMeldValue(firstHalf),
-      };
-
-      const meld2: Meld = {
-        id: `meld_split_2_${Date.now()}_${Math.random().toString(36).substring(2, 5)}`,
-        tiles: secondHalf,
-        isValid: isValidMeld(secondHalf).isValid,
-        type: isValidMeld(secondHalf).type,
-        value: calculateMeldValue(secondHalf),
-      };
-
-      const updatedMelds = currentBoard
-        .flatMap((m) => (m.id === meldId ? [meld1, meld2] : [m]))
-        .filter((m) => m.tiles.length > 0);
-
-      updateBoardMelds(refreshBoardMelds(updatedMelds));
-      soundEngine.playTileDrop();
-      showToast('Split meld into two sets.', 'info');
+      setGameState((prev) => {
+        const result = moveEngine.executeSplitMeldAt(prev, meldId, splitIndex);
+        if (result.soundEffect === 'drop') soundEngine.playTileDrop();
+        return result.nextState;
+      });
     },
-    [refreshBoardMelds, showToast, clearMeldHighlights, updateBoardMelds]
+    [clearMeldHighlights]
   );
 
+  const drawTile = useCallback(() => {
+    clearMeldHighlights();
+    setGameState((prev) => {
+      const result = moveEngine.executeDrawTile(prev);
+      if (result.toastMessage) {
+        showToast(result.toastMessage.text, result.toastMessage.type);
+      }
+      if (result.soundEffect === 'draw') soundEngine.playDraw();
+      if (result.drawnTileId) setDrawnTileId(result.drawnTileId);
+      return result.nextState;
+    });
+  }, [clearMeldHighlights, showToast]);
+
+  const endTurn = useCallback(() => {
+    clearMeldHighlights();
+    setGameState((prev) => {
+      const result = moveEngine.executeEndTurn(prev);
+      if (result.toastMessage) {
+        showToast(result.toastMessage.text, result.toastMessage.type);
+      }
+      if (result.soundEffect === 'success') soundEngine.playSuccess();
+      if (result.soundEffect === 'error') soundEngine.playError();
+      if (result.soundEffect === 'win') soundEngine.playWin();
+      return result.nextState;
+    });
+  }, [clearMeldHighlights, showToast]);
+
   const getHint = useCallback(() => {
-    const currentHuman = playersRef.current[0];
-    const currentBoard = boardMeldsRef.current;
-    if (!isHumanTurn || !currentHuman) return;
-    const handTiles = currentHuman.handTiles.map((ht) => ht.tile);
-    const result = findPossibleMoves(handTiles, currentBoard, currentHuman.hasInitialMeld);
-    setHintResult(result);
+    const moves = findPossibleMoves(
+      humanPlayer?.hand || [],
+      gameState.boardMelds,
+      humanPlayer?.hasInitialMeld ?? false
+    );
+    setHintResult(moves);
     setIsHintOpen(true);
-    soundEngine.playTileSelect();
-  }, [isHumanTurn]);
+  }, [humanPlayer, gameState.boardMelds]);
 
   const closeHint = useCallback(() => {
     setIsHintOpen(false);
@@ -3931,292 +4112,55 @@ export function useGameState() {
     [showToast]
   );
 
-  const advanceTurn = useCallback(
-    (newBoard: Meld[], newPlayers: Player[], nextPool: Tile[], isCommittedSubmit: boolean = false) => {
-      const cleanBoard = deepCopyMelds(newBoard);
-      const cleanPlayers = newPlayers.map((p) => ({
-        ...p,
-        handTiles: createSortedHandTiles(p.handTiles.map((ht) => ht.tile)),
-        playerRacks: [p.handTiles.map((ht) => ht.tile), []] as [Tile[], Tile[]],
-        rack: p.handTiles.map((ht) => ht.tile),
-      }));
-
-      // If this turn transition is a committed submission or bot move, update authoritative committed board
-      if (isCommittedSubmit) {
-        updateCommittedBoardMelds(cleanBoard);
-      }
-
-      // Synchronous ref updates to prevent stale memory access across turns
-      updateBoardMelds(cleanBoard);
-      updatePlayers(cleanPlayers);
-      updateTilePool(nextPool.map(deepCopyTile));
-      setAutoSplitLinks([]);
-
-      const nextIndex = (activePlayerIndex + 1) % cleanPlayers.length;
-      setActivePlayerIndex(nextIndex);
-
-      const nextPlayer = cleanPlayers[nextIndex];
-
-      const newSnapshot: TurnSnapshot = {
-        boardMelds: deepCopyMelds(cleanBoard),
-        handTiles: nextPlayer.handTiles.map(deepCopyHandTile),
-        playerRacks: [nextPlayer.handTiles.map((ht) => ht.tile), []],
-        playerRack: nextPlayer.handTiles.map((ht) => ht.tile),
-        hasInitialMeld: nextPlayer.hasInitialMeld,
-        poolCount: nextPool.length,
-      };
-      updateTurnSnapshot(newSnapshot);
-
-      const logMsg = `Advanced turn to ${nextPlayer.name} (Index: ${nextIndex}). Board Melds: ${cleanBoard.length}.`;
-      setDebugLog(logMsg);
-      console.log(`[PWA Debug] ${logMsg}`, cleanBoard);
-
-      setSelectedTileIds([]);
-    },
-    [activePlayerIndex, updateBoardMelds, updateCommittedBoardMelds, updatePlayers, updateTilePool, updateTurnSnapshot]
-  );
-
-  const drawTile = useCallback(() => {
-    if (!isHumanTurn || gameStatus === 'ended') return;
-    clearMeldHighlights();
-
-    const currentCommittedBoard = committedBoardMeldsRef.current;
-    const currentPool = tilePoolRef.current;
-    const currentPlayers = playersRef.current;
-    const snapshot = turnSnapshotRef.current;
-    const human = currentPlayers[0];
-
-    if (currentPool.length === 0) {
-      showToast('Tile pool is empty! Passing turn.', 'info');
-      advanceTurn(currentCommittedBoard, currentPlayers, currentPool, false);
-      return;
-    }
-
-    // Always restore board to the authoritative committedBoardMelds (melds committed on previous turns)
-    const restoredBoard = deepCopyMelds(currentCommittedBoard);
-
-    // Return any uncommitted tiles staged from hand during this turn back into hand
-    const turnStartHandTiles = snapshot ? snapshot.handTiles.map((ht) => ht.tile) : (human ? human.handTiles.map(ht => ht.tile) : []);
-    const committedBoardTileIds = new Set(currentCommittedBoard.flatMap((m) => m.tiles.map((t) => t.id)));
-
-    let currentHand = human ? human.handTiles.map((ht) => ht.tile) : [];
-    const currentHandTileIds = new Set(currentHand.map((t) => t.id));
-
-    // Filter tiles in turnStartHand that are neither in currentHand nor in committedBoardTileIds
-    const uncommittedHandTiles = turnStartHandTiles.filter(
-      (t) => !currentHandTileIds.has(t.id) && !committedBoardTileIds.has(t.id)
-    );
-
-    currentHand = [...currentHand, ...uncommittedHandTiles];
-
-    const drawnTile = deepCopyTile(currentPool[0]);
-    const remainingPool = currentPool.slice(1);
-    currentHand.push(drawnTile);
-
-    setDrawnTileId(drawnTile.id);
-
-    const autoArrangedHand = createSortedHandTiles(currentHand);
-
-    const updatedPlayers = currentPlayers.map((p, idx) =>
-      idx === 0
-        ? {
-            ...p,
-            handTiles: autoArrangedHand,
-            playerRacks: [autoArrangedHand.map((ht) => ht.tile), []] as [Tile[], Tile[]],
-            rack: autoArrangedHand.map((ht) => ht.tile),
-          }
-        : p
-    );
-
-    setAutoSplitLinks([]);
-    soundEngine.playDraw();
-    showToast(`You drew a tile (${drawnTile.isJoker ? 'Joker' : `${drawnTile.color} ${drawnTile.value}`}).`, 'info');
-
-    advanceTurn(restoredBoard, updatedPlayers, remainingPool, false);
-  }, [isHumanTurn, gameStatus, showToast, advanceTurn, clearMeldHighlights]);
-
-  const endTurn = useCallback(() => {
-    const currentBoard = boardMeldsRef.current;
-    const currentPlayers = playersRef.current;
-    const currentPool = tilePoolRef.current;
-    const snapshot = turnSnapshotRef.current;
-    const human = currentPlayers[0];
-
-    if (!isHumanTurn || !snapshot || gameStatus === 'ended' || !human) return;
-    clearMeldHighlights();
-
-    const boardValidation = validateBoard(currentBoard);
-    if (!boardValidation.allValid) {
-      showToast(
-        `Cannot end turn: There are invalid melds on the table (${boardValidation.invalidMeldIds.length} invalid).`,
-        'error'
-      );
-      return;
-    }
-
-    const startHandCount = snapshot.handTiles.length;
-    const currentHandCount = human.handTiles.length;
-    const tilesPlayedCount = startHandCount - currentHandCount;
-
-    if (tilesPlayedCount <= 0) {
-      showToast('You must play at least 1 tile or Draw a tile to end turn.', 'error');
-      return;
-    }
-
-    if (!human.hasInitialMeld) {
-      const snapshotPoints = snapshot.boardMelds.reduce((acc, m) => acc + (m.isValid ? m.value : 0), 0);
-      const currentPoints = boardValidation.totalPoints;
-      const turnPointsGained = currentPoints - snapshotPoints;
-
-      if (turnPointsGained < 30) {
-        showToast(
-          `Initial Meld Requirement: You need at least 30 points of new melds from your rack. (You achieved ${turnPointsGained} pts).`,
-          'error'
-        );
-        return;
-      }
-    }
-
-    const normalizedBoard = normalizeBoard(currentBoard);
-
-    const updatedPlayers = currentPlayers.map((p, idx) =>
-      idx === 0
-        ? {
-            ...p,
-            handTiles: createSortedHandTiles(p.handTiles.map((ht) => ht.tile)),
-            playerRacks: [p.handTiles.map((ht) => ht.tile), []] as [Tile[], Tile[]],
-            rack: p.handTiles.map((ht) => ht.tile),
-            hasInitialMeld: true,
-          }
-        : p
-    );
-
-    if (human.handTiles.length === 0) {
-      setGameStatus('ended');
-      setWinner({ ...human, hasInitialMeld: true });
-      soundEngine.playWin();
-      confetti({ particleCount: 120, spread: 70, origin: { y: 0.6 } });
-      showToast('🎉 CONGRATULATIONS! You emptied your hand and won the game!', 'success');
-      return;
-    }
-
-    setAutoSplitLinks([]);
-    soundEngine.playSuccess();
-    showToast('Turn submitted successfully!', 'success');
-
-    // Submit committed turn: updates committedBoardMelds permanently
-    advanceTurn(normalizedBoard, updatedPlayers, currentPool, true);
-  }, [isHumanTurn, gameStatus, showToast, advanceTurn, clearMeldHighlights]);
-
-  // AI turn automation using synchronized state refs to prevent stale closure bugs
+  // Automated AI turn execution
   useEffect(() => {
-    if (gameStatus !== 'playing' || isHumanTurn) return;
-
-    const currentPlayers = playersRef.current;
-    const currentAiPlayer = currentPlayers[activePlayerIndex];
-    if (!currentAiPlayer || !currentAiPlayer.isAi) return;
+    if (gameState.gameStatus !== 'playing' || gameState.activePlayerIndex === 0) return;
 
     setIsAiThinking(true);
 
     const timer = setTimeout(() => {
-      const latestBoard = boardMeldsRef.current;
-      const latestPool = tilePoolRef.current;
-      const latestPlayers = playersRef.current;
-      const latestAiPlayer = latestPlayers[activePlayerIndex];
-
-      if (!latestAiPlayer || !latestAiPlayer.isAi) {
-        setIsAiThinking(false);
-        return;
-      }
-
-      const preBoardMeldMap = new Map(latestBoard.map((m) => [m.id, JSON.stringify(m.tiles.map((t) => t.id))]));
-
-      const aiResult = executeAiTurn(latestAiPlayer, latestBoard, latestPool);
-      const normalizedAiBoard = normalizeBoard(aiResult.newBoardMelds);
-
-      const botMeldIds: string[] = [];
-      for (const meld of normalizedAiBoard) {
-        const preSig = preBoardMeldMap.get(meld.id);
-        const currentSig = JSON.stringify(meld.tiles.map((t) => t.id));
-        if (!preSig || preSig !== currentSig) {
-          botMeldIds.push(meld.id);
+      setGameState((prev) => {
+        const result = moveEngine.executeAiTurnStep(prev);
+        if (result.toastMessage) {
+          showToast(result.toastMessage.text, result.toastMessage.type);
         }
-      }
-
-      if (botMeldIds.length > 0) {
-        setHighlightedMeldIds(botMeldIds);
-      }
-
-      showToast(aiResult.message, 'info');
-
-      const updatedPlayers = latestPlayers.map((p, idx) => {
-        if (idx === activePlayerIndex) {
-          const playedAny = aiResult.playedTilesCount > 0;
-          const aiHandTiles = createSortedHandTiles(aiResult.newAiRack);
-          return {
-            ...p,
-            handTiles: aiHandTiles,
-            playerRacks: [aiResult.newAiRack.map(deepCopyTile), []] as [Tile[], Tile[]],
-            rack: aiResult.newAiRack.map(deepCopyTile),
-            hasInitialMeld: p.hasInitialMeld || (playedAny && !aiResult.drewTile),
-          };
-        }
-        return p;
+        if (result.soundEffect === 'error') soundEngine.playError();
+        return result.nextState;
       });
-
-      const nextPool = aiResult.drewTile && latestPool.length > 0 ? latestPool.slice(1) : latestPool;
-
-      if (aiResult.newAiRack.length === 0) {
-        setGameStatus('ended');
-        setWinner(updatedPlayers[activePlayerIndex]);
-        soundEngine.playError();
-        showToast(`🤖 ${latestAiPlayer.name} has played all tiles and won!`, 'info');
-        setIsAiThinking(false);
-        return;
-      }
-
       setIsAiThinking(false);
-      // AI turn completes and commits board melds
-      advanceTurn(normalizedAiBoard, updatedPlayers, nextPool, true);
     }, 1200);
 
     return () => clearTimeout(timer);
-  }, [gameStatus, isHumanTurn, activePlayerIndex, showToast, advanceTurn]);
+  }, [gameState.gameStatus, gameState.activePlayerIndex, showToast]);
 
   return {
-    tilePool,
-    boardMelds,
-    committedBoardMelds,
-    players,
-    humanPlayer: players[0] || null,
-    aiPlayer: players[1] || null,
+    tilePool: gameState.tilePool,
+    boardMelds: gameState.boardMelds,
+    committedBoardMelds: gameState.committedBoardMelds,
+    players: gameState.players,
+    humanPlayer,
+    aiPlayer,
     activePlayer,
-    activePlayerIndex,
     isHumanTurn,
-    gameStatus,
-    winner,
+    gameStatus: gameState.gameStatus,
+    winner: gameState.winner,
+    turnSnapshot: gameState.turnSnapshot,
     selectedTileIds,
     notification,
-    sortMode,
     isAiThinking,
     soundEnabled,
-    turnSnapshot,
-    autoSplitLinks,
     highlightedMeldIds,
     drawnTileId,
-    debugLog,
+    botLastMoveMessage: gameState.botLastMoveMessage,
+    debugLog: gameState.debugLog,
     hintResult,
     isHintOpen,
     isMagnifierEnabled,
-
     startNewGame,
     toggleSound,
     toggleMagnifier,
     toggleTileSelection,
     clearSelection,
-    sortRack,
-    clearToRack1,
-    resetTurn,
     createMeldFromSelection,
     handleDropTile,
     handleDropTileCanvas,
@@ -4330,6 +4274,9 @@ export default useGameState;
 @import "tailwindcss";
 
 @layer base {
+  html {
+    font-size: 18.67px; /* +2 font points larger baseline (12pt -> 14pt) */
+  }
   body {
     @apply bg-slate-950 text-slate-100 min-h-screen font-sans antialiased selection:bg-amber-500/30 selection:text-amber-200 overflow-x-hidden;
     background-image: 
@@ -4445,12 +4392,6 @@ export interface Tile {
   isJoker: boolean;
 }
 
-export interface HandTile {
-  tile: Tile;
-  x: number; // x coordinate in px relative to hand canvas
-  y: number; // y coordinate in px relative to hand canvas
-}
-
 export type MeldType = 'group' | 'run' | 'invalid';
 
 export interface MeldValidationResult {
@@ -4468,24 +4409,21 @@ export interface Meld {
   type: MeldType;
   value: number;
   errorReason?: string;
+  isCommitted?: boolean;
 }
 
 export interface Player {
   id: string;
   name: string;
   isAi: boolean;
-  handTiles: HandTile[]; // Free 2D canvas tile positions
-  playerRacks: [Tile[], Tile[]]; // Legacy rack support for compatibility
-  rack: Tile[]; // Flattened view of all tiles in hand
+  hand: Tile[];
   hasInitialMeld: boolean;
   score: number;
 }
 
 export interface TurnSnapshot {
   boardMelds: Meld[];
-  handTiles: HandTile[];
-  playerRacks: [Tile[], Tile[]];
-  playerRack: Tile[];
+  hand: Tile[];
   hasInitialMeld: boolean;
   poolCount: number;
 }
@@ -4497,11 +4435,109 @@ export type SortMode = 'number' | 'color' | 'group' | 'none';
 export interface DragItem {
   tileId: string;
   source: 'rack' | 'board';
-  sourceRackIndex?: number;
   sourceMeldId?: string;
   sourceIndex?: number;
-  offsetX?: number;
-  offsetY?: number;
+}
+
+
+
+/* =============================================================================
+ * FILE: tsconfig.app.json
+ * ============================================================================= */
+
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "target": "es2023",
+    "lib": ["ES2023", "DOM"],
+    "module": "esnext",
+    "types": ["vite/client"],
+    "allowArbitraryExtensions": true,
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "moduleResolution": "bundler",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+    "jsx": "react-jsx",
+
+    /* Linting */
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["src"]
+}
+
+
+
+/* =============================================================================
+ * FILE: tsconfig.json
+ * ============================================================================= */
+
+{
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
+  ]
+}
+
+
+
+/* =============================================================================
+ * FILE: tsconfig.node.json
+ * ============================================================================= */
+
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
+    "target": "es2023",
+    "lib": ["ES2023"],
+    "types": ["node"],
+    "skipLibCheck": true,
+
+    /* Bundler mode */
+    "module": "nodenext",
+    "allowImportingTsExtensions": true,
+    "verbatimModuleSyntax": true,
+    "moduleDetection": "force",
+    "noEmit": true,
+
+    /* Linting */
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "erasableSyntaxOnly": true,
+    "noFallthroughCasesInSwitch": true
+  },
+  "include": ["vite.config.ts"]
+}
+
+
+
+/* =============================================================================
+ * FILE: update-sw-version.js
+ * ============================================================================= */
+
+import fs from 'fs';
+import path from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const SW_PATH = path.join(__dirname, 'public', 'sw.js');
+
+if (fs.existsSync(SW_PATH)) {
+  let content = fs.readFileSync(SW_PATH, 'utf-8');
+  const version = process.env.VITE_APP_VERSION || `v1.0.${Date.now()}`;
+  const buildVersion = `rummikub-pwa-${version}`;
+  content = content.replace(/const CACHE_NAME = '.*?';/, `const CACHE_NAME = '${buildVersion}';`);
+  fs.writeFileSync(SW_PATH, content, 'utf-8');
+  console.log(`[PWA Build] Invalidation cache key updated -> ${buildVersion}`);
 }
 
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Player } from '../types/game';
-import { Volume2, VolumeX, HelpCircle, RefreshCw, Layers, ShieldCheck, ShieldAlert, Lightbulb, Download, Bot, Search, Sparkles } from 'lucide-react';
+import { Volume2, VolumeX, HelpCircle, RefreshCw, Layers, ShieldAlert, Lightbulb, Download, Bot, Search, Sparkles } from 'lucide-react';
 import { clsx } from 'clsx';
 
 interface HeaderProps {
@@ -11,6 +11,7 @@ interface HeaderProps {
   isHumanTurn: boolean;
   soundEnabled: boolean;
   isMagnifierEnabled: boolean;
+  botLastMoveMessage?: string | null;
   onToggleSound: () => void;
   onToggleMagnifier: () => void;
   onOpenRules: () => void;
@@ -29,6 +30,7 @@ export const Header: React.FC<HeaderProps> = ({
   isHumanTurn,
   soundEnabled,
   isMagnifierEnabled,
+  botLastMoveMessage,
   onToggleSound,
   onToggleMagnifier,
   onOpenRules,
@@ -36,7 +38,7 @@ export const Header: React.FC<HeaderProps> = ({
   onGetHint,
   onInstallApp,
 }) => {
-  const aiTileCount = aiPlayer?.handTiles?.length ?? 14;
+  const aiTileCount = aiPlayer?.hand?.length ?? 14;
 
   return (
     <header className="w-full bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 py-3 shadow-xl sticky top-0 z-30">
@@ -71,6 +73,15 @@ export const Header: React.FC<HeaderProps> = ({
             <span className="font-bold font-mono text-amber-300">{aiTileCount} tiles</span>
           </div>
 
+          {/* Persistent Bot Last Move Status Banner at Top of Window */}
+          {botLastMoveMessage && (
+            <div className="flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 rounded-lg text-xs font-semibold shadow-sm text-amber-300">
+              <Bot className="w-4 h-4 text-amber-400" />
+              <span className="text-slate-400">Bot's Last Turn:</span>
+              <span className="font-bold text-amber-200">{botLastMoveMessage}</span>
+            </div>
+          )}
+
           <div
             className={clsx(
               'flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-semibold shadow-sm transition-all',
@@ -83,26 +94,12 @@ export const Header: React.FC<HeaderProps> = ({
             <span>Turn: {activePlayer?.name || 'Loading...'}</span>
           </div>
 
-          <div
-            className={clsx(
-              'hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium',
-              humanPlayer?.hasInitialMeld
-                ? 'bg-emerald-950/40 border-emerald-800/50 text-emerald-300'
-                : 'bg-amber-950/40 border-amber-800/50 text-amber-300'
-            )}
-          >
-            {humanPlayer?.hasInitialMeld ? (
-              <>
-                <ShieldCheck className="w-4 h-4 text-emerald-400" />
-                <span>Initial Meld Done</span>
-              </>
-            ) : (
-              <>
-                <ShieldAlert className="w-4 h-4 text-amber-400" />
-                <span>Initial Meld Required (&ge; 30 pts)</span>
-              </>
-            )}
-          </div>
+          {!humanPlayer?.hasInitialMeld && (
+            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium bg-amber-950/40 border-amber-800/50 text-amber-300">
+              <ShieldAlert className="w-4 h-4 text-amber-400" />
+              <span>Initial Meld Required (&ge; 30 pts)</span>
+            </div>
+          )}
         </div>
 
         {/* Action & Settings Buttons */}

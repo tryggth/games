@@ -12,8 +12,13 @@ const INCLUDE_PATHS = [
   'index.html',
   'vite.config.ts',
   'package.json',
-  'public/manifest.json',
-  'public/sw.js',
+  'tsconfig.json',
+  'tsconfig.app.json',
+  'tsconfig.node.json',
+  'update-sw-version.js',
+  'README.md',
+  '.github/workflows/deploy.yml',
+  'public',
   'src',
 ];
 
@@ -49,13 +54,16 @@ function runConcatenation() {
     }
   });
 
-  // Filter out node_modules, build outputs, git files, and output file itself
+  // Filter out node_modules, build outputs, git files, binary images, and output files
   fileList = fileList.filter((f) => {
     const rel = path.relative(__dirname, f);
+    const isBinary = f.endsWith('.png') || f.endsWith('.jpg') || f.endsWith('.ico') || f.endsWith('.zip');
     return (
+      !isBinary &&
       !rel.startsWith('node_modules') &&
       !rel.startsWith('dist') &&
       !rel.startsWith('.git') &&
+      !rel.startsWith('scratch') &&
       !rel.endsWith('combined_source_code.txt') &&
       !rel.endsWith('concat-source.js')
     );

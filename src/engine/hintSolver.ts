@@ -17,6 +17,32 @@ export interface HintResult {
 }
 
 /**
+ * Helper to produce a clear, human-readable description of an existing table meld.
+ * Examples:
+ * - "Group of 11s [BLACK, BLUE, YELLOW]"
+ * - "Run of RED [8, 9, 10]"
+ */
+export function formatMeldDescription(meld: Meld): string {
+  const norm = normalizeMeld(meld.tiles);
+  if (norm.length === 0) return 'empty meld';
+
+  const isRun = isValidMeld(norm).type === 'run';
+
+  if (isRun) {
+    const nonJoker = norm.find((t) => !t.isJoker);
+    const colorStr = nonJoker ? nonJoker.color.toUpperCase() : 'MIXED';
+    const valuesStr = norm.map((t) => (t.isJoker ? 'Joker' : t.value)).join(', ');
+    return `Run of ${colorStr} [${valuesStr}]`;
+  } else {
+    // Group of same values across different colors
+    const nonJoker = norm.find((t) => !t.isJoker);
+    const valStr = nonJoker ? `${nonJoker.value}s` : 'Jokers';
+    const colorsStr = norm.map((t) => (t.isJoker ? 'Joker' : t.color.toUpperCase())).join(', ');
+    return `Group of ${valStr} [${colorsStr}]`;
+  }
+}
+
+/**
  * Validates that every resulting meld fragment contains at least 3 tiles and forms a valid Group or Run.
  */
 function validateResultingMelds(resultingMelds: Tile[][]): boolean {
@@ -33,19 +59,19 @@ function validateResultingMelds(resultingMelds: Tile[][]): boolean {
  * 3. Point values for table moves reflect ONLY the net contributed points played from hand.
  */
 export function findPossibleMoves(
-  handTiles: Tile[],
+  hand: Tile[],
   boardMelds: Meld[],
   hasInitialMeld: boolean
 ): HintResult {
   const moves: HintMove[] = [];
   const moveDescriptions = new Set<string>();
 
-  const n = handTiles.length;
+  const n = hand.length;
 
   // 1. Search for New Melds from Hand (subsets of length 3..6)
   if (n >= 3) {
     for (let len = 3; len <= Math.min(n, 6); len++) {
-      const subsets = getSubsetsOfLength(handTiles, len);
+      const subsets = getSubsetsOfLength(hand, len);
       for (const subset of subsets) {
         const valRes = isValidMeld(subset);
         if (valRes.isValid) {
@@ -91,13 +117,16 @@ export function findPossibleMoves(
     if (!meld.isValid) continue;
 
     const baseMeldValue = getEffectiveMeldPointValue(meld.tiles);
+    const meldDesc = formatMeldDescription(meld);
 
-    for (const ht of handTiles) {
+    for (const ht of hand) {
+      const tileName = `${ht.color.toUpperCase()} ${ht.isJoker ? 'Joker' : ht.value}`;
+
       // Test prepending to meld
       const prependSet = [ht, ...meld.tiles];
       if (isValidMeld(prependSet).isValid) {
         const netPoints = getEffectiveMeldPointValue(prependSet) - baseMeldValue;
-        const desc = `Attach ${ht.color.toUpperCase()} ${ht.isJoker ? 'Joker' : ht.value} to start of table meld (+${netPoints} pts)`;
+        const desc = `Attach ${tileName} from hand to start of ${meldDesc} (+${netPoints} pts)`;
         if (!moveDescriptions.has(desc)) {
           moveDescriptions.add(desc);
           moves.push({
@@ -116,7 +145,7 @@ export function findPossibleMoves(
       const appendSet = [...meld.tiles, ht];
       if (isValidMeld(appendSet).isValid) {
         const netPoints = getEffectiveMeldPointValue(appendSet) - baseMeldValue;
-        const desc = `Attach ${ht.color.toUpperCase()} ${ht.isJoker ? 'Joker' : ht.value} to end of table meld (+${netPoints} pts)`;
+        const desc = `Attach ${tileName} from hand to end of ${meldDesc} (+${netPoints} pts)`;
         if (!moveDescriptions.has(desc)) {
           moveDescriptions.add(desc);
           moves.push({
@@ -137,20 +166,24 @@ export function findPossibleMoves(
   for (const meld of boardMelds) {
     if (!meld.isValid || meld.tiles.length < 4) continue;
 
+    const meldDesc = formatMeldDescription(meld);
+
     for (let i = 1; i < meld.tiles.length; i++) {
       const left = meld.tiles.slice(0, i);
       const right = meld.tiles.slice(i);
       const baseLeftValue = getEffectiveMeldPointValue(left);
       const baseRightValue = getEffectiveMeldPointValue(right);
 
-      for (const ht of handTiles) {
+      for (const ht of hand) {
+        const tileName = `${ht.color.toUpperCase()} ${ht.isJoker ? 'Joker' : ht.value}`;
+
         // Case A: Attach hand tile to left fragment
         const leftPrepend = [ht, ...left];
         const leftAppend = [...left, ht];
 
         if (validateResultingMelds([leftPrepend, right])) {
           const netPoints = getEffectiveMeldPointValue(leftPrepend) - baseLeftValue;
-          const desc = `Split table meld and attach ${ht.color.toUpperCase()} ${ht.isJoker ? 'Joker' : ht.value} from hand (+${netPoints} pts)`;
+          const desc = `Split ${meldDesc} and attach ${tileName} from hand (+${netPoints} pts)`;
           if (!moveDescriptions.has(desc)) {
             moveDescriptions.add(desc);
             moves.push({
@@ -167,7 +200,7 @@ export function findPossibleMoves(
 
         if (validateResultingMelds([leftAppend, right])) {
           const netPoints = getEffectiveMeldPointValue(leftAppend) - baseLeftValue;
-          const desc = `Split table meld and attach ${ht.color.toUpperCase()} ${ht.isJoker ? 'Joker' : ht.value} from hand (+${netPoints} pts)`;
+          const desc = `Split ${meldDesc} and attach ${tileName} from hand (+${netPoints} pts)`;
           if (!moveDescriptions.has(desc)) {
             moveDescriptions.add(desc);
             moves.push({
@@ -188,7 +221,7 @@ export function findPossibleMoves(
 
         if (validateResultingMelds([left, rightPrepend])) {
           const netPoints = getEffectiveMeldPointValue(rightPrepend) - baseRightValue;
-          const desc = `Split table meld and attach ${ht.color.toUpperCase()} ${ht.isJoker ? 'Joker' : ht.value} from hand (+${netPoints} pts)`;
+          const desc = `Split ${meldDesc} and attach ${tileName} from hand (+${netPoints} pts)`;
           if (!moveDescriptions.has(desc)) {
             moveDescriptions.add(desc);
             moves.push({
@@ -205,7 +238,7 @@ export function findPossibleMoves(
 
         if (validateResultingMelds([left, rightAppend])) {
           const netPoints = getEffectiveMeldPointValue(rightAppend) - baseRightValue;
-          const desc = `Split table meld and attach ${ht.color.toUpperCase()} ${ht.isJoker ? 'Joker' : ht.value} from hand (+${netPoints} pts)`;
+          const desc = `Split ${meldDesc} and attach ${tileName} from hand (+${netPoints} pts)`;
           if (!moveDescriptions.has(desc)) {
             moveDescriptions.add(desc);
             moves.push({

@@ -11,7 +11,6 @@ interface TileComponentProps {
   isMagnifierEnabled?: boolean;
   onClick?: () => void;
   source: 'rack' | 'board';
-  sourceRackIndex?: number;
   sourceMeldId?: string;
   sourceIndex?: number;
   size?: 'sm' | 'md' | 'lg';
@@ -49,7 +48,6 @@ export const TileComponent: React.FC<TileComponentProps> = ({
   isMagnifierEnabled = false,
   onClick,
   source,
-  sourceRackIndex,
   sourceMeldId,
   sourceIndex,
   size = 'md',
@@ -60,15 +58,11 @@ export const TileComponent: React.FC<TileComponentProps> = ({
 
   const handleDragStart = (e: React.DragEvent) => {
     setHoverPos(null);
-    const rect = e.currentTarget.getBoundingClientRect();
     const dragItem: DragItem = {
       tileId: tile.id,
       source,
-      sourceRackIndex,
       sourceMeldId,
       sourceIndex,
-      offsetX: e.clientX - rect.left,
-      offsetY: e.clientY - rect.top,
     };
     e.dataTransfer.setData('application/json', JSON.stringify(dragItem));
     e.dataTransfer.effectAllowed = 'move';
@@ -107,9 +101,9 @@ export const TileComponent: React.FC<TileComponentProps> = ({
   };
 
   const sizeClasses = {
-    sm: 'w-8 h-12 text-base rounded-md',
-    md: 'w-11 h-16 text-xl rounded-lg',
-    lg: 'w-14 h-20 text-2xl rounded-xl',
+    sm: 'w-8.5 h-12.5 text-lg rounded-md',
+    md: 'w-11.5 h-16.5 text-2xl rounded-lg',
+    lg: 'w-14.5 h-20.5 text-3xl rounded-xl',
   }[size];
 
   const colorConfig = colorStyles[tile.color];
@@ -130,7 +124,10 @@ export const TileComponent: React.FC<TileComponentProps> = ({
           'bg-gradient-to-b from-amber-50 via-amber-100 to-amber-200 border border-amber-300/80',
           'tile-shadow tile-hover transition-all duration-150 transform',
           sizeClasses,
-          isSelected && 'tile-selected -translate-y-2 ring-2 ring-amber-400 z-10',
+          isSelected &&
+            (source === 'rack'
+              ? 'tile-selected -translate-y-2 ring-2 ring-amber-400 z-10'
+              : 'ring-2 ring-amber-400 z-10'),
           isDrawnTile &&
             'ring-4 ring-amber-400 ring-offset-2 ring-offset-slate-950 scale-105 z-20 shadow-xl shadow-amber-500/50 animate-pulse',
           isRecentlyPlaced &&
@@ -141,14 +138,14 @@ export const TileComponent: React.FC<TileComponentProps> = ({
       >
         {/* Drawn Tile Highlight "NEW" Badge */}
         {isDrawnTile && (
-          <span className="absolute -top-2.5 -right-2.5 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 text-[9px] font-extrabold px-1.5 py-0.5 rounded-full shadow-lg border border-amber-300 animate-bounce z-30">
+          <span className="absolute -top-2.5 -right-2.5 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 text-[11px] font-extrabold px-1.5 py-0.5 rounded-full shadow-lg border border-amber-300 animate-bounce z-30">
             NEW
           </span>
         )}
 
         {/* Bot Placement Highlight Badge */}
         {isRecentlyPlaced && (
-          <span className="absolute -top-2 -right-2 w-4 h-4 bg-cyan-500 text-slate-950 rounded-full font-bold text-[9px] flex items-center justify-center shadow-lg animate-bounce border border-cyan-300 z-30">
+          <span className="absolute -top-2 -right-2 w-4 h-4 bg-cyan-500 text-slate-950 rounded-full font-bold text-[11px] flex items-center justify-center shadow-lg animate-bounce border border-cyan-300 z-30">
             <Bot className="w-2.5 h-2.5" />
           </span>
         )}
@@ -168,14 +165,14 @@ export const TileComponent: React.FC<TileComponentProps> = ({
               tile.color === 'yellow' && 'bg-amber-500'
             )}
           />
-          <span className="text-[9px] font-mono opacity-50 select-none">R</span>
+          <span className="text-[11px] font-mono opacity-50 select-none">R</span>
         </div>
 
         <div className="flex-1 flex items-center justify-center font-bold tracking-tight">
           {tile.isJoker ? (
             <div className="flex flex-col items-center text-amber-600 animate-pulse">
               <Sparkles className="w-5 h-5" />
-              <span className="text-[10px] uppercase font-semibold">Joker</span>
+              <span className="text-[12px] uppercase font-semibold">Joker</span>
             </div>
           ) : (
             <span className="drop-shadow-sm">{tile.value}</span>

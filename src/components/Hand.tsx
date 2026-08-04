@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Player, DragItem, HandTile, Tile } from '../types/game';
+import type { Player, DragItem, Tile } from '../types/game';
 import { TileComponent } from './TileComponent';
 import { Sparkles, X } from 'lucide-react';
 
@@ -26,7 +26,7 @@ export const Hand: React.FC<HandProps> = ({
   onDropTileCanvas,
   isHumanTurn,
 }) => {
-  const handTiles: HandTile[] = humanPlayer?.handTiles || [];
+  const hand: Tile[] = humanPlayer?.hand || [];
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -63,7 +63,7 @@ export const Hand: React.FC<HandProps> = ({
           <span className="text-sm font-bold text-amber-200 uppercase tracking-wide flex items-center gap-2">
             Player Hand Tray{' '}
             <span className="text-xs px-2 py-0.5 rounded-full bg-amber-950/80 text-amber-400 border border-amber-800/40 font-mono">
-              {handTiles.length} tiles (Auto-Sorted)
+              {hand.length} tiles (Auto-Sorted)
             </span>
           </span>
 
@@ -100,32 +100,31 @@ export const Hand: React.FC<HandProps> = ({
 
       {/* Auto-Sorted Flex Wrap Hand Tiles Container */}
       <div className="w-full min-h-[72px] max-h-44 md:max-h-52 overflow-y-auto pt-2.5 pb-1 pr-1 z-10 flex flex-wrap gap-2.5 items-start content-start">
-        {handTiles.length === 0 ? (
+        {hand.length === 0 ? (
           <div className="w-full h-full flex items-center justify-center text-amber-500/30 text-xs font-mono">
             [Your hand tray is empty! You played all your tiles.]
           </div>
         ) : (
-          handTiles.map((ht, idx) => {
-            const prevTile = idx > 0 ? handTiles[idx - 1].tile : null;
-            const currTile = ht.tile;
+          hand.map((tile, idx) => {
+            const prevTile = idx > 0 ? hand[idx - 1] : null;
             const getGroupKey = (t: Tile) => (t.isJoker ? 'joker' : t.color);
-            const isNewGroup = prevTile !== null && getGroupKey(currTile) !== getGroupKey(prevTile);
+            const isNewGroup = prevTile !== null && getGroupKey(tile) !== getGroupKey(prevTile);
 
             return (
-              <React.Fragment key={ht.tile.id}>
+              <React.Fragment key={tile.id}>
                 {isNewGroup && (
                   <div
-                    key={`spacer-${ht.tile.id}`}
+                    key={`spacer-${tile.id}`}
                     className="w-11 h-16 pointer-events-none flex-shrink-0"
                     aria-hidden="true"
                   />
                 )}
                 <TileComponent
-                  tile={ht.tile}
-                  isSelected={selectedTileIds.includes(ht.tile.id)}
-                  isDrawnTile={ht.tile.id === drawnTileId}
+                  tile={tile}
+                  isSelected={selectedTileIds.includes(tile.id)}
+                  isDrawnTile={tile.id === drawnTileId}
                   isMagnifierEnabled={isMagnifierEnabled}
-                  onClick={() => isHumanTurn && onToggleTileSelection(ht.tile.id)}
+                  onClick={() => isHumanTurn && onToggleTileSelection(tile.id)}
                   source="rack"
                   size="md"
                 />

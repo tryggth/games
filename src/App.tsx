@@ -29,6 +29,7 @@ export function App() {
     soundEnabled,
     highlightedMeldIds,
     drawnTileId,
+    botLastMoveMessage,
     debugLog,
     hintResult,
     isHintOpen,
@@ -51,7 +52,7 @@ export function App() {
   } = useGameState();
 
   const tilesPlayedCount = turnSnapshot
-    ? turnSnapshot.handTiles.length - (humanPlayer?.handTiles?.length || 0)
+    ? turnSnapshot.hand.length - (humanPlayer?.hand?.length || 0)
     : 0;
 
   const isBoardValid = boardMelds.every((m) => m.isValid);
@@ -91,6 +92,7 @@ export function App() {
         isHumanTurn={isHumanTurn}
         soundEnabled={soundEnabled}
         isMagnifierEnabled={isMagnifierEnabled}
+        botLastMoveMessage={botLastMoveMessage}
         onToggleSound={toggleSound}
         onToggleMagnifier={toggleMagnifier}
         onOpenRules={() => setIsRulesOpen(true)}
@@ -143,7 +145,7 @@ export function App() {
       {/* Debug Diagnostic Status Bar */}
       <div className="w-full bg-slate-900/90 border-t border-slate-800 px-4 py-1 flex items-center justify-between text-[11px] font-mono text-slate-400 z-40">
         <span className="truncate max-w-[70%]">🔍 {debugLog}</span>
-        <span className="text-amber-300">Board Melds: {boardMelds.length} | Hand: {humanPlayer?.handTiles?.length || 0} tiles</span>
+        <span className="text-amber-300">Board Melds: {boardMelds.length} | Hand: {humanPlayer?.hand?.length || 0} tiles</span>
       </div>
 
       {/* Move Suggestions Hint Modal */}

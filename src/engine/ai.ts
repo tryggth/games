@@ -3,7 +3,7 @@ import { isValidMeld, calculateMeldValue } from './validator';
 
 export interface AiMoveResult {
   newBoardMelds: Meld[];
-  newAiRack: Tile[];
+  newAiHand: Tile[];
   drewTile: boolean;
   playedTilesCount: number;
   message: string;
@@ -12,12 +12,12 @@ export interface AiMoveResult {
 /**
  * Searches for all possible valid melds from a set of tiles.
  */
-export function findPossibleMeldsFromRack(rack: Tile[]): Tile[][] {
+export function findPossibleMeldsFromHand(hand: Tile[]): Tile[][] {
   const validMelds: Tile[][] = [];
-  const n = rack.length;
+  const n = hand.length;
 
   for (let len = 3; len <= Math.min(n, 6); len++) {
-    const subsets = getSubsetsOfLength(rack, len);
+    const subsets = getSubsetsOfLength(hand, len);
     for (const subset of subsets) {
       const valRes = isValidMeld(subset);
       if (valRes.isValid) {
@@ -57,15 +57,15 @@ export function executeAiTurn(
   boardMelds: Meld[],
   tilePool: Tile[]
 ): AiMoveResult {
-  const rack = [...aiPlayer.rack];
+  const hand = [...aiPlayer.hand];
 
-  const possibleMelds = findPossibleMeldsFromRack(rack);
+  const possibleMelds = findPossibleMeldsFromHand(hand);
 
   if (!aiPlayer.hasInitialMeld) {
     for (const meldCandidate of possibleMelds) {
       const val = calculateMeldValue(meldCandidate);
       if (val >= 30) {
-        const remainingRack = rack.filter((t) => !meldCandidate.some((mt) => mt.id === t.id));
+        const remainingHand = hand.filter((t) => !meldCandidate.some((mt) => mt.id === t.id));
         const newMeld: Meld = {
           id: `meld_ai_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
           tiles: meldCandidate,
@@ -76,7 +76,7 @@ export function executeAiTurn(
 
         return {
           newBoardMelds: [...boardMelds, newMeld],
-          newAiRack: remainingRack,
+          newAiHand: remainingHand,
           drewTile: false,
           playedTilesCount: meldCandidate.length,
           message: `${aiPlayer.name} made initial meld with ${val} points!`,
@@ -90,7 +90,7 @@ export function executeAiTurn(
   if (possibleMelds.length > 0) {
     possibleMelds.sort((a, b) => calculateMeldValue(b) - calculateMeldValue(a));
     const bestMeld = possibleMelds[0];
-    const remainingRack = rack.filter((t) => !bestMeld.some((mt) => mt.id === t.id));
+    const remainingHand = hand.filter((t) => !bestMeld.some((mt) => mt.id === t.id));
     const val = calculateMeldValue(bestMeld);
 
     const newMeld: Meld = {
@@ -103,7 +103,7 @@ export function executeAiTurn(
 
     return {
       newBoardMelds: [...boardMelds, newMeld],
-      newAiRack: remainingRack,
+      newAiHand: remainingHand,
       drewTile: false,
       playedTilesCount: bestMeld.length,
       message: `${aiPlayer.name} played a meld of ${bestMeld.length} tiles!`,
@@ -112,11 +112,11 @@ export function executeAiTurn(
 
   for (let mIdx = 0; mIdx < boardMelds.length; mIdx++) {
     const targetMeld = boardMelds[mIdx];
-    for (let rIdx = 0; rIdx < rack.length; rIdx++) {
-      const tileToTry = rack[rIdx];
+    for (let rIdx = 0; rIdx < hand.length; rIdx++) {
+      const tileToTry = hand[rIdx];
       const candidateAtStart = [tileToTry, ...targetMeld.tiles];
       if (isValidMeld(candidateAtStart).isValid) {
-        const remainingRack = rack.filter((t) => t.id !== tileToTry.id);
+        const remainingHand = hand.filter((t) => t.id !== tileToTry.id);
         const updatedMelds = [...boardMelds];
         updatedMelds[mIdx] = {
           ...targetMeld,
@@ -127,7 +127,7 @@ export function executeAiTurn(
         };
         return {
           newBoardMelds: updatedMelds,
-          newAiRack: remainingRack,
+          newAiHand: remainingHand,
           drewTile: false,
           playedTilesCount: 1,
           message: `${aiPlayer.name} added a tile to table meld!`,
@@ -136,7 +136,7 @@ export function executeAiTurn(
 
       const candidateAtEnd = [...targetMeld.tiles, tileToTry];
       if (isValidMeld(candidateAtEnd).isValid) {
-        const remainingRack = rack.filter((t) => t.id !== tileToTry.id);
+        const remainingHand = hand.filter((t) => t.id !== tileToTry.id);
         const updatedMelds = [...boardMelds];
         updatedMelds[mIdx] = {
           ...targetMeld,
@@ -147,7 +147,7 @@ export function executeAiTurn(
         };
         return {
           newBoardMelds: updatedMelds,
-          newAiRack: remainingRack,
+          newAiHand: remainingHand,
           drewTile: false,
           playedTilesCount: 1,
           message: `${aiPlayer.name} added a tile to table meld!`,
@@ -163,7 +163,7 @@ function handleAiDraw(aiPlayer: Player, boardMelds: Meld[], tilePool: Tile[]): A
   if (tilePool.length === 0) {
     return {
       newBoardMelds: boardMelds,
-      newAiRack: aiPlayer.rack,
+      newAiHand: aiPlayer.hand,
       drewTile: true,
       playedTilesCount: 0,
       message: `${aiPlayer.name} passed (pool empty).`,
@@ -173,7 +173,7 @@ function handleAiDraw(aiPlayer: Player, boardMelds: Meld[], tilePool: Tile[]): A
   const drawnTile = tilePool[0];
   return {
     newBoardMelds: boardMelds,
-    newAiRack: [...aiPlayer.rack, drawnTile],
+    newAiHand: [...aiPlayer.hand, drawnTile],
     drewTile: true,
     playedTilesCount: 0,
     message: `${aiPlayer.name} drew 1 tile from the pool.`,

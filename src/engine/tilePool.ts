@@ -1,4 +1,4 @@
-import type { Tile, TileColor } from '../types/game';
+import type { Tile, TileColor, Meld } from '../types/game';
 
 export const COLORS: TileColor[] = ['red', 'blue', 'black', 'yellow'];
 
@@ -55,6 +55,30 @@ export function shuffleTiles(tiles: Tile[]): Tile[] {
 }
 
 /**
+ * Generates a full, shuffled tile pool.
+ */
+export function generateTilePool(): Tile[] {
+  return shuffleTiles(createTilePool());
+}
+
+/**
+ * Deep copy helper for a single tile.
+ */
+export function deepCopyTile(tile: Tile): Tile {
+  return { ...tile };
+}
+
+/**
+ * Deep copy helper for an array of melds.
+ */
+export function deepCopyMelds(melds: Meld[]): Meld[] {
+  return melds.map((m) => ({
+    ...m,
+    tiles: m.tiles.map(deepCopyTile),
+  }));
+}
+
+/**
  * Sorts tiles by value (1-13), then by color.
  */
 export function sortTilesByValue(tiles: Tile[]): Tile[] {
@@ -88,12 +112,10 @@ const COLOR_ORDER: TileColor[] = ['red', 'blue', 'black', 'yellow'];
  */
 export function sortHandColorThenNumber(tiles: Tile[]): Tile[] {
   return [...tiles].sort((a, b) => {
-    // 1. Jokers always go to the end
     if (a.isJoker && !b.isJoker) return 1;
     if (!a.isJoker && b.isJoker) return -1;
     if (a.isJoker && b.isJoker) return 0;
 
-    // 2. Sort by color order
     const colorIndexA = COLOR_ORDER.indexOf(a.color);
     const colorIndexB = COLOR_ORDER.indexOf(b.color);
 
@@ -101,7 +123,6 @@ export function sortHandColorThenNumber(tiles: Tile[]): Tile[] {
       return colorIndexA - colorIndexB;
     }
 
-    // 3. Within same color, sort ascending by numerical value
     return a.value - b.value;
   });
 }

@@ -7,12 +7,6 @@ export interface Tile {
   isJoker: boolean;
 }
 
-export interface HandTile {
-  tile: Tile;
-  x: number; // x coordinate in px relative to hand canvas
-  y: number; // y coordinate in px relative to hand canvas
-}
-
 export type MeldType = 'group' | 'run' | 'invalid';
 
 export interface MeldValidationResult {
@@ -37,18 +31,14 @@ export interface Player {
   id: string;
   name: string;
   isAi: boolean;
-  handTiles: HandTile[]; // Free 2D canvas tile positions
-  playerRacks: [Tile[], Tile[]]; // Legacy rack support for compatibility
-  rack: Tile[]; // Flattened view of all tiles in hand
+  hand: Tile[];
   hasInitialMeld: boolean;
   score: number;
 }
 
 export interface TurnSnapshot {
   boardMelds: Meld[];
-  handTiles: HandTile[];
-  playerRacks: [Tile[], Tile[]];
-  playerRack: Tile[];
+  hand: Tile[];
   hasInitialMeld: boolean;
   poolCount: number;
 }
@@ -60,9 +50,6 @@ export type SortMode = 'number' | 'color' | 'group' | 'none';
 export interface DragItem {
   tileId: string;
   source: 'rack' | 'board';
-  sourceRackIndex?: number;
   sourceMeldId?: string;
   sourceIndex?: number;
-  offsetX?: number;
-  offsetY?: number;
 }
