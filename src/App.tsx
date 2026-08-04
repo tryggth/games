@@ -12,7 +12,6 @@ import { AlertCircle, CheckCircle2, Info } from 'lucide-react';
 import { clsx } from 'clsx';
 
 export function App() {
-  // PWA Auto-Update Verification Test Comment
   const [isRulesOpen, setIsRulesOpen] = useState(false);
   const { installPwa } = usePwaInstall();
 
@@ -30,6 +29,7 @@ export function App() {
     soundEnabled,
     highlightedMeldIds,
     drawnTileId,
+    debugLog,
     hintResult,
     isHintOpen,
     isMagnifierEnabled,
@@ -139,6 +139,12 @@ export function App() {
           poolCount={tilePool.length}
         />
       </main>
+
+      {/* Debug Diagnostic Status Bar */}
+      <div className="w-full bg-slate-900/90 border-t border-slate-800 px-4 py-1 flex items-center justify-between text-[11px] font-mono text-slate-400 z-40">
+        <span className="truncate max-w-[70%]">🔍 {debugLog}</span>
+        <span className="text-amber-300">Board Melds: {boardMelds.length} | Hand: {humanPlayer?.handTiles?.length || 0} tiles</span>
+      </div>
 
       {/* Move Suggestions Hint Modal */}
       <HintModal

@@ -122,6 +122,9 @@ export function useGameState() {
   // State tracking for newly drawn tile in hand
   const [drawnTileId, setDrawnTileId] = useState<string | null>(null);
 
+  // Debug info state for runtime tracing
+  const [debugLog, setDebugLog] = useState<string>('Game initialized.');
+
   // Hint engine state
   const [hintResult, setHintResult] = useState<HintResult | null>(null);
   const [isHintOpen, setIsHintOpen] = useState<boolean>(false);
@@ -134,22 +137,34 @@ export function useGameState() {
   const boardMeldsRef = useRef(boardMelds);
   const tilePoolRef = useRef(tilePool);
   const activePlayerIndexRef = useRef(activePlayerIndex);
+  const turnSnapshotRef = useRef(turnSnapshot);
 
-  useEffect(() => {
-    playersRef.current = players;
-  }, [players]);
+  // Helper to update state AND refs synchronously
+  const updateBoardMelds = useCallback((newMelds: Meld[]) => {
+    const clean = deepCopyMelds(newMelds);
+    boardMeldsRef.current = clean;
+    setBoardMelds(clean);
+  }, []);
 
-  useEffect(() => {
-    boardMeldsRef.current = boardMelds;
-  }, [boardMelds]);
+  const updatePlayers = useCallback((newPlayers: Player[]) => {
+    playersRef.current = newPlayers;
+    setPlayers(newPlayers);
+  }, []);
 
-  useEffect(() => {
-    tilePoolRef.current = tilePool;
-  }, [tilePool]);
+  const updateTilePool = useCallback((newPool: Tile[]) => {
+    tilePoolRef.current = newPool;
+    setTilePool(newPool);
+  }, []);
 
-  useEffect(() => {
-    activePlayerIndexRef.current = activePlayerIndex;
-  }, [activePlayerIndex]);
+  const updateActivePlayerIndex = useCallback((newIndex: number) => {
+    activePlayerIndexRef.current = newIndex;
+    setActivePlayerIndex(newIndex);
+  }, []);
+
+  const updateTurnSnapshot = useCallback((newSnapshot: TurnSnapshot | null) => {
+    turnSnapshotRef.current = newSnapshot;
+    setTurnSnapshot(newSnapshot);
+  }, []);
 
   const toggleMagnifier = useCallback(() => {
     setIsMagnifierEnabled((prev) => !prev);
@@ -197,23 +212,22 @@ export function useGameState() {
   }, []);
 
   const setHumanHandTiles = useCallback((updater: (prev: HandTile[]) => HandTile[]) => {
-    setPlayers((prevPlayers) => {
-      const copy = [...prevPlayers];
-      if (copy[0]) {
-        const nextRawHand = updater(copy[0].handTiles || []);
-        const tilesOnly = nextRawHand.map((ht) => ht.tile);
-        const sortedHand = createSortedHandTiles(tilesOnly);
+    const currentPlayers = playersRef.current;
+    const copy = [...currentPlayers];
+    if (copy[0]) {
+      const nextRawHand = updater(copy[0].handTiles || []);
+      const tilesOnly = nextRawHand.map((ht) => ht.tile);
+      const sortedHand = createSortedHandTiles(tilesOnly);
 
-        copy[0] = {
-          ...copy[0],
-          handTiles: sortedHand,
-          playerRacks: [sortedHand.map((ht) => ht.tile), []],
-          rack: sortedHand.map((ht) => ht.tile),
-        };
-      }
-      return copy;
-    });
-  }, []);
+      copy[0] = {
+        ...copy[0],
+        handTiles: sortedHand,
+        playerRacks: [sortedHand.map((ht) => ht.tile), []],
+        rack: sortedHand.map((ht) => ht.tile),
+      };
+    }
+    updatePlayers(copy);
+  }, [updatePlayers]);
 
   const startNewGame = useCallback(() => {
     clearMeldHighlights();
@@ -249,11 +263,10 @@ export function useGameState() {
       },
     ];
 
-    setTilePool(remainingPool.map(deepCopyTile));
-    setBoardMelds([]);
-    setPlayers(initialPlayers);
-    setActivePlayerIndex(0);
-    activePlayerIndexRef.current = 0;
+    updateTilePool(remainingPool.map(deepCopyTile));
+    updateBoardMelds([]);
+    updatePlayers(initialPlayers);
+    updateActivePlayerIndex(0);
     setGameStatus('playing');
     setWinner(null);
     setSelectedTileIds([]);
@@ -264,17 +277,19 @@ export function useGameState() {
     setHintResult(null);
     setIsHintOpen(false);
 
-    setTurnSnapshot({
+    const initSnapshot: TurnSnapshot = {
       boardMelds: [],
       handTiles: initialHumanHandTiles.map(deepCopyHandTile),
       playerRacks: [initialHumanHandTiles.map((ht) => ht.tile), []],
       playerRack: initialHumanHandTiles.map((ht) => ht.tile),
       hasInitialMeld: false,
       poolCount: remainingPool.length,
-    });
+    };
+    updateTurnSnapshot(initSnapshot);
+    setDebugLog('Game started. Player turn (0 melds on board).');
 
     showToast('New game started! 14 tiles arranged in auto-sorted hand tray.', 'info');
-  }, [showToast, clearMeldHighlights]);
+  }, [showToast, clearMeldHighlights, updateTilePool, updateBoardMelds, updatePlayers, updateActivePlayerIndex, updateTurnSnapshot]);
 
   useEffect(() => {
     startNewGame();
@@ -326,16 +341,17 @@ export function useGameState() {
   }, [sortRack]);
 
   const resetTurn = useCallback(() => {
-    if (!turnSnapshot || !isHumanTurn) return;
+    if (!turnSnapshotRef.current || !isHumanTurn) return;
     clearMeldHighlights();
 
-    setBoardMelds(deepCopyMelds(turnSnapshot.boardMelds));
-    setHumanHandTiles(() => turnSnapshot.handTiles.map(deepCopyHandTile));
+    const snapshot = turnSnapshotRef.current;
+    updateBoardMelds(deepCopyMelds(snapshot.boardMelds));
+    setHumanHandTiles(() => snapshot.handTiles.map(deepCopyHandTile));
     setSelectedTileIds([]);
     setAutoSplitLinks([]);
     soundEngine.playTileDrop();
     showToast('Turn reset to start snapshot.', 'info');
-  }, [turnSnapshot, isHumanTurn, setHumanHandTiles, showToast, clearMeldHighlights]);
+  }, [isHumanTurn, setHumanHandTiles, showToast, clearMeldHighlights, updateBoardMelds]);
 
   const createMeldFromSelection = useCallback(() => {
     clearMeldHighlights();
@@ -344,16 +360,18 @@ export function useGameState() {
       return;
     }
 
-    if (!humanPlayer) return;
+    const currentHuman = playersRef.current[0];
+    const currentBoard = boardMeldsRef.current;
+    if (!currentHuman) return;
 
     const tilesToMeld: Tile[] = [];
-    humanPlayer.handTiles.forEach((ht) => {
+    currentHuman.handTiles.forEach((ht) => {
       if (selectedTileIds.includes(ht.tile.id)) {
         tilesToMeld.push(ht.tile);
       }
     });
 
-    boardMelds.forEach((meld) => {
+    currentBoard.forEach((meld) => {
       meld.tiles.forEach((t) => {
         if (selectedTileIds.includes(t.id)) {
           tilesToMeld.push(t);
@@ -370,7 +388,7 @@ export function useGameState() {
 
     setHumanHandTiles((prev) => prev.filter((ht) => !selectedTileIds.includes(ht.tile.id)));
 
-    const updatedBoardMelds = boardMelds
+    const updatedBoardMelds = currentBoard
       .map((meld) => ({
         ...meld,
         tiles: meld.tiles.filter((t) => !selectedTileIds.includes(t.id)),
@@ -387,23 +405,28 @@ export function useGameState() {
       errorReason: valRes.errorReason,
     };
 
-    setBoardMelds(refreshBoardMelds([...updatedBoardMelds, newMeld]));
+    const nextMelds = refreshBoardMelds([...updatedBoardMelds, newMeld]);
+    updateBoardMelds(nextMelds);
     setSelectedTileIds([]);
     soundEngine.playTileDrop();
 
     if (!valRes.isValid) {
       showToast(`Warning: Formed meld is invalid (${valRes.errorReason}).`, 'error');
     }
-  }, [selectedTileIds, humanPlayer, boardMelds, setHumanHandTiles, refreshBoardMelds, showToast, clearMeldHighlights]);
+  }, [selectedTileIds, setHumanHandTiles, refreshBoardMelds, showToast, clearMeldHighlights, updateBoardMelds]);
 
   // Drop onto Hand Tray (returns tile to auto-sorted hand)
   const handleDropTileCanvas = useCallback(
     (item: DragItem) => {
-      if (!humanPlayer || !isHumanTurn) return;
+      const currentHuman = playersRef.current[0];
+      const currentBoard = boardMeldsRef.current;
+      const snapshot = turnSnapshotRef.current;
+
+      if (!currentHuman || !isHumanTurn) return;
       clearMeldHighlights();
 
       if (item.source === 'board') {
-        const turnStartHandTileIds = new Set(turnSnapshot?.handTiles.map((ht) => ht.tile.id));
+        const turnStartHandTileIds = new Set(snapshot?.handTiles.map((ht) => ht.tile.id));
         const autoLink = autoSplitLinks.find((l) => l.autoTileId === item.tileId);
 
         if (!turnStartHandTileIds.has(item.tileId) && !autoLink) {
@@ -419,7 +442,7 @@ export function useGameState() {
           const autoTileIdsForThisSplit = new Set(splitLinks.map((l) => l.autoTileId));
 
           const autoTilesToReturn: Tile[] = [];
-          boardMelds.forEach((m) => {
+          currentBoard.forEach((m) => {
             if (m.id === autoLink.splitMeldAId || m.id === autoLink.splitMeldBId) {
               m.tiles.forEach((t) => {
                 if (autoTileIdsForThisSplit.has(t.id) && t.id !== item.tileId) {
@@ -440,8 +463,8 @@ export function useGameState() {
             prev.filter((l) => !(l.splitMeldAId === autoLink.splitMeldAId && l.splitMeldBId === autoLink.splitMeldBId))
           );
 
-          const meldA = boardMelds.find((m) => m.id === autoLink.splitMeldAId);
-          const meldB = boardMelds.find((m) => m.id === autoLink.splitMeldBId);
+          const meldA = currentBoard.find((m) => m.id === autoLink.splitMeldAId);
+          const meldB = currentBoard.find((m) => m.id === autoLink.splitMeldBId);
 
           if (meldA || meldB) {
             const tilesA = meldA ? meldA.tiles.filter((t) => !autoTileIdsForThisSplit.has(t.id)) : [];
@@ -458,11 +481,11 @@ export function useGameState() {
                 value: calculateMeldValue(mergedTiles),
               };
 
-              const nextMelds = boardMelds
+              const nextMelds = currentBoard
                 .filter((m) => m.id !== autoLink.splitMeldAId && m.id !== autoLink.splitMeldBId)
                 .concat(mergedMeld);
 
-              setBoardMelds(refreshBoardMelds(nextMelds));
+              updateBoardMelds(refreshBoardMelds(nextMelds));
               showToast('Re-merged split melds back into single set upon returning auto-attached tile.', 'info');
             }
           }
@@ -472,20 +495,20 @@ export function useGameState() {
       // Find tile to move
       let tileToMove: Tile | null = null;
       if (item.source === 'rack') {
-        const foundHt = humanPlayer.handTiles.find((ht) => ht.tile.id === item.tileId);
+        const foundHt = currentHuman.handTiles.find((ht) => ht.tile.id === item.tileId);
         tileToMove = foundHt ? foundHt.tile : null;
       } else if (item.source === 'board' && item.sourceMeldId) {
-        const sourceMeld = boardMelds.find((m) => m.id === item.sourceMeldId);
+        const sourceMeld = currentBoard.find((m) => m.id === item.sourceMeldId);
         tileToMove = sourceMeld?.tiles.find((t) => t.id === item.tileId) || null;
       }
 
       if (!tileToMove) return;
 
       if (item.source === 'board' && item.sourceMeldId) {
-        const nextBoardMelds = boardMelds
+        const nextBoardMelds = currentBoard
           .map((m) => (m.id === item.sourceMeldId ? { ...m, tiles: m.tiles.filter((t) => t.id !== item.tileId) } : m))
           .filter((m) => m.tiles.length > 0);
-        setBoardMelds(refreshBoardMelds(nextBoardMelds));
+        updateBoardMelds(refreshBoardMelds(nextBoardMelds));
       }
 
       setHumanHandTiles((prev) => {
@@ -496,7 +519,7 @@ export function useGameState() {
       soundEngine.playTileDrop();
       setSelectedTileIds([]);
     },
-    [humanPlayer, isHumanTurn, boardMelds, turnSnapshot, autoSplitLinks, setHumanHandTiles, refreshBoardMelds, showToast, clearMeldHighlights]
+    [isHumanTurn, autoSplitLinks, setHumanHandTiles, refreshBoardMelds, showToast, clearMeldHighlights, updateBoardMelds]
   );
 
   // Drop onto board melds or new melds
@@ -509,16 +532,19 @@ export function useGameState() {
         targetIndex?: number;
       }
     ) => {
-      if (!humanPlayer || !isHumanTurn) return;
+      const currentHuman = playersRef.current[0];
+      const currentBoard = boardMeldsRef.current;
+
+      if (!currentHuman || !isHumanTurn) return;
       clearMeldHighlights();
 
       let tileToMove: Tile | null = null;
 
       if (item.source === 'rack') {
-        const foundHt = humanPlayer.handTiles.find((ht) => ht.tile.id === item.tileId);
+        const foundHt = currentHuman.handTiles.find((ht) => ht.tile.id === item.tileId);
         tileToMove = foundHt ? foundHt.tile : null;
       } else if (item.source === 'board' && item.sourceMeldId) {
-        const sourceMeld = boardMelds.find((m) => m.id === item.sourceMeldId);
+        const sourceMeld = currentBoard.find((m) => m.id === item.sourceMeldId);
         tileToMove = sourceMeld?.tiles.find((t) => t.id === item.tileId) || null;
       }
 
@@ -526,14 +552,14 @@ export function useGameState() {
 
       // Dynamic Drag Splitting & Multi-Tile Auto-Assist Engine
       if (targetLocation.type === 'board-new' && item.source === 'board' && item.sourceMeldId) {
-        const sourceMeld = boardMelds.find((m) => m.id === item.sourceMeldId);
+        const sourceMeld = currentBoard.find((m) => m.id === item.sourceMeldId);
         const sourceIdx = item.sourceIndex ?? 0;
 
         if (sourceMeld && sourceMeld.tiles.length > 1 && sourceIdx > 0) {
           let leftPiece = sourceMeld.tiles.slice(0, sourceIdx);
           let rightPiece = sourceMeld.tiles.slice(sourceIdx);
 
-          let currentHand = humanPlayer.handTiles.map(deepCopyHandTile);
+          let currentHand = currentHuman.handTiles.map(deepCopyHandTile);
           let newAutoLinks: AutoSplitLink[] = [];
 
           const leftMeldId = `meld_split_left_${Date.now()}_${Math.random().toString(36).substring(2, 5)}`;
@@ -598,11 +624,11 @@ export function useGameState() {
             value: calculateMeldValue(rightPiece),
           };
 
-          const updatedBoardMelds = boardMelds
+          const updatedBoardMelds = currentBoard
             .flatMap((m) => (m.id === item.sourceMeldId ? [meld1, meld2] : [m]))
             .filter((m) => m.tiles.length > 0);
 
-          setBoardMelds(refreshBoardMelds(updatedBoardMelds));
+          updateBoardMelds(refreshBoardMelds(updatedBoardMelds));
           soundEngine.playTileDrop();
           setSelectedTileIds([]);
 
@@ -623,7 +649,7 @@ export function useGameState() {
           setHumanHandTiles((prev) => prev.filter((ht) => ht.tile.id !== tileToMove!.id));
         }
 
-        const cleanedMelds = boardMelds
+        const cleanedMelds = currentBoard
           .map((m) => (m.id === item.sourceMeldId ? { ...m, tiles: m.tiles.filter((t) => t.id !== item.tileId) } : m))
           .filter((m) => m.tiles.length > 0);
 
@@ -636,13 +662,13 @@ export function useGameState() {
           errorReason: 'Needs at least 3 tiles to be valid',
         };
 
-        setBoardMelds(refreshBoardMelds([...cleanedMelds, newMeld]));
+        updateBoardMelds(refreshBoardMelds([...cleanedMelds, newMeld]));
       } else if (targetLocation.type === 'board-meld' && targetLocation.meldId) {
         if (item.source === 'rack') {
           setHumanHandTiles((prev) => prev.filter((ht) => ht.tile.id !== tileToMove!.id));
         }
 
-        const nextMelds = boardMelds
+        const nextMelds = currentBoard
           .map((m) => {
             let tiles = m.tiles;
             if (m.id === item.sourceMeldId) {
@@ -658,18 +684,19 @@ export function useGameState() {
           })
           .filter((m) => m.tiles.length > 0);
 
-        setBoardMelds(refreshBoardMelds(nextMelds));
+        updateBoardMelds(refreshBoardMelds(nextMelds));
       }
 
       setSelectedTileIds([]);
     },
-    [humanPlayer, isHumanTurn, boardMelds, turnSnapshot, autoSplitLinks, setHumanHandTiles, refreshBoardMelds, showToast, clearMeldHighlights]
+    [isHumanTurn, setHumanHandTiles, refreshBoardMelds, showToast, clearMeldHighlights, updateBoardMelds]
   );
 
   const splitMeldAt = useCallback(
     (meldId: string, splitIndex: number) => {
       clearMeldHighlights();
-      const targetMeld = boardMelds.find((m) => m.id === meldId);
+      const currentBoard = boardMeldsRef.current;
+      const targetMeld = currentBoard.find((m) => m.id === meldId);
       if (!targetMeld || splitIndex <= 0 || splitIndex >= targetMeld.tiles.length) return;
 
       const firstHalf = normalizeMeld(targetMeld.tiles.slice(0, splitIndex));
@@ -691,25 +718,27 @@ export function useGameState() {
         value: calculateMeldValue(secondHalf),
       };
 
-      const updatedMelds = boardMelds
+      const updatedMelds = currentBoard
         .flatMap((m) => (m.id === meldId ? [meld1, meld2] : [m]))
         .filter((m) => m.tiles.length > 0);
 
-      setBoardMelds(refreshBoardMelds(updatedMelds));
+      updateBoardMelds(refreshBoardMelds(updatedMelds));
       soundEngine.playTileDrop();
       showToast('Split meld into two sets.', 'info');
     },
-    [boardMelds, refreshBoardMelds, showToast, clearMeldHighlights]
+    [refreshBoardMelds, showToast, clearMeldHighlights, updateBoardMelds]
   );
 
   const getHint = useCallback(() => {
-    if (!isHumanTurn || !humanPlayer) return;
-    const handTiles = humanPlayer.handTiles.map((ht) => ht.tile);
-    const result = findPossibleMoves(handTiles, boardMelds, humanPlayer.hasInitialMeld);
+    const currentHuman = playersRef.current[0];
+    const currentBoard = boardMeldsRef.current;
+    if (!isHumanTurn || !currentHuman) return;
+    const handTiles = currentHuman.handTiles.map((ht) => ht.tile);
+    const result = findPossibleMoves(handTiles, currentBoard, currentHuman.hasInitialMeld);
     setHintResult(result);
     setIsHintOpen(true);
     soundEngine.playTileSelect();
-  }, [isHumanTurn, humanPlayer, boardMelds]);
+  }, [isHumanTurn]);
 
   const closeHint = useCallback(() => {
     setIsHintOpen(false);
@@ -734,31 +763,35 @@ export function useGameState() {
         rack: p.handTiles.map((ht) => ht.tile),
       }));
 
-      setBoardMelds(cleanBoard);
-      setPlayers(cleanPlayers);
-      setTilePool(nextPool.map(deepCopyTile));
+      // Synchronous ref updates to prevent stale memory access across turns
+      updateBoardMelds(cleanBoard);
+      updatePlayers(cleanPlayers);
+      updateTilePool(nextPool.map(deepCopyTile));
       setAutoSplitLinks([]);
 
-      // Strictly use current activePlayerIndexRef to calculate nextIndex reliably
       const currentActiveIndex = activePlayerIndexRef.current;
       const nextIndex = (currentActiveIndex + 1) % cleanPlayers.length;
-      setActivePlayerIndex(nextIndex);
-      activePlayerIndexRef.current = nextIndex;
+      updateActivePlayerIndex(nextIndex);
 
       const nextPlayer = cleanPlayers[nextIndex];
 
-      setTurnSnapshot({
+      const newSnapshot: TurnSnapshot = {
         boardMelds: deepCopyMelds(cleanBoard),
         handTiles: nextPlayer.handTiles.map(deepCopyHandTile),
         playerRacks: [nextPlayer.handTiles.map((ht) => ht.tile), []],
         playerRack: nextPlayer.handTiles.map((ht) => ht.tile),
         hasInitialMeld: nextPlayer.hasInitialMeld,
         poolCount: nextPool.length,
-      });
+      };
+      updateTurnSnapshot(newSnapshot);
+
+      const logMsg = `Advanced turn to ${nextPlayer.name} (Index: ${nextIndex}). Board Melds: ${cleanBoard.length}.`;
+      setDebugLog(logMsg);
+      console.log(`[PWA Debug] ${logMsg}`, cleanBoard);
 
       setSelectedTileIds([]);
     },
-    []
+    [updateBoardMelds, updatePlayers, updateTilePool, updateActivePlayerIndex, updateTurnSnapshot]
   );
 
   const drawTile = useCallback(() => {
@@ -768,6 +801,7 @@ export function useGameState() {
     const currentBoard = boardMeldsRef.current;
     const currentPool = tilePoolRef.current;
     const currentPlayers = playersRef.current;
+    const snapshot = turnSnapshotRef.current;
     const human = currentPlayers[0];
 
     if (currentPool.length === 0) {
@@ -778,9 +812,9 @@ export function useGameState() {
 
     let currentHand = human ? human.handTiles.map((ht) => ht.tile) : [];
 
-    const turnStartHandTiles = turnSnapshot ? turnSnapshot.handTiles.map((ht) => ht.tile) : [];
+    const turnStartHandTiles = snapshot ? snapshot.handTiles.map((ht) => ht.tile) : [];
     const turnStartBoardTileIds = new Set(
-      turnSnapshot ? turnSnapshot.boardMelds.flatMap((m) => m.tiles.map((t) => t.id)) : []
+      snapshot ? snapshot.boardMelds.flatMap((m) => m.tiles.map((t) => t.id)) : []
     );
 
     const currentHandTileIds = new Set(currentHand.map((t) => t.id));
@@ -790,11 +824,11 @@ export function useGameState() {
       (t) => !currentHandTileIds.has(t.id) && !turnStartBoardTileIds.has(t.id)
     );
 
-    // If uncommitted hand tiles were played this turn, revert board back to turnSnapshot.
+    // If uncommitted hand tiles were played this turn, revert board back to snapshot.
     // Otherwise, strictly preserve currentBoard (table melds already committed on prior turns).
     const hasUncommittedMoves = uncommittedHandTiles.length > 0;
-    const restoredBoard = hasUncommittedMoves && turnSnapshot
-      ? deepCopyMelds(turnSnapshot.boardMelds)
+    const restoredBoard = hasUncommittedMoves && snapshot
+      ? deepCopyMelds(snapshot.boardMelds)
       : deepCopyMelds(currentBoard);
 
     currentHand = [...currentHand, ...uncommittedHandTiles];
@@ -823,15 +857,19 @@ export function useGameState() {
     showToast(`You drew a tile (${drawnTile.isJoker ? 'Joker' : `${drawnTile.color} ${drawnTile.value}`}).`, 'info');
 
     advanceTurn(restoredBoard, updatedPlayers, remainingPool);
-  }, [isHumanTurn, gameStatus, turnSnapshot, showToast, advanceTurn, clearMeldHighlights]);
+  }, [isHumanTurn, gameStatus, showToast, advanceTurn, clearMeldHighlights]);
 
   const endTurn = useCallback(() => {
-    if (!isHumanTurn || !turnSnapshot || gameStatus === 'ended') return;
+    const currentBoard = boardMeldsRef.current;
+    const currentPlayers = playersRef.current;
+    const currentPool = tilePoolRef.current;
+    const snapshot = turnSnapshotRef.current;
+    const human = currentPlayers[0];
+
+    if (!isHumanTurn || !snapshot || gameStatus === 'ended' || !human) return;
     clearMeldHighlights();
 
-    const human = players[0];
-
-    const boardValidation = validateBoard(boardMelds);
+    const boardValidation = validateBoard(currentBoard);
     if (!boardValidation.allValid) {
       showToast(
         `Cannot end turn: There are invalid melds on the table (${boardValidation.invalidMeldIds.length} invalid).`,
@@ -840,7 +878,7 @@ export function useGameState() {
       return;
     }
 
-    const startHandCount = turnSnapshot.handTiles.length;
+    const startHandCount = snapshot.handTiles.length;
     const currentHandCount = human.handTiles.length;
     const tilesPlayedCount = startHandCount - currentHandCount;
 
@@ -850,7 +888,7 @@ export function useGameState() {
     }
 
     if (!human.hasInitialMeld) {
-      const snapshotPoints = turnSnapshot.boardMelds.reduce((acc, m) => acc + (m.isValid ? m.value : 0), 0);
+      const snapshotPoints = snapshot.boardMelds.reduce((acc, m) => acc + (m.isValid ? m.value : 0), 0);
       const currentPoints = boardValidation.totalPoints;
       const turnPointsGained = currentPoints - snapshotPoints;
 
@@ -863,9 +901,9 @@ export function useGameState() {
       }
     }
 
-    const normalizedBoard = normalizeBoard(boardMelds);
+    const normalizedBoard = normalizeBoard(currentBoard);
 
-    const updatedPlayers = players.map((p, idx) =>
+    const updatedPlayers = currentPlayers.map((p, idx) =>
       idx === 0
         ? {
             ...p,
@@ -890,8 +928,8 @@ export function useGameState() {
     soundEngine.playSuccess();
     showToast('Turn submitted successfully!', 'success');
 
-    advanceTurn(normalizedBoard, updatedPlayers, tilePool);
-  }, [isHumanTurn, turnSnapshot, gameStatus, players, boardMelds, showToast, advanceTurn, clearMeldHighlights]);
+    advanceTurn(normalizedBoard, updatedPlayers, currentPool);
+  }, [isHumanTurn, gameStatus, showToast, advanceTurn, clearMeldHighlights]);
 
   // AI turn automation using synchronized state refs to prevent stale closure bugs
   useEffect(() => {
@@ -989,6 +1027,7 @@ export function useGameState() {
     autoSplitLinks,
     highlightedMeldIds,
     drawnTileId,
+    debugLog,
     hintResult,
     isHintOpen,
     isMagnifierEnabled,
