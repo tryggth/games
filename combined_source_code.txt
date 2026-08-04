@@ -1,6 +1,6 @@
 ================================================================================
  RUMMIKUB PRO - COMBINED SOURCE CODE BUNDLE
- Generated on: 2026-08-04T16:06:06.056Z
+ Generated on: 2026-08-04T16:13:37.572Z
  Total Source Files: 31
 ================================================================================
 
@@ -167,7 +167,7 @@
  * FILE: public/sw.js
  * ============================================================================= */
 
-const CACHE_NAME = 'rummikub-pwa-v1785859563653';
+const CACHE_NAME = 'rummikub-pwa-v1785860015319';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -180,19 +180,20 @@ const ASSETS_TO_CACHE = [
   './favicon.svg',
 ];
 
-// Service Worker Installation
+// Service Worker Installation: Immediate takeover
 self.addEventListener('install', (event) => {
+  console.log('[Service Worker] Installing new version:', CACHE_NAME);
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      console.log('[Service Worker] Pre-caching offline game assets');
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
   self.skipWaiting();
 });
 
-// Service Worker Activation & Cache Cleanup
+// Service Worker Activation: Delete ALL old caches immediately
 self.addEventListener('activate', (event) => {
+  console.log('[Service Worker] Activating new version:', CACHE_NAME);
   event.waitUntil(
     caches.keys().then((cacheNames) => {
       return Promise.all(
@@ -208,31 +209,46 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// Offline Fetch Handler (Cache First, Network Fallback)
+// Smart Fetch Strategy:
+// - Navigation / HTML: Network First (always load latest online, fall back to cache offline)
+// - Assets: Cache First (fast loading, fall back to network)
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
 
-  event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(event.request)
+  const isHTML =
+    event.request.mode === 'navigate' ||
+    (event.request.headers.get('accept') && event.request.headers.get('accept').includes('text/html'));
+
+  if (isHTML) {
+    event.respondWith(
+      fetch(event.request)
         .then((networkResponse) => {
-          if (!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'opaque' && networkResponse.type !== 'basic') {
-            return networkResponse;
+          if (networkResponse && networkResponse.status === 200) {
+            const copy = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
           }
-          const responseToCache = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, responseToCache);
-          });
           return networkResponse;
         })
         .catch(() => {
-          return caches.match('./index.html');
+          return caches.match(event.request) || caches.match('./index.html');
+        })
+    );
+  } else {
+    event.respondWith(
+      caches.match(event.request).then((cachedResponse) => {
+        if (cachedResponse) {
+          return cachedResponse;
+        }
+        return fetch(event.request).then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const copy = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+          }
+          return networkResponse;
         });
-    })
-  );
+      })
+    );
+  }
 });
 
 
