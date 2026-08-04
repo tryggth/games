@@ -171,6 +171,15 @@ export function useGameState() {
     setTurnSnapshot(newSnapshot);
   }, []);
 
+  // Always synchronize refs with state on every render pass to guarantee zero stale closure gaps
+  useEffect(() => {
+    playersRef.current = players;
+    boardMeldsRef.current = boardMelds;
+    committedBoardMeldsRef.current = committedBoardMelds;
+    tilePoolRef.current = tilePool;
+    turnSnapshotRef.current = turnSnapshot;
+  });
+
   const toggleMagnifier = useCallback(() => {
     setIsMagnifierEnabled((prev) => !prev);
   }, []);
@@ -825,11 +834,15 @@ export function useGameState() {
     }
 
     // Always restore board to the authoritative committedBoardMelds (melds committed on previous turns)
-    const restoredBoard = deepCopyMelds(currentCommittedBoard);
+    const effectiveCommittedBoard =
+      currentCommittedBoard.length > 0
+        ? currentCommittedBoard
+        : (human?.hasInitialMeld ? boardMeldsRef.current.filter((m) => m.isValid) : []);
+    const restoredBoard = deepCopyMelds(effectiveCommittedBoard);
 
     // Return any uncommitted tiles staged from hand during this turn back into hand
     const turnStartHandTiles = snapshot ? snapshot.handTiles.map((ht) => ht.tile) : (human ? human.handTiles.map(ht => ht.tile) : []);
-    const committedBoardTileIds = new Set(currentCommittedBoard.flatMap((m) => m.tiles.map((t) => t.id)));
+    const committedBoardTileIds = new Set(effectiveCommittedBoard.flatMap((m) => m.tiles.map((t) => t.id)));
 
     let currentHand = human ? human.handTiles.map((ht) => ht.tile) : [];
     const currentHandTileIds = new Set(currentHand.map((t) => t.id));

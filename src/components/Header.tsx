@@ -19,7 +19,7 @@ interface HeaderProps {
   onInstallApp?: () => void;
 }
 
-const appVersion = import.meta.env.VITE_APP_VERSION || 'v1.0.0';
+const appVersion = (import.meta as any).env?.VITE_APP_VERSION || 'v1.0.0';
 
 export const Header: React.FC<HeaderProps> = ({
   poolCount,
