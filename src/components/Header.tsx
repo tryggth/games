@@ -19,6 +19,8 @@ interface HeaderProps {
   onInstallApp?: () => void;
 }
 
+const appVersion = import.meta.env.VITE_APP_VERSION || 'v1.0.0';
+
 export const Header: React.FC<HeaderProps> = ({
   poolCount,
   activePlayer,
@@ -47,7 +49,7 @@ export const Header: React.FC<HeaderProps> = ({
             <h1 className="text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
               Rummikub <span className="text-amber-400 text-xs px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 font-mono">PRO</span>
               <span className="text-cyan-300 text-xs px-2.5 py-0.5 rounded-full bg-cyan-500/20 border border-cyan-500/40 font-mono font-bold flex items-center gap-1 shadow-lg shadow-cyan-500/20">
-                <Sparkles className="w-3.5 h-3.5 text-cyan-400" /> v1.0.2 FIX
+                <Sparkles className="w-3.5 h-3.5 text-cyan-400" /> {appVersion}
               </span>
             </h1>
             <p className="text-xs text-slate-400">Classic Tile Strategy Game</p>
