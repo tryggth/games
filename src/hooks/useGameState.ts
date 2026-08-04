@@ -774,7 +774,9 @@ export function useGameState() {
 
   const advanceTurn = useCallback(
     (newBoard: Meld[], newPlayers: Player[], nextPool: Tile[], isCommittedSubmit: boolean = false) => {
-      const cleanBoard = deepCopyMelds(newBoard);
+      const cleanBoard = deepCopyMelds(newBoard).map((m) =>
+        isCommittedSubmit && m.isValid ? { ...m, isCommitted: true } : m
+      );
       const cleanPlayers = newPlayers.map((p) => ({
         ...p,
         handTiles: createSortedHandTiles(p.handTiles.map((ht) => ht.tile)),

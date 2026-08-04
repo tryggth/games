@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import type { Meld, DragItem } from '../types/game';
 import { TileComponent } from './TileComponent';
-import { CheckCircle2, XCircle, PlusCircle, Bot, ChevronDown } from 'lucide-react';
+import { CheckCircle2, XCircle, PlusCircle, Bot, ChevronDown, Lock } from 'lucide-react';
 import { clsx } from 'clsx';
 
 interface BoardProps {
@@ -109,6 +109,13 @@ const MeldContainer: React.FC<{
             <span className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-300 bg-rose-500/20 px-2 py-0.5 rounded-md border border-rose-500/30">
               <XCircle className="w-3 h-3 text-rose-400" />
               <span className="max-w-[150px] truncate">{meld.errorReason || 'Invalid'}</span>
+            </span>
+          )}
+
+          {meld.isCommitted && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-cyan-300 bg-cyan-500/20 px-1.5 py-0.5 rounded-md border border-cyan-500/30">
+              <Lock className="w-3 h-3 text-cyan-400" />
+              <span>Locked Meld</span>
             </span>
           )}
 

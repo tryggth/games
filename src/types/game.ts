@@ -30,6 +30,7 @@ export interface Meld {
   type: MeldType;
   value: number;
   errorReason?: string;
+  isCommitted?: boolean;
 }
 
 export interface Player {
