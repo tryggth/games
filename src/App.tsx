@@ -99,7 +99,7 @@ export function App() {
       />
 
       {/* Main Responsive Viewport Workspace (No Window Scrollbars) */}
-      <main className="flex-1 min-h-0 max-w-7xl w-full mx-auto p-3 md:p-4 flex flex-col gap-3 overflow-hidden">
+      <main className="flex-1 min-h-0 max-w-7xl w-full mx-auto p-2.5 md:p-4 flex flex-col gap-2.5 md:gap-3 overflow-hidden">
         {/* Table Board Area (flex-1 dynamically takes remaining height) */}
         <Board
           melds={boardMelds}

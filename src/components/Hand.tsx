@@ -52,7 +52,7 @@ export const Hand: React.FC<HandProps> = ({
     <div
       onDragOver={handleDragOver}
       onDrop={handleCanvasDrop}
-      className="w-full flex-none h-52 md:h-60 bg-rack-wood rounded-2xl border border-amber-900/60 shadow-2xl relative overflow-hidden select-none flex flex-col justify-between p-4"
+      className="w-full flex-none h-auto bg-rack-wood rounded-2xl border border-amber-900/60 shadow-2xl relative overflow-hidden select-none flex flex-col justify-between p-3 md:p-4 transition-all duration-200"
     >
       {/* Wood Finish Accent Line */}
       <div className="absolute inset-x-4 top-2 h-0.5 bg-amber-950/80 rounded pointer-events-none" />
@@ -99,7 +99,7 @@ export const Hand: React.FC<HandProps> = ({
       </div>
 
       {/* Auto-Sorted Flex Wrap Hand Tiles Container */}
-      <div className="w-full flex-1 overflow-y-auto pt-3 pb-1 pr-1 z-10 flex flex-wrap gap-2.5 items-start content-start">
+      <div className="w-full min-h-[72px] max-h-44 md:max-h-52 overflow-y-auto pt-2.5 pb-1 pr-1 z-10 flex flex-wrap gap-2.5 items-start content-start">
         {handTiles.length === 0 ? (
           <div className="w-full h-full flex items-center justify-center text-amber-500/30 text-xs font-mono">
             [Your hand tray is empty! You played all your tiles.]
