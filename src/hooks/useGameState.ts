@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import type { Tile, Meld, Player, TurnSnapshot, GameStatus, SortMode, DragItem, HandTile } from '../types/game';
 import { createTilePool, shuffleTiles, sortHandColorThenNumber } from '../engine/tilePool';
 import { validateBoard, isValidMeld, calculateMeldValue, normalizeMeld, normalizeBoard } from '../engine/validator';
@@ -128,6 +128,23 @@ export function useGameState() {
 
   // Toggleable Tile Magnifier Preview State
   const [isMagnifierEnabled, setIsMagnifierEnabled] = useState<boolean>(false);
+
+  // Synchronized state refs to prevent stale closure bugs in async timers / AI bot turns
+  const playersRef = useRef(players);
+  const boardMeldsRef = useRef(boardMelds);
+  const tilePoolRef = useRef(tilePool);
+
+  useEffect(() => {
+    playersRef.current = players;
+  }, [players]);
+
+  useEffect(() => {
+    boardMeldsRef.current = boardMelds;
+  }, [boardMelds]);
+
+  useEffect(() => {
+    tilePoolRef.current = tilePool;
+  }, [tilePool]);
 
   const toggleMagnifier = useCallback(() => {
     setIsMagnifierEnabled((prev) => !prev);
@@ -385,7 +402,7 @@ export function useGameState() {
 
         if (!turnStartHandTileIds.has(item.tileId) && !autoLink) {
           soundEngine.playError();
-          showToast('Cannot return board tiles to hand.', 'error');
+          showToast('Cannot return board tiles to hand that were on the table before your turn.', 'error');
           return;
         }
 
@@ -747,9 +764,17 @@ export function useGameState() {
 
     let currentHand = humanPlayer ? humanPlayer.handTiles.map((ht) => ht.tile) : [];
 
-    const turnStartHand = turnSnapshot ? turnSnapshot.handTiles.map((ht) => ht.tile) : [];
+    const turnStartHandTiles = turnSnapshot ? turnSnapshot.handTiles.map((ht) => ht.tile) : [];
+    const turnStartBoardTileIds = new Set(
+      turnSnapshot ? turnSnapshot.boardMelds.flatMap((m) => m.tiles.map((t) => t.id)) : []
+    );
+
     const currentHandTileIds = new Set(currentHand.map((t) => t.id));
-    const uncommittedHandTiles = turnStartHand.filter((t) => !currentHandTileIds.has(t.id));
+
+    // Filter uncommitted hand tiles: must have been in turnStartHand AND not in currentHand AND not in turnStartBoardTileIds!
+    const uncommittedHandTiles = turnStartHandTiles.filter(
+      (t) => !currentHandTileIds.has(t.id) && !turnStartBoardTileIds.has(t.id)
+    );
 
     currentHand = [...currentHand, ...uncommittedHandTiles];
 
@@ -850,19 +875,30 @@ export function useGameState() {
     advanceTurn(normalizedBoard, updatedPlayers, tilePool);
   }, [isHumanTurn, turnSnapshot, gameStatus, players, boardMelds, showToast, advanceTurn, clearMeldHighlights]);
 
-  // AI turn automation with automatic end-of-turn normalization pass & event-driven bot move meld highlights
+  // AI turn automation using synchronized state refs to prevent stale closure bugs
   useEffect(() => {
     if (gameStatus !== 'playing' || isHumanTurn) return;
 
-    const aiPlayerLocal = players[activePlayerIndex];
-    if (!aiPlayerLocal || !aiPlayerLocal.isAi) return;
+    const currentPlayers = playersRef.current;
+    const currentAiPlayer = currentPlayers[activePlayerIndex];
+    if (!currentAiPlayer || !currentAiPlayer.isAi) return;
 
     setIsAiThinking(true);
 
     const timer = setTimeout(() => {
-      const preBoardMeldMap = new Map(boardMelds.map((m) => [m.id, JSON.stringify(m.tiles.map((t) => t.id))]));
+      const latestBoard = boardMeldsRef.current;
+      const latestPool = tilePoolRef.current;
+      const latestPlayers = playersRef.current;
+      const latestAiPlayer = latestPlayers[activePlayerIndex];
 
-      const aiResult = executeAiTurn(aiPlayerLocal, boardMelds, tilePool);
+      if (!latestAiPlayer || !latestAiPlayer.isAi) {
+        setIsAiThinking(false);
+        return;
+      }
+
+      const preBoardMeldMap = new Map(latestBoard.map((m) => [m.id, JSON.stringify(m.tiles.map((t) => t.id))]));
+
+      const aiResult = executeAiTurn(latestAiPlayer, latestBoard, latestPool);
       const normalizedAiBoard = normalizeBoard(aiResult.newBoardMelds);
 
       const botMeldIds: string[] = [];
@@ -880,7 +916,7 @@ export function useGameState() {
 
       showToast(aiResult.message, 'info');
 
-      const updatedPlayers = players.map((p, idx) => {
+      const updatedPlayers = latestPlayers.map((p, idx) => {
         if (idx === activePlayerIndex) {
           const playedAny = aiResult.playedTilesCount > 0;
           const aiHandTiles = createSortedHandTiles(aiResult.newAiRack);
@@ -895,13 +931,13 @@ export function useGameState() {
         return p;
       });
 
-      const nextPool = aiResult.drewTile && tilePool.length > 0 ? tilePool.slice(1) : tilePool;
+      const nextPool = aiResult.drewTile && latestPool.length > 0 ? latestPool.slice(1) : latestPool;
 
       if (aiResult.newAiRack.length === 0) {
         setGameStatus('ended');
         setWinner(updatedPlayers[activePlayerIndex]);
         soundEngine.playError();
-        showToast(`🤖 ${aiPlayerLocal.name} has played all tiles and won!`, 'info');
+        showToast(`🤖 ${latestAiPlayer.name} has played all tiles and won!`, 'info');
         setIsAiThinking(false);
         return;
       }
@@ -911,7 +947,7 @@ export function useGameState() {
     }, 1200);
 
     return () => clearTimeout(timer);
-  }, [gameStatus, isHumanTurn, activePlayerIndex, players, boardMelds, tilePool, showToast, advanceTurn]);
+  }, [gameStatus, isHumanTurn, activePlayerIndex, showToast, advanceTurn]);
 
   return {
     tilePool,
