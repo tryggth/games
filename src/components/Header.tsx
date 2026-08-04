@@ -1,6 +1,6 @@
 import React from 'react';
 import type { Player } from '../types/game';
-import { Volume2, VolumeX, HelpCircle, RefreshCw, Layers, ShieldCheck, ShieldAlert, Lightbulb, Download, Bot, Search } from 'lucide-react';
+import { Volume2, VolumeX, HelpCircle, RefreshCw, Layers, ShieldCheck, ShieldAlert, Lightbulb, Download, Bot, Search, Sparkles } from 'lucide-react';
 import { clsx } from 'clsx';
 
 interface HeaderProps {
@@ -46,6 +46,9 @@ export const Header: React.FC<HeaderProps> = ({
           <div>
             <h1 className="text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
               Rummikub <span className="text-amber-400 text-xs px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 font-mono">PRO</span>
+              <span className="text-emerald-300 text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 font-mono font-bold flex items-center gap-1 shadow-lg shadow-emerald-500/20 animate-pulse">
+                <Sparkles className="w-3.5 h-3.5 text-emerald-400" /> v1.0.1 UPDATED
+              </span>
             </h1>
             <p className="text-xs text-slate-400">Classic Tile Strategy Game</p>
           </div>

@@ -1,6 +1,6 @@
 ================================================================================
  RUMMIKUB PRO - COMBINED SOURCE CODE BUNDLE
- Generated on: 2026-08-03T19:08:59.059Z
+ Generated on: 2026-08-04T16:01:13.676Z
  Total Source Files: 31
 ================================================================================
 
@@ -167,7 +167,7 @@
  * FILE: public/sw.js
  * ============================================================================= */
 
-const CACHE_NAME = 'rummikub-pwa-v1785784136900';
+const CACHE_NAME = 'rummikub-pwa-v1785859271366';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -533,7 +533,7 @@ export function App() {
       />
 
       {/* Main Responsive Viewport Workspace (No Window Scrollbars) */}
-      <main className="flex-1 min-h-0 max-w-7xl w-full mx-auto p-3 md:p-4 flex flex-col gap-3 overflow-hidden">
+      <main className="flex-1 min-h-0 max-w-7xl w-full mx-auto p-2.5 md:p-4 flex flex-col gap-2.5 md:gap-3 overflow-hidden">
         {/* Table Board Area (flex-1 dynamically takes remaining height) */}
         <Board
           melds={boardMelds}
@@ -995,7 +995,7 @@ export default Board;
  * ============================================================================= */
 
 import React from 'react';
-import type { Player, DragItem, HandTile } from '../types/game';
+import type { Player, DragItem, HandTile, Tile } from '../types/game';
 import { TileComponent } from './TileComponent';
 import { Sparkles, X } from 'lucide-react';
 
@@ -1048,7 +1048,7 @@ export const Hand: React.FC<HandProps> = ({
     <div
       onDragOver={handleDragOver}
       onDrop={handleCanvasDrop}
-      className="w-full flex-none h-52 md:h-60 bg-rack-wood rounded-2xl border border-amber-900/60 shadow-2xl relative overflow-hidden select-none flex flex-col justify-between p-4"
+      className="w-full flex-none h-auto bg-rack-wood rounded-2xl border border-amber-900/60 shadow-2xl relative overflow-hidden select-none flex flex-col justify-between p-3 md:p-4 transition-all duration-200"
     >
       {/* Wood Finish Accent Line */}
       <div className="absolute inset-x-4 top-2 h-0.5 bg-amber-950/80 rounded pointer-events-none" />
@@ -1095,24 +1095,39 @@ export const Hand: React.FC<HandProps> = ({
       </div>
 
       {/* Auto-Sorted Flex Wrap Hand Tiles Container */}
-      <div className="w-full flex-1 overflow-y-auto pt-3 pb-1 pr-1 z-10 flex flex-wrap gap-2.5 items-start content-start">
+      <div className="w-full min-h-[72px] max-h-44 md:max-h-52 overflow-y-auto pt-2.5 pb-1 pr-1 z-10 flex flex-wrap gap-2.5 items-start content-start">
         {handTiles.length === 0 ? (
           <div className="w-full h-full flex items-center justify-center text-amber-500/30 text-xs font-mono">
             [Your hand tray is empty! You played all your tiles.]
           </div>
         ) : (
-          handTiles.map((ht) => (
-            <TileComponent
-              key={ht.tile.id}
-              tile={ht.tile}
-              isSelected={selectedTileIds.includes(ht.tile.id)}
-              isDrawnTile={ht.tile.id === drawnTileId}
-              isMagnifierEnabled={isMagnifierEnabled}
-              onClick={() => isHumanTurn && onToggleTileSelection(ht.tile.id)}
-              source="rack"
-              size="md"
-            />
-          ))
+          handTiles.map((ht, idx) => {
+            const prevTile = idx > 0 ? handTiles[idx - 1].tile : null;
+            const currTile = ht.tile;
+            const getGroupKey = (t: Tile) => (t.isJoker ? 'joker' : t.color);
+            const isNewGroup = prevTile !== null && getGroupKey(currTile) !== getGroupKey(prevTile);
+
+            return (
+              <React.Fragment key={ht.tile.id}>
+                {isNewGroup && (
+                  <div
+                    key={`spacer-${ht.tile.id}`}
+                    className="w-11 h-16 pointer-events-none flex-shrink-0"
+                    aria-hidden="true"
+                  />
+                )}
+                <TileComponent
+                  tile={ht.tile}
+                  isSelected={selectedTileIds.includes(ht.tile.id)}
+                  isDrawnTile={ht.tile.id === drawnTileId}
+                  isMagnifierEnabled={isMagnifierEnabled}
+                  onClick={() => isHumanTurn && onToggleTileSelection(ht.tile.id)}
+                  source="rack"
+                  size="md"
+                />
+              </React.Fragment>
+            );
+          })
         )}
       </div>
     </div>
@@ -1127,7 +1142,7 @@ export const Hand: React.FC<HandProps> = ({
 
 import React from 'react';
 import type { Player } from '../types/game';
-import { Volume2, VolumeX, HelpCircle, RefreshCw, Layers, ShieldCheck, ShieldAlert, Lightbulb, Download, Bot, Search } from 'lucide-react';
+import { Volume2, VolumeX, HelpCircle, RefreshCw, Layers, ShieldCheck, ShieldAlert, Lightbulb, Download, Bot, Search, Sparkles } from 'lucide-react';
 import { clsx } from 'clsx';
 
 interface HeaderProps {
@@ -1173,6 +1188,9 @@ export const Header: React.FC<HeaderProps> = ({
           <div>
             <h1 className="text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
               Rummikub <span className="text-amber-400 text-xs px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 font-mono">PRO</span>
+              <span className="text-emerald-300 text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 border border-emerald-500/40 font-mono font-bold flex items-center gap-1 shadow-lg shadow-emerald-500/20 animate-pulse">
+                <Sparkles className="w-3.5 h-3.5 text-emerald-400" /> v1.0.1 UPDATED
+              </span>
             </h1>
             <p className="text-xs text-slate-400">Classic Tile Strategy Game</p>
           </div>
