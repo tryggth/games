@@ -35,9 +35,9 @@ const colorStyles: Record<TileColor, { text: string; bg: string; border: string 
     border: 'border-slate-800/30',
   },
   yellow: {
-    text: 'text-amber-500',
-    bg: 'bg-amber-500/10',
-    border: 'border-amber-500/30',
+    text: 'text-emerald-700 font-black',
+    bg: 'bg-emerald-500/10',
+    border: 'border-emerald-500/30',
   },
 };
 
@@ -149,7 +149,7 @@ export const TileComponent: React.FC<TileComponentProps> = ({
               tile.color === 'red' && 'bg-red-500',
               tile.color === 'blue' && 'bg-blue-500',
               tile.color === 'black' && 'bg-slate-900',
-              tile.color === 'yellow' && 'bg-amber-500'
+              tile.color === 'yellow' && 'bg-emerald-600'
             )}
           />
           <span className="text-[11px] font-mono opacity-80 font-extrabold tracking-wider">RUMMIKUB</span>
@@ -226,7 +226,7 @@ export const TileComponent: React.FC<TileComponentProps> = ({
               tile.color === 'red' && 'bg-red-500',
               tile.color === 'blue' && 'bg-blue-500',
               tile.color === 'black' && 'bg-slate-900',
-              tile.color === 'yellow' && 'bg-amber-500'
+              tile.color === 'yellow' && 'bg-emerald-600'
             )}
           />
           <span className="text-[11px] font-mono opacity-50 select-none">R</span>
