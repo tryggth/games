@@ -1,6 +1,6 @@
 ================================================================================
  RUMMIKUB PRO - COMBINED SOURCE CODE BUNDLE
- Generated on: 2026-08-15T23:20:51.340Z
+ Generated on: 2026-08-15T23:41:36.338Z
  Total Source Files: 41
 ================================================================================
 
@@ -386,7 +386,7 @@ See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rule
  * FILE: public/sw.js
  * ============================================================================= */
 
-const CACHE_NAME = 'rummikub-pwa-v1.0.1786836047698';
+const CACHE_NAME = 'rummikub-pwa-v1.0.1786837292596';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -860,7 +860,7 @@ export default App;
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import type { Meld, DragItem } from '../types/game';
 import { TileComponent } from './TileComponent';
-import { CheckCircle2, XCircle, Bot, PlusCircle, Lock, ChevronDown } from 'lucide-react';
+import { XCircle, Bot, PlusCircle, ChevronDown } from 'lucide-react';
 import { clsx } from 'clsx';
 
 interface BoardProps {
@@ -945,52 +945,38 @@ const MeldContainer: React.FC<{
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       className={clsx(
-        'relative p-3 rounded-2xl border transition-all duration-300 backdrop-blur-md shadow-lg flex flex-col gap-2.5 select-none cursor-pointer',
+        'relative p-2 rounded-xl border transition-all duration-300 backdrop-blur-md shadow-md flex flex-col gap-1.5 select-none cursor-pointer',
         isDragOver
           ? 'bg-amber-950/70 border-amber-400 ring-4 ring-amber-400/80 shadow-2xl shadow-amber-500/50 scale-102 z-30'
           : isHighlighted
           ? 'ring-2 ring-amber-400 bg-amber-500/15 shadow-lg shadow-amber-500/30 scale-101 border-amber-400/70 z-20'
           : meld.isValid
-          ? 'bg-emerald-950/50 border-emerald-500/60 shadow-emerald-950/50 ring-1 ring-emerald-500/30'
+          ? 'bg-emerald-950/40 border-emerald-600/40 hover:border-emerald-500/70'
           : 'bg-rose-950/60 border-rose-500/70 ring-1 ring-rose-500/50 shadow-rose-950/50'
       )}
       title="Drop tile anywhere on this meld to add and auto-sort into logical order"
     >
-      {/* Compact Meld Status Badge & Bot Move Highlight Indicator */}
-      <div className="flex items-center justify-between gap-2 pb-1.5 border-b border-white/15 text-xs pointer-events-none">
-        <div className="flex items-center gap-2">
-          {meld.isValid ? (
-            <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-emerald-200 bg-emerald-500/25 px-2.5 py-0.5 rounded-md border border-emerald-400/50 shadow-sm">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-300" />
-              <span>
-                {meld.type.toUpperCase()} ({meld.value} pts)
-              </span>
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-rose-100 bg-rose-500/25 px-2.5 py-0.5 rounded-md border border-rose-400/50 shadow-sm">
+      {/* Show only Invalid error or Bot Move highlight indicators */}
+      {(!meld.isValid || isHighlighted) && (
+        <div className="flex items-center gap-1.5 pb-1 border-b border-white/10 text-xs pointer-events-none">
+          {!meld.isValid && (
+            <span className="inline-flex items-center gap-1 text-xs font-extrabold text-rose-100 bg-rose-500/25 px-2 py-0.5 rounded-md border border-rose-400/50 shadow-sm">
               <XCircle className="w-3.5 h-3.5 text-rose-300" />
               <span className="max-w-[180px] truncate">{meld.errorReason || 'Invalid'}</span>
             </span>
           )}
 
-          {meld.isCommitted && (
-            <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-cyan-100 bg-cyan-500/25 px-2 py-0.5 rounded-md border border-cyan-400/50 shadow-sm">
-              <Lock className="w-3.5 h-3.5 text-cyan-300" />
-              <span>Locked</span>
-            </span>
-          )}
-
           {isHighlighted && (
-            <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-amber-100 bg-amber-500/25 px-2.5 py-0.5 rounded-md border border-amber-400/60 animate-pulse shadow-sm">
+            <span className="inline-flex items-center gap-1 text-xs font-extrabold text-amber-100 bg-amber-500/25 px-2 py-0.5 rounded-md border border-amber-400/60 animate-pulse shadow-sm">
               <Bot className="w-3.5 h-3.5 text-amber-300" />
               <span>Bot Move</span>
             </span>
           )}
         </div>
-      </div>
+      )}
 
       {/* Clean Tiles Row */}
-      <div className="flex items-center gap-1.5 p-1 overflow-x-auto">
+      <div className="flex items-center gap-1.5 p-0.5 overflow-x-auto">
         {meld.tiles.map((tile, idx) => (
           <TileComponent
             key={`${meld.id}_${tile.id}_${idx}`}
