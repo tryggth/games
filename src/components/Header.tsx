@@ -41,62 +41,62 @@ export const Header: React.FC<HeaderProps> = ({
   const aiTileCount = aiPlayer?.hand?.length ?? 14;
 
   return (
-    <header className="w-full bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 py-3 shadow-xl sticky top-0 z-30">
+    <header className="w-full bg-slate-900/95 backdrop-blur-md border-b border-slate-700 px-4 py-3 shadow-xl sticky top-0 z-30">
       <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center shadow-lg ring-2 ring-amber-400/30">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center shadow-lg ring-2 ring-amber-400/40">
             <span className="font-extrabold text-slate-950 text-xl tracking-wider">R</span>
           </div>
           <div>
             <h1 className="text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
-              Rummikub <span className="text-amber-400 text-xs px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 font-mono">PRO</span>
-              <span className="text-cyan-300 text-xs px-2.5 py-0.5 rounded-full bg-cyan-500/20 border border-cyan-500/40 font-mono font-bold flex items-center gap-1 shadow-lg shadow-cyan-500/20">
-                <Sparkles className="w-3.5 h-3.5 text-cyan-400" /> {appVersion}
+              Rummikub <span className="text-amber-300 text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/40 font-mono font-bold">PRO</span>
+              <span className="text-cyan-200 text-xs px-2.5 py-0.5 rounded-full bg-cyan-500/25 border border-cyan-400/50 font-mono font-bold flex items-center gap-1 shadow-lg shadow-cyan-500/20">
+                <Sparkles className="w-3.5 h-3.5 text-cyan-300" /> {appVersion}
               </span>
             </h1>
-            <p className="text-xs text-slate-400">Classic Tile Strategy Game</p>
+            <p className="text-sm text-slate-200 font-medium">Classic Tile Strategy Game</p>
           </div>
         </div>
 
         {/* HUD Game Status Bar */}
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700/60 shadow-inner">
+          <div className="flex items-center gap-2 bg-slate-800 px-3.5 py-1.5 rounded-lg border border-slate-600 shadow-inner">
             <Layers className="w-4 h-4 text-amber-400" />
-            <span className="text-xs text-slate-400 font-medium">Pool:</span>
-            <span className="text-sm font-bold font-mono text-amber-300">{poolCount} tiles</span>
+            <span className="text-sm text-slate-200 font-semibold">Pool:</span>
+            <span className="text-base font-extrabold font-mono text-amber-300">{poolCount} tiles</span>
           </div>
 
           {/* Persistent Bot Hand Tile Count Display Badge */}
-          <div className="flex items-center gap-1.5 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700/60 text-xs font-semibold shadow-inner text-amber-300">
+          <div className="flex items-center gap-2 bg-slate-800 px-3.5 py-1.5 rounded-lg border border-slate-600 text-sm font-semibold shadow-inner text-amber-300">
             <Bot className="w-4 h-4 text-amber-400" />
-            <span className="text-slate-400">Bot:</span>
-            <span className="font-bold font-mono text-amber-300">{aiTileCount} tiles</span>
+            <span className="text-slate-200">Bot:</span>
+            <span className="text-base font-extrabold font-mono text-amber-300">{aiTileCount} tiles</span>
           </div>
 
           {/* Persistent Bot Last Move Status Banner at Top of Window */}
           {botLastMoveMessage && (
-            <div className="flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 rounded-lg text-xs font-semibold shadow-sm text-amber-300">
+            <div className="flex items-center gap-2 bg-amber-500/15 border border-amber-400/40 px-3.5 py-1.5 rounded-lg text-sm font-semibold shadow-sm text-amber-200">
               <Bot className="w-4 h-4 text-amber-400" />
-              <span className="text-slate-400">Bot's Last Turn:</span>
-              <span className="font-bold text-amber-200">{botLastMoveMessage}</span>
+              <span className="text-slate-200 font-medium">Bot's Last Turn:</span>
+              <span className="font-extrabold text-amber-100">{botLastMoveMessage}</span>
             </div>
           )}
 
           <div
             className={clsx(
-              'flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-semibold shadow-sm transition-all',
+              'flex items-center gap-2 px-3.5 py-1.5 rounded-lg border text-sm font-bold shadow-sm transition-all',
               isHumanTurn
-                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 animate-pulse-subtle'
-                : 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+                ? 'bg-emerald-500/20 border-emerald-400 text-emerald-300 animate-pulse-subtle'
+                : 'bg-amber-500/20 border-amber-400 text-amber-200'
             )}
           >
-            <span className={clsx('w-2 h-2 rounded-full', isHumanTurn ? 'bg-emerald-400' : 'bg-amber-400')} />
+            <span className={clsx('w-2.5 h-2.5 rounded-full ring-2 ring-white/20', isHumanTurn ? 'bg-emerald-400' : 'bg-amber-400')} />
             <span>Turn: {activePlayer?.name || 'Loading...'}</span>
           </div>
 
           {!humanPlayer?.hasInitialMeld && (
-            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium bg-amber-950/40 border-amber-800/50 text-amber-300">
-              <ShieldAlert className="w-4 h-4 text-amber-400" />
+            <div className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border text-sm font-bold bg-amber-950/60 border-amber-600/70 text-amber-200 shadow-md">
+              <ShieldAlert className="w-4 h-4 text-amber-300" />
               <span>Initial Meld Required (&ge; 30 pts)</span>
             </div>
           )}
@@ -107,10 +107,10 @@ export const Header: React.FC<HeaderProps> = ({
           {onInstallApp && (
             <button
               onClick={onInstallApp}
-              className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-extrabold text-xs shadow-lg shadow-cyan-500/20 flex items-center gap-1.5 transition transform hover:scale-105 active:scale-95 cursor-pointer border border-cyan-300/40"
+              className="px-3.5 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-extrabold text-sm shadow-lg shadow-cyan-500/20 flex items-center gap-1.5 transition transform hover:scale-105 active:scale-95 cursor-pointer border border-cyan-300"
               title="Install Rummikub as a standalone PWA application on ChromeOS/Desktop"
             >
-              <Download className="w-3.5 h-3.5 text-slate-950" />
+              <Download className="w-4 h-4 text-slate-950" />
               <span>Install App</span>
             </button>
           )}
@@ -119,14 +119,14 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             onClick={onToggleMagnifier}
             className={clsx(
-              'px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 border transition cursor-pointer',
+              'px-3 py-2 rounded-lg text-sm font-extrabold flex items-center gap-1.5 border transition cursor-pointer',
               isMagnifierEnabled
-                ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 shadow-cyan-500/20 shadow-lg ring-1 ring-cyan-400/40'
-                : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white hover:bg-slate-700'
+                ? 'bg-cyan-500/25 border-cyan-400 text-cyan-200 shadow-cyan-500/20 shadow-lg ring-2 ring-cyan-400/50'
+                : 'bg-slate-800 border-slate-600 text-slate-200 hover:text-white hover:bg-slate-700'
             )}
             title="Toggle 2x Zoom Tile Magnifier Preview on hover"
           >
-            <Search className="w-3.5 h-3.5" />
+            <Search className="w-4 h-4 text-cyan-300" />
             <span>Magnifier: {isMagnifierEnabled ? 'ON' : 'OFF'}</span>
           </button>
 
@@ -135,40 +135,40 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={onGetHint}
               disabled={!isHumanTurn}
               className={clsx(
-                'px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 border transition shadow-sm',
+                'px-3.5 py-2 rounded-lg text-sm font-extrabold flex items-center gap-1.5 border transition shadow-sm',
                 isHumanTurn
-                  ? 'bg-amber-500/20 border-amber-500/50 text-amber-300 hover:bg-amber-500/30 hover:text-amber-100 shadow-amber-500/10 cursor-pointer transform hover:scale-105 active:scale-95'
-                  : 'bg-slate-800/40 border-slate-700/40 text-slate-500 cursor-not-allowed opacity-50'
+                  ? 'bg-amber-500/25 border-amber-400 text-amber-200 hover:bg-amber-500/35 hover:text-white shadow-amber-500/20 cursor-pointer transform hover:scale-105 active:scale-95'
+                  : 'bg-slate-800/40 border-slate-700 text-slate-500 cursor-not-allowed opacity-50'
               )}
               title="Get AI move suggestions and hints for your turn"
             >
-              <Lightbulb className="w-4 h-4 text-amber-400 animate-pulse" />
+              <Lightbulb className="w-4 h-4 text-amber-300 animate-pulse" />
               <span>Hint</span>
             </button>
           )}
 
           <button
             onClick={onToggleSound}
-            className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition border border-slate-700 cursor-pointer"
+            className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white transition border border-slate-600 cursor-pointer"
             title={soundEnabled ? 'Mute Sound' : 'Enable Sound'}
           >
-            {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+            {soundEnabled ? <Volume2 className="w-4 h-4 text-amber-400" /> : <VolumeX className="w-4 h-4 text-slate-400" />}
           </button>
 
           <button
             onClick={onOpenRules}
-            className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition border border-slate-700 flex items-center gap-1 text-xs cursor-pointer"
+            className="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white transition border border-slate-600 flex items-center gap-1.5 text-sm font-semibold cursor-pointer"
             title="Game Rules & Guide"
           >
-            <HelpCircle className="w-4 h-4" />
+            <HelpCircle className="w-4 h-4 text-amber-400" />
             <span className="hidden md:inline">Rules</span>
           </button>
 
           <button
             onClick={onRestartGame}
-            className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white transition border border-slate-700 flex items-center gap-1.5 text-xs font-semibold cursor-pointer"
+            className="px-3.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-100 hover:text-white transition border border-slate-600 flex items-center gap-1.5 text-sm font-bold cursor-pointer"
           >
-            <RefreshCw className="w-3.5 h-3.5" />
+            <RefreshCw className="w-4 h-4 text-amber-400" />
             <span>New Game</span>
           </button>
         </div>

@@ -1,6 +1,6 @@
 ================================================================================
  RUMMIKUB PRO - COMBINED SOURCE CODE BUNDLE
- Generated on: 2026-08-15T23:14:58.445Z
+ Generated on: 2026-08-15T23:18:49.505Z
  Total Source Files: 41
 ================================================================================
 
@@ -386,7 +386,7 @@ See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rule
  * FILE: public/sw.js
  * ============================================================================= */
 
-const CACHE_NAME = 'rummikub-pwa-v1.0.1786835694317';
+const CACHE_NAME = 'rummikub-pwa-v1.0.1786835924011';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -739,15 +739,15 @@ export function App() {
       {notification && (
         <div
           className={clsx(
-            'fixed top-14 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-xl shadow-2xl border text-xs font-semibold flex items-center gap-2 transition-all animate-bounce',
-            notification.type === 'error' && 'bg-rose-950/90 border-rose-600 text-rose-200 shadow-rose-950/50',
-            notification.type === 'success' && 'bg-emerald-950/90 border-emerald-600 text-emerald-200 shadow-emerald-950/50',
-            notification.type === 'info' && 'bg-slate-900/95 border-amber-500/40 text-amber-200 shadow-slate-950/50'
+            'fixed top-14 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-xl shadow-2xl border text-sm font-bold flex items-center gap-2.5 transition-all animate-bounce',
+            notification.type === 'error' && 'bg-rose-950 border-rose-500 text-rose-100 shadow-rose-950/70',
+            notification.type === 'success' && 'bg-emerald-950 border-emerald-500 text-emerald-100 shadow-emerald-950/70',
+            notification.type === 'info' && 'bg-slate-900 border-amber-400 text-amber-100 shadow-slate-950/80'
           )}
         >
-          {notification.type === 'error' && <AlertCircle className="w-4 h-4 text-rose-400" />}
-          {notification.type === 'success' && <CheckCircle2 className="w-4 h-4 text-emerald-400" />}
-          {notification.type === 'info' && <Info className="w-4 h-4 text-amber-400" />}
+          {notification.type === 'error' && <AlertCircle className="w-5 h-5 text-rose-400" />}
+          {notification.type === 'success' && <CheckCircle2 className="w-5 h-5 text-emerald-400" />}
+          {notification.type === 'info' && <Info className="w-5 h-5 text-amber-400" />}
           <span>{notification.message}</span>
         </div>
       )}
@@ -812,9 +812,9 @@ export function App() {
       </main>
 
       {/* Debug Diagnostic Status Bar */}
-      <div className="w-full bg-slate-900/90 border-t border-slate-800 px-4 py-1 flex items-center justify-between text-[11px] font-mono text-slate-400 z-40">
-        <span className="truncate max-w-[70%]">🔍 {debugLog}</span>
-        <span className="text-amber-300">Board Melds: {boardMelds.length} | Hand: {humanPlayer?.hand?.length || 0} tiles</span>
+      <div className="w-full bg-slate-900 border-t border-slate-700 px-4 py-1.5 flex items-center justify-between text-xs font-mono text-slate-200 z-40">
+        <span className="truncate max-w-[70%] font-medium">🔍 {debugLog}</span>
+        <span className="text-amber-300 font-bold">Board Melds: {boardMelds.length} | Hand: {humanPlayer?.hand?.length || 0} tiles</span>
       </div>
 
       {/* Move Suggestions Hint Modal */}
@@ -857,10 +857,10 @@ export default App;
  * FILE: src/components/Board.tsx
  * ============================================================================= */
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import type { Meld, DragItem } from '../types/game';
 import { TileComponent } from './TileComponent';
-import { CheckCircle2, XCircle, PlusCircle, Bot, ChevronDown, Lock } from 'lucide-react';
+import { CheckCircle2, XCircle, Bot, PlusCircle, Lock, ChevronDown } from 'lucide-react';
 import { clsx } from 'clsx';
 
 interface BoardProps {
@@ -877,20 +877,24 @@ interface BoardProps {
       targetIndex?: number;
     }
   ) => void;
-  onSplitMeld: (meldId: string, splitIndex: number) => void;
+  onSplitMeld?: (meldId: string, splitIndex: number) => void;
   isHumanTurn: boolean;
 }
 
-/**
- * Single Unified Meld Container Component
- */
 const MeldContainer: React.FC<{
   meld: Meld;
   selectedTileIds: string[];
   isHighlighted?: boolean;
   isMagnifierEnabled?: boolean;
   onToggleTileSelection: (tileId: string) => void;
-  onDropTile: BoardProps['onDropTile'];
+  onDropTile: (
+    item: DragItem,
+    targetLocation: {
+      type: 'board-new' | 'board-meld' | 'rack' | 'hand';
+      meldId?: string;
+      targetIndex?: number;
+    }
+  ) => void;
   isHumanTurn: boolean;
 }> = ({
   meld,
@@ -904,7 +908,6 @@ const MeldContainer: React.FC<{
   const [isDragOver, setIsDragOver] = useState(false);
 
   const handleDragOver = (e: React.DragEvent) => {
-    if (!isHumanTurn) return;
     e.preventDefault();
     e.stopPropagation();
     e.dataTransfer.dropEffect = 'move';
@@ -918,7 +921,6 @@ const MeldContainer: React.FC<{
   };
 
   const handleDrop = (e: React.DragEvent) => {
-    if (!isHumanTurn) return;
     e.preventDefault();
     e.stopPropagation();
     setIsDragOver(false);
@@ -947,40 +949,40 @@ const MeldContainer: React.FC<{
         isDragOver
           ? 'bg-amber-950/70 border-amber-400 ring-4 ring-amber-400/80 shadow-2xl shadow-amber-500/50 scale-102 z-30'
           : isHighlighted
-          ? 'ring-2 ring-amber-400 bg-amber-500/10 shadow-lg shadow-amber-500/30 scale-101 border-amber-400/60 z-20'
+          ? 'ring-2 ring-amber-400 bg-amber-500/15 shadow-lg shadow-amber-500/30 scale-101 border-amber-400/70 z-20'
           : meld.isValid
-          ? 'bg-emerald-950/40 border-emerald-600/50 shadow-emerald-950/50 ring-1 ring-emerald-500/20'
-          : 'bg-rose-950/50 border-rose-600/60 ring-1 ring-rose-500/40 shadow-rose-950/50'
+          ? 'bg-emerald-950/50 border-emerald-500/60 shadow-emerald-950/50 ring-1 ring-emerald-500/30'
+          : 'bg-rose-950/60 border-rose-500/70 ring-1 ring-rose-500/50 shadow-rose-950/50'
       )}
       title="Drop tile anywhere on this meld to add and auto-sort into logical order"
     >
       {/* Compact Meld Status Badge & Bot Move Highlight Indicator */}
-      <div className="flex items-center justify-between gap-2 pb-1.5 border-b border-white/10 text-xs pointer-events-none">
-        <div className="flex items-center gap-1.5">
+      <div className="flex items-center justify-between gap-2 pb-1.5 border-b border-white/15 text-xs pointer-events-none">
+        <div className="flex items-center gap-2">
           {meld.isValid ? (
-            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-300 bg-emerald-500/20 px-2 py-0.5 rounded-md border border-emerald-500/30">
-              <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+            <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-emerald-200 bg-emerald-500/25 px-2.5 py-0.5 rounded-md border border-emerald-400/50 shadow-sm">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-300" />
               <span>
                 {meld.type.toUpperCase()} ({meld.value} pts)
               </span>
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-300 bg-rose-500/20 px-2 py-0.5 rounded-md border border-rose-500/30">
-              <XCircle className="w-3 h-3 text-rose-400" />
-              <span className="max-w-[150px] truncate">{meld.errorReason || 'Invalid'}</span>
+            <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-rose-100 bg-rose-500/25 px-2.5 py-0.5 rounded-md border border-rose-400/50 shadow-sm">
+              <XCircle className="w-3.5 h-3.5 text-rose-300" />
+              <span className="max-w-[180px] truncate">{meld.errorReason || 'Invalid'}</span>
             </span>
           )}
 
           {meld.isCommitted && (
-            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-cyan-300 bg-cyan-500/20 px-1.5 py-0.5 rounded-md border border-cyan-500/30">
-              <Lock className="w-3 h-3 text-cyan-400" />
-              <span>Locked Meld</span>
+            <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-cyan-100 bg-cyan-500/25 px-2 py-0.5 rounded-md border border-cyan-400/50 shadow-sm">
+              <Lock className="w-3.5 h-3.5 text-cyan-300" />
+              <span>Locked</span>
             </span>
           )}
 
           {isHighlighted && (
-            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded-md border border-amber-400/40 animate-pulse">
-              <Bot className="w-3 h-3 text-amber-400" />
+            <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-amber-100 bg-amber-500/25 px-2.5 py-0.5 rounded-md border border-amber-400/60 animate-pulse shadow-sm">
+              <Bot className="w-3.5 h-3.5 text-amber-300" />
               <span>Bot Move</span>
             </span>
           )}
@@ -1017,62 +1019,60 @@ export const Board: React.FC<BoardProps> = ({
   isHumanTurn,
 }) => {
   const [isBoardDragOver, setIsBoardDragOver] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [isScrolledUp, setIsScrolledUp] = useState(false);
   const [hiddenMeldCount, setHiddenMeldCount] = useState(0);
 
-  const scrollRef = useRef<HTMLDivElement>(null);
+  // Check if board content overflows and user has content below
+  const checkOverflow = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
 
-  // Check scroll & overflow boundaries
-  const checkOverflow = () => {
-    if (!scrollRef.current) return;
-    const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
-    const isOverflowing = scrollHeight > clientHeight + 10;
-    const isBottom = scrollTop + clientHeight >= scrollHeight - 20;
-    setIsScrolledUp(isOverflowing && !isBottom);
+    const hasScrollBelow = el.scrollHeight > el.clientHeight && el.scrollTop + el.clientHeight < el.scrollHeight - 20;
+    setIsScrolledUp(hasScrollBelow);
 
-    // Approximate hidden meld count below fold
-    if (isOverflowing && !isBottom) {
-      const pixelsRemaining = scrollHeight - (scrollTop + clientHeight);
-      const estCount = Math.max(1, Math.ceil(pixelsRemaining / 120));
-      setHiddenMeldCount(estCount);
+    if (hasScrollBelow) {
+      // Estimate hidden melds based on average container height
+      const remainingHeight = el.scrollHeight - (el.scrollTop + el.clientHeight);
+      const estHidden = Math.max(1, Math.ceil(remainingHeight / 120));
+      setHiddenMeldCount(estHidden);
     } else {
       setHiddenMeldCount(0);
     }
-  };
+  }, []);
 
   useEffect(() => {
     checkOverflow();
-  }, [melds]);
-
-  // Auto-scroll container to bring newly added or modified melds into view
-  useEffect(() => {
-    if (scrollRef.current && melds.length > 0) {
-      scrollRef.current.scrollTo({
-        top: scrollRef.current.scrollHeight,
-        behavior: 'smooth',
-      });
-    }
-  }, [melds.length, highlightedMeldIds]);
+    window.addEventListener('resize', checkOverflow);
+    return () => window.removeEventListener('resize', checkOverflow);
+  }, [melds, checkOverflow]);
 
   const handleBoardDragOver = (e: React.DragEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     e.dataTransfer.dropEffect = 'move';
     setIsBoardDragOver(true);
   };
 
   const handleBoardDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     setIsBoardDragOver(false);
   };
 
   const handleBoardDropOnNewZone = (e: React.DragEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     setIsBoardDragOver(false);
+
     const dataStr = e.dataTransfer.getData('application/json');
     if (!dataStr) return;
+
     try {
       const item: DragItem = JSON.parse(dataStr);
-      onDropTile(item, { type: 'board-new' });
+      onDropTile(item, {
+        type: 'board-new',
+      });
     } catch {
       // Ignore invalid JSON
     }
@@ -1085,21 +1085,21 @@ export const Board: React.FC<BoardProps> = ({
       onDrop={handleBoardDropOnNewZone}
       className={clsx(
         'w-full flex-1 min-h-0 bg-table-felt rounded-2xl border p-4 md:p-6 shadow-2xl relative flex flex-col justify-between overflow-hidden transition-all',
-        isBoardDragOver ? 'border-amber-400/80 ring-2 ring-amber-400/30' : 'border-emerald-900/60'
+        isBoardDragOver ? 'border-amber-400/80 ring-2 ring-amber-400/30' : 'border-emerald-800/80'
       )}
     >
       {/* Background Ambient Radial Gradient */}
       <div className="absolute inset-0 bg-radial from-emerald-500/5 via-transparent to-black/40 pointer-events-none" />
 
       {/* Board Header Bar */}
-      <div className="flex items-center justify-between pb-3 border-b border-emerald-800/40 z-10 mb-4">
-        <div className="flex items-center gap-2">
-          <span className="w-3 h-3 rounded-full bg-emerald-500 ring-4 ring-emerald-500/20" />
-          <h2 className="text-sm font-bold uppercase tracking-wider text-emerald-200/90">
+      <div className="flex items-center justify-between pb-3 border-b border-emerald-700/60 z-10 mb-4">
+        <div className="flex items-center gap-2.5">
+          <span className="w-3.5 h-3.5 rounded-full bg-emerald-400 ring-4 ring-emerald-500/30" />
+          <h2 className="text-base font-extrabold uppercase tracking-wider text-emerald-100">
             Table Board ({melds.length} Melds)
           </h2>
         </div>
-        <span className="text-xs text-emerald-300/60 font-mono hidden sm:inline">
+        <span className="text-sm text-emerald-200 font-medium hidden sm:inline">
           Container-level drop targets • Instant auto-reordering into logical groups & runs
         </span>
       </div>
@@ -1111,10 +1111,10 @@ export const Board: React.FC<BoardProps> = ({
         className="flex-1 overflow-y-auto z-10 pr-1 pb-4 min-h-[260px] scroll-smooth"
       >
         {melds.length === 0 ? (
-          <div className="w-full h-56 rounded-xl border-2 border-dashed border-emerald-700/50 flex flex-col items-center justify-center text-emerald-300/60 transition-all hover:border-emerald-500/80 hover:bg-emerald-950/20 group">
-            <PlusCircle className="w-10 h-10 mb-2 opacity-50 group-hover:opacity-100 group-hover:scale-110 transition-all text-emerald-400" />
-            <p className="text-sm font-medium">Table is currently empty</p>
-            <p className="text-xs opacity-70 mt-1">
+          <div className="w-full h-56 rounded-xl border-2 border-dashed border-emerald-600/70 flex flex-col items-center justify-center text-emerald-200 transition-all hover:border-emerald-400 hover:bg-emerald-950/30 group">
+            <PlusCircle className="w-12 h-12 mb-2 text-emerald-300 group-hover:scale-110 transition-all" />
+            <p className="text-base font-bold text-emerald-100">Table is currently empty</p>
+            <p className="text-sm text-emerald-200 font-medium mt-1.5">
               {isHumanTurn ? 'Drag tiles anywhere on the table to start a new meld' : 'Waiting for opponent move...'}
             </p>
           </div>
@@ -1138,13 +1138,13 @@ export const Board: React.FC<BoardProps> = ({
 
       {/* Bottom Gradient Fade Overlay for Overflow Indication */}
       {isScrolledUp && (
-        <div className="absolute bottom-12 inset-x-0 h-16 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent pointer-events-none z-20" />
+        <div className="absolute bottom-12 inset-x-0 h-16 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent pointer-events-none z-20" />
       )}
 
       {/* Floating Scroll Overflow Banner Indicator */}
       {isScrolledUp && (
-        <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-30 px-3.5 py-1.5 rounded-full bg-slate-900/95 border border-amber-400/50 text-amber-300 text-xs font-bold shadow-2xl flex items-center gap-1.5 animate-bounce pointer-events-none">
-          <ChevronDown className="w-4 h-4 text-amber-400" />
+        <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-30 px-4 py-2 rounded-full bg-slate-900 border border-amber-400 text-amber-200 text-sm font-extrabold shadow-2xl flex items-center gap-2 animate-bounce pointer-events-none">
+          <ChevronDown className="w-4 h-4 text-amber-300" />
           <span>{hiddenMeldCount} more meld(s) below — Scroll to view</span>
         </div>
       )}
@@ -1155,13 +1155,13 @@ export const Board: React.FC<BoardProps> = ({
           onDragOver={handleBoardDragOver}
           onDrop={handleBoardDropOnNewZone}
           className={clsx(
-            'mt-3 py-2.5 px-4 rounded-xl border border-dashed text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer z-10',
+            'mt-3 py-3 px-4 rounded-xl border border-dashed text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer z-10',
             isBoardDragOver
-              ? 'border-amber-400 bg-amber-500/20 text-amber-200 scale-102 shadow-lg shadow-amber-500/30'
-              : 'border-emerald-600/40 bg-emerald-950/30 text-emerald-300/80 hover:border-emerald-400 hover:bg-emerald-950/50 hover:text-emerald-100'
+              ? 'border-amber-400 bg-amber-500/25 text-amber-100 scale-102 shadow-lg shadow-amber-500/40 ring-2 ring-amber-400/50'
+              : 'border-emerald-500/60 bg-emerald-950/50 text-emerald-200 hover:border-emerald-300 hover:bg-emerald-950/70 hover:text-white'
           )}
         >
-          <PlusCircle className="w-4 h-4 text-emerald-400 animate-pulse" />
+          <PlusCircle className="w-5 h-5 text-emerald-300 animate-pulse" />
           <span>Drop tile anywhere here to form a NEW table meld</span>
         </div>
       )}
@@ -1240,56 +1240,56 @@ export const Hand: React.FC<HandProps> = ({
     <div
       onDragOver={handleDragOver}
       onDrop={handleCanvasDrop}
-      className="w-full flex-none h-auto bg-rack-wood rounded-2xl border border-amber-900/60 shadow-2xl relative overflow-hidden select-none flex flex-col justify-between p-3 md:p-4 transition-all duration-200"
+      className="w-full flex-none h-auto bg-rack-wood rounded-2xl border border-amber-900/80 shadow-2xl relative overflow-hidden select-none flex flex-col justify-between p-3.5 md:p-4 transition-all duration-200"
     >
       {/* Wood Finish Accent Line */}
-      <div className="absolute inset-x-4 top-2 h-0.5 bg-amber-950/80 rounded pointer-events-none" />
+      <div className="absolute inset-x-4 top-2 h-0.5 bg-amber-950/90 rounded pointer-events-none" />
 
       {/* Header Controls Overlay Bar */}
-      <div className="w-full flex items-center justify-between pb-2 border-b border-amber-900/40 z-20">
+      <div className="w-full flex items-center justify-between pb-2.5 border-b border-amber-900/60 z-20">
         <div className="flex items-center gap-3">
-          <span className="text-sm font-bold text-amber-200 uppercase tracking-wide flex items-center gap-2">
+          <span className="text-base font-extrabold text-amber-100 uppercase tracking-wide flex items-center gap-2">
             Player Hand Tray{' '}
-            <span className="text-xs px-2 py-0.5 rounded-full bg-amber-950/80 text-amber-400 border border-amber-800/40 font-mono">
+            <span className="text-sm px-2.5 py-0.5 rounded-full bg-amber-950 text-amber-300 border border-amber-700/80 font-mono font-bold">
               {hand.length} tiles (Auto-Sorted)
             </span>
           </span>
 
           {selectedTileIds.length > 0 && (
-            <div className="flex items-center gap-2 bg-amber-500/20 px-2.5 py-1 rounded-md border border-amber-500/40 text-xs text-amber-300">
-              <span className="font-semibold">{selectedTileIds.length} selected</span>
+            <div className="flex items-center gap-2 bg-amber-500/25 px-3 py-1 rounded-md border border-amber-400 text-sm font-bold text-amber-100 shadow-sm">
+              <span>{selectedTileIds.length} selected</span>
               <button
                 onClick={onClearSelection}
-                className="hover:text-white p-0.5 rounded hover:bg-amber-500/30 transition cursor-pointer"
+                className="hover:text-white p-0.5 rounded hover:bg-amber-500/40 transition cursor-pointer"
                 title="Clear selection"
               >
-                <X className="w-3.5 h-3.5" />
+                <X className="w-4 h-4" />
               </button>
             </div>
           )}
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           {selectedTileIds.length >= 3 && isHumanTurn && (
             <button
               onClick={onCreateMeldFromSelection}
-              className="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-xs shadow-lg shadow-amber-500/20 flex items-center gap-1.5 transition transform hover:scale-105 active:scale-95 cursor-pointer"
+              className="px-4 py-2 rounded-lg bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-extrabold text-sm shadow-lg shadow-amber-500/30 flex items-center gap-1.5 transition transform hover:scale-105 active:scale-95 cursor-pointer border border-amber-300"
             >
               <Sparkles className="w-4 h-4" />
               <span>Create Meld ({selectedTileIds.length})</span>
             </button>
           )}
 
-          <span className="text-[11px] text-amber-400/80 font-mono italic hidden md:inline">
+          <span className="text-xs text-amber-200 font-semibold font-mono hidden md:inline">
             ★ Always sorted by Color & Number
           </span>
         </div>
       </div>
 
       {/* Auto-Sorted Flex Wrap Hand Tiles Container */}
-      <div className="w-full min-h-[72px] max-h-44 md:max-h-52 overflow-y-auto pt-2.5 pb-1 pr-1 z-10 flex flex-wrap gap-2.5 items-start content-start">
+      <div className="w-full min-h-[76px] max-h-44 md:max-h-52 overflow-y-auto pt-3 pb-1 pr-1 z-10 flex flex-wrap gap-2.5 items-start content-start">
         {hand.length === 0 ? (
-          <div className="w-full h-full flex items-center justify-center text-amber-500/30 text-xs font-mono">
+          <div className="w-full h-full flex items-center justify-center text-amber-300/80 text-sm font-bold font-mono">
             [Your hand tray is empty! You played all your tiles.]
           </div>
         ) : (
@@ -1374,62 +1374,62 @@ export const Header: React.FC<HeaderProps> = ({
   const aiTileCount = aiPlayer?.hand?.length ?? 14;
 
   return (
-    <header className="w-full bg-slate-900/90 backdrop-blur-md border-b border-slate-800 px-4 py-3 shadow-xl sticky top-0 z-30">
+    <header className="w-full bg-slate-900/95 backdrop-blur-md border-b border-slate-700 px-4 py-3 shadow-xl sticky top-0 z-30">
       <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center shadow-lg ring-2 ring-amber-400/30">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center shadow-lg ring-2 ring-amber-400/40">
             <span className="font-extrabold text-slate-950 text-xl tracking-wider">R</span>
           </div>
           <div>
             <h1 className="text-xl font-extrabold tracking-tight text-white flex items-center gap-2">
-              Rummikub <span className="text-amber-400 text-xs px-2 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 font-mono">PRO</span>
-              <span className="text-cyan-300 text-xs px-2.5 py-0.5 rounded-full bg-cyan-500/20 border border-cyan-500/40 font-mono font-bold flex items-center gap-1 shadow-lg shadow-cyan-500/20">
-                <Sparkles className="w-3.5 h-3.5 text-cyan-400" /> {appVersion}
+              Rummikub <span className="text-amber-300 text-xs px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-400/40 font-mono font-bold">PRO</span>
+              <span className="text-cyan-200 text-xs px-2.5 py-0.5 rounded-full bg-cyan-500/25 border border-cyan-400/50 font-mono font-bold flex items-center gap-1 shadow-lg shadow-cyan-500/20">
+                <Sparkles className="w-3.5 h-3.5 text-cyan-300" /> {appVersion}
               </span>
             </h1>
-            <p className="text-xs text-slate-400">Classic Tile Strategy Game</p>
+            <p className="text-sm text-slate-200 font-medium">Classic Tile Strategy Game</p>
           </div>
         </div>
 
         {/* HUD Game Status Bar */}
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700/60 shadow-inner">
+          <div className="flex items-center gap-2 bg-slate-800 px-3.5 py-1.5 rounded-lg border border-slate-600 shadow-inner">
             <Layers className="w-4 h-4 text-amber-400" />
-            <span className="text-xs text-slate-400 font-medium">Pool:</span>
-            <span className="text-sm font-bold font-mono text-amber-300">{poolCount} tiles</span>
+            <span className="text-sm text-slate-200 font-semibold">Pool:</span>
+            <span className="text-base font-extrabold font-mono text-amber-300">{poolCount} tiles</span>
           </div>
 
           {/* Persistent Bot Hand Tile Count Display Badge */}
-          <div className="flex items-center gap-1.5 bg-slate-800/80 px-3 py-1.5 rounded-lg border border-slate-700/60 text-xs font-semibold shadow-inner text-amber-300">
+          <div className="flex items-center gap-2 bg-slate-800 px-3.5 py-1.5 rounded-lg border border-slate-600 text-sm font-semibold shadow-inner text-amber-300">
             <Bot className="w-4 h-4 text-amber-400" />
-            <span className="text-slate-400">Bot:</span>
-            <span className="font-bold font-mono text-amber-300">{aiTileCount} tiles</span>
+            <span className="text-slate-200">Bot:</span>
+            <span className="text-base font-extrabold font-mono text-amber-300">{aiTileCount} tiles</span>
           </div>
 
           {/* Persistent Bot Last Move Status Banner at Top of Window */}
           {botLastMoveMessage && (
-            <div className="flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/30 px-3 py-1.5 rounded-lg text-xs font-semibold shadow-sm text-amber-300">
+            <div className="flex items-center gap-2 bg-amber-500/15 border border-amber-400/40 px-3.5 py-1.5 rounded-lg text-sm font-semibold shadow-sm text-amber-200">
               <Bot className="w-4 h-4 text-amber-400" />
-              <span className="text-slate-400">Bot's Last Turn:</span>
-              <span className="font-bold text-amber-200">{botLastMoveMessage}</span>
+              <span className="text-slate-200 font-medium">Bot's Last Turn:</span>
+              <span className="font-extrabold text-amber-100">{botLastMoveMessage}</span>
             </div>
           )}
 
           <div
             className={clsx(
-              'flex items-center gap-2 px-3 py-1.5 rounded-lg border text-xs font-semibold shadow-sm transition-all',
+              'flex items-center gap-2 px-3.5 py-1.5 rounded-lg border text-sm font-bold shadow-sm transition-all',
               isHumanTurn
-                ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 animate-pulse-subtle'
-                : 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+                ? 'bg-emerald-500/20 border-emerald-400 text-emerald-300 animate-pulse-subtle'
+                : 'bg-amber-500/20 border-amber-400 text-amber-200'
             )}
           >
-            <span className={clsx('w-2 h-2 rounded-full', isHumanTurn ? 'bg-emerald-400' : 'bg-amber-400')} />
+            <span className={clsx('w-2.5 h-2.5 rounded-full ring-2 ring-white/20', isHumanTurn ? 'bg-emerald-400' : 'bg-amber-400')} />
             <span>Turn: {activePlayer?.name || 'Loading...'}</span>
           </div>
 
           {!humanPlayer?.hasInitialMeld && (
-            <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-medium bg-amber-950/40 border-amber-800/50 text-amber-300">
-              <ShieldAlert className="w-4 h-4 text-amber-400" />
+            <div className="hidden sm:flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border text-sm font-bold bg-amber-950/60 border-amber-600/70 text-amber-200 shadow-md">
+              <ShieldAlert className="w-4 h-4 text-amber-300" />
               <span>Initial Meld Required (&ge; 30 pts)</span>
             </div>
           )}
@@ -1440,10 +1440,10 @@ export const Header: React.FC<HeaderProps> = ({
           {onInstallApp && (
             <button
               onClick={onInstallApp}
-              className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-extrabold text-xs shadow-lg shadow-cyan-500/20 flex items-center gap-1.5 transition transform hover:scale-105 active:scale-95 cursor-pointer border border-cyan-300/40"
+              className="px-3.5 py-2 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-extrabold text-sm shadow-lg shadow-cyan-500/20 flex items-center gap-1.5 transition transform hover:scale-105 active:scale-95 cursor-pointer border border-cyan-300"
               title="Install Rummikub as a standalone PWA application on ChromeOS/Desktop"
             >
-              <Download className="w-3.5 h-3.5 text-slate-950" />
+              <Download className="w-4 h-4 text-slate-950" />
               <span>Install App</span>
             </button>
           )}
@@ -1452,14 +1452,14 @@ export const Header: React.FC<HeaderProps> = ({
           <button
             onClick={onToggleMagnifier}
             className={clsx(
-              'px-2.5 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 border transition cursor-pointer',
+              'px-3 py-2 rounded-lg text-sm font-extrabold flex items-center gap-1.5 border transition cursor-pointer',
               isMagnifierEnabled
-                ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 shadow-cyan-500/20 shadow-lg ring-1 ring-cyan-400/40'
-                : 'bg-slate-800 border-slate-700 text-slate-400 hover:text-white hover:bg-slate-700'
+                ? 'bg-cyan-500/25 border-cyan-400 text-cyan-200 shadow-cyan-500/20 shadow-lg ring-2 ring-cyan-400/50'
+                : 'bg-slate-800 border-slate-600 text-slate-200 hover:text-white hover:bg-slate-700'
             )}
             title="Toggle 2x Zoom Tile Magnifier Preview on hover"
           >
-            <Search className="w-3.5 h-3.5" />
+            <Search className="w-4 h-4 text-cyan-300" />
             <span>Magnifier: {isMagnifierEnabled ? 'ON' : 'OFF'}</span>
           </button>
 
@@ -1468,40 +1468,40 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={onGetHint}
               disabled={!isHumanTurn}
               className={clsx(
-                'px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 border transition shadow-sm',
+                'px-3.5 py-2 rounded-lg text-sm font-extrabold flex items-center gap-1.5 border transition shadow-sm',
                 isHumanTurn
-                  ? 'bg-amber-500/20 border-amber-500/50 text-amber-300 hover:bg-amber-500/30 hover:text-amber-100 shadow-amber-500/10 cursor-pointer transform hover:scale-105 active:scale-95'
-                  : 'bg-slate-800/40 border-slate-700/40 text-slate-500 cursor-not-allowed opacity-50'
+                  ? 'bg-amber-500/25 border-amber-400 text-amber-200 hover:bg-amber-500/35 hover:text-white shadow-amber-500/20 cursor-pointer transform hover:scale-105 active:scale-95'
+                  : 'bg-slate-800/40 border-slate-700 text-slate-500 cursor-not-allowed opacity-50'
               )}
               title="Get AI move suggestions and hints for your turn"
             >
-              <Lightbulb className="w-4 h-4 text-amber-400 animate-pulse" />
+              <Lightbulb className="w-4 h-4 text-amber-300 animate-pulse" />
               <span>Hint</span>
             </button>
           )}
 
           <button
             onClick={onToggleSound}
-            className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition border border-slate-700 cursor-pointer"
+            className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white transition border border-slate-600 cursor-pointer"
             title={soundEnabled ? 'Mute Sound' : 'Enable Sound'}
           >
-            {soundEnabled ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4 text-slate-500" />}
+            {soundEnabled ? <Volume2 className="w-4 h-4 text-amber-400" /> : <VolumeX className="w-4 h-4 text-slate-400" />}
           </button>
 
           <button
             onClick={onOpenRules}
-            className="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition border border-slate-700 flex items-center gap-1 text-xs cursor-pointer"
+            className="px-3 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white transition border border-slate-600 flex items-center gap-1.5 text-sm font-semibold cursor-pointer"
             title="Game Rules & Guide"
           >
-            <HelpCircle className="w-4 h-4" />
+            <HelpCircle className="w-4 h-4 text-amber-400" />
             <span className="hidden md:inline">Rules</span>
           </button>
 
           <button
             onClick={onRestartGame}
-            className="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white transition border border-slate-700 flex items-center gap-1.5 text-xs font-semibold cursor-pointer"
+            className="px-3.5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-100 hover:text-white transition border border-slate-600 flex items-center gap-1.5 text-sm font-bold cursor-pointer"
           >
-            <RefreshCw className="w-3.5 h-3.5" />
+            <RefreshCw className="w-4 h-4 text-amber-400" />
             <span>New Game</span>
           </button>
         </div>
@@ -1520,7 +1520,6 @@ import React from 'react';
 import type { HintResult, HintMove } from '../engine/hintSolver';
 import { Lightbulb, X, Sparkles, PlusCircle, Split, Info } from 'lucide-react';
 
-
 interface HintModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -1538,9 +1537,9 @@ export const HintModal: React.FC<HintModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in">
-      <div className="w-full max-w-xl bg-slate-900 border border-amber-500/40 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
+      <div className="w-full max-w-xl bg-slate-900 border border-amber-500/50 rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]">
         {/* Header Bar */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800 bg-slate-950/80">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-700 bg-slate-950">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-400 shadow-inner">
               <Lightbulb className="w-6 h-6 animate-pulse" />
@@ -1549,7 +1548,7 @@ export const HintModal: React.FC<HintModalProps> = ({
               <h3 className="text-lg font-bold text-slate-100 flex items-center gap-2">
                 Move Suggestions & Hints
               </h3>
-              <p className="text-xs text-slate-400">
+              <p className="text-sm text-slate-200 font-medium">
                 {hintResult.hasMoves
                   ? `Found ${hintResult.moves.length} strategic move(s) for your turn`
                   : 'Turn Strategy Recommendation'}
@@ -1559,71 +1558,71 @@ export const HintModal: React.FC<HintModalProps> = ({
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition"
+            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Modal Body Content */}
-        <div className="p-6 overflow-y-auto space-y-3.5 flex-1">
+        <div className="p-6 overflow-y-auto space-y-4 flex-1">
           {!hintResult.hasMoves ? (
-            <div className="py-8 px-4 rounded-xl border border-dashed border-slate-800 bg-slate-950/40 flex flex-col items-center justify-center text-center gap-3">
+            <div className="py-8 px-4 rounded-xl border border-dashed border-slate-700 bg-slate-950/60 flex flex-col items-center justify-center text-center gap-3">
               <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-amber-400">
                 <Info className="w-6 h-6" />
               </div>
               <h4 className="text-base font-bold text-amber-200">No Valid Plays Found</h4>
-              <p className="text-xs text-slate-400 max-w-md leading-relaxed">
+              <p className="text-sm text-slate-200 max-w-md leading-relaxed">
                 There are currently no legal melds or extensions available from your hand.
-                Click <span className="text-amber-300 font-semibold">Draw Tile</span> on the control bar below to pass your turn and get a new tile.
+                Click <span className="text-amber-300 font-bold">Draw Tile</span> on the control bar below to pass your turn and get a new tile.
               </p>
             </div>
           ) : (
             hintResult.moves.map((move: HintMove, idx: number) => (
               <div
                 key={move.id || idx}
-                className="p-4 rounded-xl border border-slate-800 bg-slate-950/60 hover:border-amber-500/40 transition flex flex-col gap-2.5 shadow-md group"
+                className="p-4 rounded-xl border border-slate-700 bg-slate-950/70 hover:border-amber-500/50 transition flex flex-col gap-2.5 shadow-md group"
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     {move.type === 'new-meld' && (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                        <Sparkles className="w-3 h-3 text-emerald-400" />
+                      <span className="inline-flex items-center gap-1 text-xs font-black uppercase px-2.5 py-0.5 rounded bg-emerald-500/25 text-emerald-200 border border-emerald-400/50">
+                        <Sparkles className="w-3.5 h-3.5 text-emerald-300" />
                         <span>New Meld</span>
                       </span>
                     )}
 
                     {move.type === 'extend-meld' && (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                        <PlusCircle className="w-3 h-3 text-amber-400" />
+                      <span className="inline-flex items-center gap-1 text-xs font-black uppercase px-2.5 py-0.5 rounded bg-amber-500/25 text-amber-200 border border-amber-400/50">
+                        <PlusCircle className="w-3.5 h-3.5 text-amber-300" />
                         <span>Extend Meld</span>
                       </span>
                     )}
 
                     {move.type === 'split-recombine' && (
-                      <span className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                        <Split className="w-3 h-3 text-purple-400" />
+                      <span className="inline-flex items-center gap-1 text-xs font-black uppercase px-2.5 py-0.5 rounded bg-purple-500/25 text-purple-200 border border-purple-400/50">
+                        <Split className="w-3.5 h-3.5 text-purple-300" />
                         <span>Split & Recombine</span>
                       </span>
                     )}
 
-                    <span className="text-xs font-bold text-slate-200">{move.title}</span>
+                    <span className="text-sm font-bold text-slate-100">{move.title}</span>
                   </div>
 
                   {move.pointValue && move.pointValue > 0 && (
-                    <span className="text-xs font-mono font-bold text-amber-400">
+                    <span className="text-sm font-mono font-extrabold text-amber-300">
                       +{move.pointValue} pts
                     </span>
                   )}
                 </div>
 
-                <p className="text-xs text-slate-300 font-medium leading-relaxed">
+                <p className="text-sm text-slate-200 font-medium leading-relaxed">
                   {move.description}
                 </p>
 
                 {move.suggestedTileIds.length > 0 && (
-                  <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between">
-                    <span className="text-[11px] text-slate-400 font-mono">
+                  <div className="pt-2.5 border-t border-slate-700 flex items-center justify-between">
+                    <span className="text-xs text-slate-300 font-mono font-semibold">
                       {move.suggestedTileIds.length} tile(s) suggested
                     </span>
 
@@ -1632,7 +1631,7 @@ export const HintModal: React.FC<HintModalProps> = ({
                         onSelectSuggestedTiles(move.suggestedTileIds);
                         onClose();
                       }}
-                      className="px-3 py-1 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow transition transform hover:scale-105 active:scale-95 flex items-center gap-1"
+                      className="px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs shadow-md transition transform hover:scale-105 active:scale-95 flex items-center gap-1.5 cursor-pointer"
                     >
                       <Sparkles className="w-3.5 h-3.5" />
                       <span>Select Tiles</span>
@@ -1645,10 +1644,10 @@ export const HintModal: React.FC<HintModalProps> = ({
         </div>
 
         {/* Modal Footer */}
-        <div className="px-6 py-3 border-t border-slate-800 bg-slate-950/90 flex justify-end">
+        <div className="px-6 py-3.5 border-t border-slate-700 bg-slate-950 flex justify-end">
           <button
             onClick={onClose}
-            className="px-4 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold transition"
+            className="px-5 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white text-sm font-bold transition cursor-pointer"
           >
             Close
           </button>
@@ -1688,44 +1687,44 @@ export const RulesModal: React.FC<RulesModalProps> = ({ isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md animate-fadeIn">
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
+      <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-2xl w-full max-h-[85vh] flex flex-col shadow-2xl overflow-hidden">
         {/* Modal Header */}
-        <div className="flex items-center justify-between p-5 border-b border-slate-800 bg-slate-900/50">
+        <div className="flex items-center justify-between p-5 border-b border-slate-700 bg-slate-950/80">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-400">
+            <div className="p-2 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-400">
               <Sparkles className="w-5 h-5" />
             </div>
             <div>
-              <h2 className="text-lg font-bold text-white">How to Play Rummikub</h2>
-              <p className="text-xs text-slate-400">Official rules & game engine guide</p>
+              <h2 className="text-xl font-extrabold text-white">How to Play Rummikub</h2>
+              <p className="text-sm text-slate-200 font-medium">Official rules & game engine guide</p>
             </div>
           </div>
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white transition"
+            className="p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition cursor-pointer"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
         {/* Modal Body Scrollable Content */}
-        <div className="p-6 overflow-y-auto space-y-6 text-sm text-slate-300">
+        <div className="p-6 overflow-y-auto space-y-6 text-sm text-slate-200">
           {/* Section 1: Objective */}
           <div className="space-y-2">
-            <h3 className="text-base font-bold text-amber-400 flex items-center gap-2">
-              <Layers className="w-4 h-4" /> Game Objective
+            <h3 className="text-base font-extrabold text-amber-300 flex items-center gap-2">
+              <Layers className="w-5 h-5" /> Game Objective
             </h3>
-            <p>
+            <p className="leading-relaxed">
               Be the first player to clear all 14+ tiles from your rack by forming valid combinations (melds) on the board!
             </p>
           </div>
 
           {/* Section 2: Initial Meld Requirement */}
-          <div className="p-4 rounded-xl bg-amber-950/30 border border-amber-800/40 space-y-2">
-            <h3 className="text-base font-bold text-amber-300 flex items-center gap-2">
+          <div className="p-4 rounded-xl bg-amber-950/50 border border-amber-600/70 space-y-2 shadow-md">
+            <h3 className="text-base font-extrabold text-amber-200 flex items-center gap-2">
               <ShieldAlert className="w-5 h-5 text-amber-400" /> Initial Meld Requirement (&ge; 30 Points)
             </h3>
-            <p className="text-xs leading-relaxed text-amber-200/90">
+            <p className="text-sm leading-relaxed text-amber-100 font-medium">
               For your very first play of the game, you must place valid melds directly from your rack totaling at least{' '}
               <strong className="text-amber-300 font-bold">30 points</strong>. You cannot manipulate existing table melds until after your initial meld is achieved.
             </p>
@@ -1733,22 +1732,22 @@ export const RulesModal: React.FC<RulesModalProps> = ({ isOpen, onClose }) => {
 
           {/* Section 3: Valid Melds */}
           <div className="space-y-3">
-            <h3 className="text-base font-bold text-emerald-400 flex items-center gap-2">
-              <CheckCircle className="w-4 h-4" /> Valid Melds
+            <h3 className="text-base font-extrabold text-emerald-300 flex items-center gap-2">
+              <CheckCircle className="w-5 h-5" /> Valid Melds
             </h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="p-3.5 rounded-xl bg-slate-800/60 border border-slate-700/60">
-                <h4 className="font-bold text-white mb-1 text-xs uppercase tracking-wider text-amber-300">Groups</h4>
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  3 or 4 tiles of the <strong>same number value</strong> with <strong>different colors</strong> (e.g. Red 7, Blue 7, Black 7).
+              <div className="p-4 rounded-xl bg-slate-800 border border-slate-600 shadow-sm">
+                <h4 className="font-extrabold text-amber-300 mb-1.5 text-sm uppercase tracking-wider">Groups</h4>
+                <p className="text-sm text-slate-200 leading-relaxed">
+                  3 or 4 tiles of the <strong className="text-white">same number value</strong> with <strong className="text-white">different colors</strong> (e.g. Red 7, Blue 7, Black 7, Green 7).
                 </p>
               </div>
 
-              <div className="p-3.5 rounded-xl bg-slate-800/60 border border-slate-700/60">
-                <h4 className="font-bold text-white mb-1 text-xs uppercase tracking-wider text-emerald-300">Runs</h4>
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  3 or more <strong>consecutive numbers</strong> of the <strong>same color</strong> (e.g. Blue 4, Blue 5, Blue 6, Blue 7).
+              <div className="p-4 rounded-xl bg-slate-800 border border-slate-600 shadow-sm">
+                <h4 className="font-extrabold text-emerald-300 mb-1.5 text-sm uppercase tracking-wider">Runs</h4>
+                <p className="text-sm text-slate-200 leading-relaxed">
+                  3 or more <strong className="text-white">consecutive numbers</strong> of the <strong className="text-white">same color</strong> (e.g. Blue 4, Blue 5, Blue 6, Blue 7).
                 </p>
               </div>
             </div>
@@ -1756,36 +1755,36 @@ export const RulesModal: React.FC<RulesModalProps> = ({ isOpen, onClose }) => {
 
           {/* Section 4: Jokers */}
           <div className="space-y-2">
-            <h3 className="text-base font-bold text-amber-400">Jokers</h3>
-            <p className="text-xs leading-relaxed">
+            <h3 className="text-base font-extrabold text-amber-300">Jokers</h3>
+            <p className="text-sm leading-relaxed">
               Jokers can substitute for any tile color or number in a group or run. Their point value matches the tile they substitute for.
             </p>
           </div>
 
           {/* Section 5: Turn Controls */}
-          <div className="space-y-2 border-t border-slate-800 pt-4">
-            <h3 className="text-base font-bold text-slate-200">Turn Snapshot & Actions</h3>
-            <ul className="list-disc list-inside text-xs space-y-1.5 text-slate-400">
+          <div className="space-y-2 border-t border-slate-700 pt-4">
+            <h3 className="text-base font-extrabold text-slate-100">Turn Snapshot & Actions</h3>
+            <ul className="list-disc list-inside text-sm space-y-2 text-slate-200">
               <li>
-                <strong className="text-slate-200">End Turn:</strong> Validates all melds on the table. Rejects turn if any table meld is invalid.
+                <strong className="text-white font-bold">End Turn:</strong> Validates all melds on the table. Rejects turn if any table meld is invalid.
               </li>
               <li>
-                <strong className="text-slate-200">Reset Turn:</strong> Reverts the table board and your rack to the state at the start of your turn.
+                <strong className="text-white font-bold">Reset Turn:</strong> Reverts the table board and your rack to the state at the start of your turn.
               </li>
               <li>
-                <strong className="text-slate-200">Draw Tile:</strong> Reverts modified board state, draws 1 tile from the pool to your rack, and passes turn.
+                <strong className="text-white font-bold">Draw Tile:</strong> Reverts uncommitted board moves, draws 1 tile from the pool to your rack, and passes turn.
               </li>
             </ul>
           </div>
         </div>
 
         {/* Modal Footer */}
-        <div className="p-4 border-t border-slate-800 bg-slate-900/50 flex justify-end">
+        <div className="p-4 border-t border-slate-700 bg-slate-950 flex justify-end">
           <button
             onClick={onClose}
-            className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition"
+            className="px-6 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-extrabold text-sm transition cursor-pointer shadow-lg"
           >
-            Got it, Let's Play!
+            Got It
           </button>
         </div>
       </div>
@@ -2099,36 +2098,36 @@ export const TurnControls: React.FC<TurnControlsProps> = ({
   }
 
   return (
-    <div className="w-full bg-slate-900/90 backdrop-blur-md rounded-2xl border border-slate-800 p-4 shadow-xl flex flex-wrap items-center justify-between gap-4">
+    <div className="w-full bg-slate-900/95 backdrop-blur-md rounded-2xl border border-slate-700 p-4 shadow-xl flex flex-wrap items-center justify-between gap-4">
       {/* Bot Thinking & Player Status Indicator */}
       <div className="flex items-center gap-3">
         {isAiThinking ? (
-          <div className="flex items-center gap-2 text-amber-400 text-sm font-semibold animate-pulse">
+          <div className="flex items-center gap-2 text-amber-300 text-sm font-bold animate-pulse">
             <Loader2 className="w-4 h-4 animate-spin" />
             <span>Rummikub Bot is thinking & playing...</span>
           </div>
         ) : (
-          <div className="text-xs text-slate-400">
+          <div className="text-sm font-semibold text-slate-200">
             {isHumanTurn ? (
               hasPlayedTiles ? (
                 canEndTurn ? (
-                  <span className="text-emerald-400 font-medium flex items-center gap-1.5">
-                    <CheckCircle2 className="w-4 h-4" /> Played {tilesPlayedCount} tile(s) (+{turnPointsGained} pts). Ready to submit!
+                  <span className="text-emerald-300 font-bold flex items-center gap-1.5">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400" /> Played {tilesPlayedCount} tile(s) (+{turnPointsGained} pts). Ready to submit!
                   </span>
                 ) : !initialMeldSatisfied ? (
-                  <span className="text-amber-400 font-medium flex items-center gap-1.5">
-                    <AlertTriangle className="w-4 h-4" /> Played {tilesPlayedCount} tile(s). Initial meld requires 30+ pts from hand ({turnPointsGained}/30 pts).
+                  <span className="text-amber-200 font-bold flex items-center gap-1.5">
+                    <AlertTriangle className="w-4 h-4 text-amber-400" /> Played {tilesPlayedCount} tile(s). Initial meld requires 30+ pts from hand ({turnPointsGained}/30 pts).
                   </span>
                 ) : (
-                  <span className="text-rose-400 font-medium flex items-center gap-1.5">
-                    <AlertTriangle className="w-4 h-4" /> Played {tilesPlayedCount} tile(s). Fix invalid melds on table before ending.
+                  <span className="text-rose-200 font-bold flex items-center gap-1.5">
+                    <AlertTriangle className="w-4 h-4 text-rose-400" /> Played {tilesPlayedCount} tile(s). Fix invalid melds on table before ending.
                   </span>
                 )
               ) : (
-                <span className="text-slate-300 font-medium">Your Turn: Make table melds or Draw a tile to pass.</span>
+                <span className="text-slate-100 font-semibold">Your Turn: Make table melds or Draw a tile to pass.</span>
               )
             ) : (
-              <span className="text-slate-400 font-medium">Opponent's Turn</span>
+              <span className="text-slate-300 font-semibold">Opponent's Turn</span>
             )}
           </div>
         )}
@@ -2142,14 +2141,14 @@ export const TurnControls: React.FC<TurnControlsProps> = ({
             onClick={onDrawTile}
             disabled={!isHumanTurn || isAiThinking}
             className={clsx(
-              'px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition border shadow-lg cursor-pointer transform hover:scale-105 active:scale-95',
+              'px-6 py-2.5 rounded-xl font-extrabold text-sm flex items-center gap-2 transition border shadow-lg cursor-pointer transform hover:scale-105 active:scale-95',
               isHumanTurn && !isAiThinking
-                ? 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white border-cyan-400 shadow-blue-500/20'
-                : 'bg-slate-800/40 text-slate-600 border-slate-800 cursor-not-allowed'
+                ? 'bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white border-cyan-300 shadow-blue-500/30'
+                : 'bg-slate-800/40 text-slate-500 border-slate-700 cursor-not-allowed'
             )}
             title={`Draw 1 tile from pool (${poolCount} left) and pass turn`}
           >
-            <Plus className="w-4 h-4 text-cyan-300" />
+            <Plus className="w-4 h-4 text-cyan-200" />
             <span>Draw Tile & Pass (+1)</span>
           </button>
         ) : canEndTurn ? (
@@ -2158,10 +2157,10 @@ export const TurnControls: React.FC<TurnControlsProps> = ({
             onClick={onEndTurn}
             disabled={!isHumanTurn || isAiThinking}
             className={clsx(
-              'px-6 py-2.5 rounded-xl font-extrabold text-xs flex items-center gap-2 transition border shadow-xl cursor-pointer transform hover:scale-105 active:scale-95 animate-pulse',
+              'px-7 py-2.5 rounded-xl font-black text-sm flex items-center gap-2 transition border shadow-xl cursor-pointer transform hover:scale-105 active:scale-95 animate-pulse',
               isHumanTurn && !isAiThinking
-                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 border-emerald-300 shadow-emerald-500/40 ring-2 ring-emerald-400/60'
-                : 'bg-slate-800/40 text-slate-600 border-slate-800 cursor-not-allowed'
+                ? 'bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 border-emerald-300 shadow-emerald-500/50 ring-2 ring-emerald-400/60'
+                : 'bg-slate-800/40 text-slate-500 border-slate-700 cursor-not-allowed'
             )}
             title="Submit turn and pass to opponent"
           >
@@ -2172,7 +2171,7 @@ export const TurnControls: React.FC<TurnControlsProps> = ({
           /* CASE 2B: Tiles added from hand but invalid melds or unmet initial meld -> Show Invalid Melds (DISABLED) */
           <button
             disabled={true}
-            className="px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition border shadow-md bg-slate-800/60 text-rose-400/80 border-rose-900/40 cursor-not-allowed opacity-80"
+            className="px-6 py-2.5 rounded-xl font-bold text-sm flex items-center gap-2 transition border shadow-md bg-slate-800 text-rose-300 border-rose-600/60 cursor-not-allowed opacity-90"
             title="Return uncommitted tiles to your hand tray or arrange them into valid melds to enable End Turn"
           >
             <AlertTriangle className="w-4 h-4 text-rose-400" />

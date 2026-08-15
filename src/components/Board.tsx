@@ -1,7 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import type { Meld, DragItem } from '../types/game';
 import { TileComponent } from './TileComponent';
-import { CheckCircle2, XCircle, PlusCircle, Bot, ChevronDown, Lock } from 'lucide-react';
+import { CheckCircle2, XCircle, Bot, PlusCircle, Lock, ChevronDown } from 'lucide-react';
 import { clsx } from 'clsx';
 
 interface BoardProps {
@@ -18,20 +18,24 @@ interface BoardProps {
       targetIndex?: number;
     }
   ) => void;
-  onSplitMeld: (meldId: string, splitIndex: number) => void;
+  onSplitMeld?: (meldId: string, splitIndex: number) => void;
   isHumanTurn: boolean;
 }
 
-/**
- * Single Unified Meld Container Component
- */
 const MeldContainer: React.FC<{
   meld: Meld;
   selectedTileIds: string[];
   isHighlighted?: boolean;
   isMagnifierEnabled?: boolean;
   onToggleTileSelection: (tileId: string) => void;
-  onDropTile: BoardProps['onDropTile'];
+  onDropTile: (
+    item: DragItem,
+    targetLocation: {
+      type: 'board-new' | 'board-meld' | 'rack' | 'hand';
+      meldId?: string;
+      targetIndex?: number;
+    }
+  ) => void;
   isHumanTurn: boolean;
 }> = ({
   meld,
@@ -45,7 +49,6 @@ const MeldContainer: React.FC<{
   const [isDragOver, setIsDragOver] = useState(false);
 
   const handleDragOver = (e: React.DragEvent) => {
-    if (!isHumanTurn) return;
     e.preventDefault();
     e.stopPropagation();
     e.dataTransfer.dropEffect = 'move';
@@ -59,7 +62,6 @@ const MeldContainer: React.FC<{
   };
 
   const handleDrop = (e: React.DragEvent) => {
-    if (!isHumanTurn) return;
     e.preventDefault();
     e.stopPropagation();
     setIsDragOver(false);
@@ -88,40 +90,40 @@ const MeldContainer: React.FC<{
         isDragOver
           ? 'bg-amber-950/70 border-amber-400 ring-4 ring-amber-400/80 shadow-2xl shadow-amber-500/50 scale-102 z-30'
           : isHighlighted
-          ? 'ring-2 ring-amber-400 bg-amber-500/10 shadow-lg shadow-amber-500/30 scale-101 border-amber-400/60 z-20'
+          ? 'ring-2 ring-amber-400 bg-amber-500/15 shadow-lg shadow-amber-500/30 scale-101 border-amber-400/70 z-20'
           : meld.isValid
-          ? 'bg-emerald-950/40 border-emerald-600/50 shadow-emerald-950/50 ring-1 ring-emerald-500/20'
-          : 'bg-rose-950/50 border-rose-600/60 ring-1 ring-rose-500/40 shadow-rose-950/50'
+          ? 'bg-emerald-950/50 border-emerald-500/60 shadow-emerald-950/50 ring-1 ring-emerald-500/30'
+          : 'bg-rose-950/60 border-rose-500/70 ring-1 ring-rose-500/50 shadow-rose-950/50'
       )}
       title="Drop tile anywhere on this meld to add and auto-sort into logical order"
     >
       {/* Compact Meld Status Badge & Bot Move Highlight Indicator */}
-      <div className="flex items-center justify-between gap-2 pb-1.5 border-b border-white/10 text-xs pointer-events-none">
-        <div className="flex items-center gap-1.5">
+      <div className="flex items-center justify-between gap-2 pb-1.5 border-b border-white/15 text-xs pointer-events-none">
+        <div className="flex items-center gap-2">
           {meld.isValid ? (
-            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-300 bg-emerald-500/20 px-2 py-0.5 rounded-md border border-emerald-500/30">
-              <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+            <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-emerald-200 bg-emerald-500/25 px-2.5 py-0.5 rounded-md border border-emerald-400/50 shadow-sm">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-300" />
               <span>
                 {meld.type.toUpperCase()} ({meld.value} pts)
               </span>
             </span>
           ) : (
-            <span className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-300 bg-rose-500/20 px-2 py-0.5 rounded-md border border-rose-500/30">
-              <XCircle className="w-3 h-3 text-rose-400" />
-              <span className="max-w-[150px] truncate">{meld.errorReason || 'Invalid'}</span>
+            <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-rose-100 bg-rose-500/25 px-2.5 py-0.5 rounded-md border border-rose-400/50 shadow-sm">
+              <XCircle className="w-3.5 h-3.5 text-rose-300" />
+              <span className="max-w-[180px] truncate">{meld.errorReason || 'Invalid'}</span>
             </span>
           )}
 
           {meld.isCommitted && (
-            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-cyan-300 bg-cyan-500/20 px-1.5 py-0.5 rounded-md border border-cyan-500/30">
-              <Lock className="w-3 h-3 text-cyan-400" />
-              <span>Locked Meld</span>
+            <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-cyan-100 bg-cyan-500/25 px-2 py-0.5 rounded-md border border-cyan-400/50 shadow-sm">
+              <Lock className="w-3.5 h-3.5 text-cyan-300" />
+              <span>Locked</span>
             </span>
           )}
 
           {isHighlighted && (
-            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded-md border border-amber-400/40 animate-pulse">
-              <Bot className="w-3 h-3 text-amber-400" />
+            <span className="inline-flex items-center gap-1.5 text-xs font-extrabold text-amber-100 bg-amber-500/25 px-2.5 py-0.5 rounded-md border border-amber-400/60 animate-pulse shadow-sm">
+              <Bot className="w-3.5 h-3.5 text-amber-300" />
               <span>Bot Move</span>
             </span>
           )}
@@ -158,62 +160,60 @@ export const Board: React.FC<BoardProps> = ({
   isHumanTurn,
 }) => {
   const [isBoardDragOver, setIsBoardDragOver] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [isScrolledUp, setIsScrolledUp] = useState(false);
   const [hiddenMeldCount, setHiddenMeldCount] = useState(0);
 
-  const scrollRef = useRef<HTMLDivElement>(null);
+  // Check if board content overflows and user has content below
+  const checkOverflow = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
 
-  // Check scroll & overflow boundaries
-  const checkOverflow = () => {
-    if (!scrollRef.current) return;
-    const { scrollTop, scrollHeight, clientHeight } = scrollRef.current;
-    const isOverflowing = scrollHeight > clientHeight + 10;
-    const isBottom = scrollTop + clientHeight >= scrollHeight - 20;
-    setIsScrolledUp(isOverflowing && !isBottom);
+    const hasScrollBelow = el.scrollHeight > el.clientHeight && el.scrollTop + el.clientHeight < el.scrollHeight - 20;
+    setIsScrolledUp(hasScrollBelow);
 
-    // Approximate hidden meld count below fold
-    if (isOverflowing && !isBottom) {
-      const pixelsRemaining = scrollHeight - (scrollTop + clientHeight);
-      const estCount = Math.max(1, Math.ceil(pixelsRemaining / 120));
-      setHiddenMeldCount(estCount);
+    if (hasScrollBelow) {
+      // Estimate hidden melds based on average container height
+      const remainingHeight = el.scrollHeight - (el.scrollTop + el.clientHeight);
+      const estHidden = Math.max(1, Math.ceil(remainingHeight / 120));
+      setHiddenMeldCount(estHidden);
     } else {
       setHiddenMeldCount(0);
     }
-  };
+  }, []);
 
   useEffect(() => {
     checkOverflow();
-  }, [melds]);
-
-  // Auto-scroll container to bring newly added or modified melds into view
-  useEffect(() => {
-    if (scrollRef.current && melds.length > 0) {
-      scrollRef.current.scrollTo({
-        top: scrollRef.current.scrollHeight,
-        behavior: 'smooth',
-      });
-    }
-  }, [melds.length, highlightedMeldIds]);
+    window.addEventListener('resize', checkOverflow);
+    return () => window.removeEventListener('resize', checkOverflow);
+  }, [melds, checkOverflow]);
 
   const handleBoardDragOver = (e: React.DragEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     e.dataTransfer.dropEffect = 'move';
     setIsBoardDragOver(true);
   };
 
   const handleBoardDragLeave = (e: React.DragEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     setIsBoardDragOver(false);
   };
 
   const handleBoardDropOnNewZone = (e: React.DragEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     setIsBoardDragOver(false);
+
     const dataStr = e.dataTransfer.getData('application/json');
     if (!dataStr) return;
+
     try {
       const item: DragItem = JSON.parse(dataStr);
-      onDropTile(item, { type: 'board-new' });
+      onDropTile(item, {
+        type: 'board-new',
+      });
     } catch {
       // Ignore invalid JSON
     }
@@ -226,21 +226,21 @@ export const Board: React.FC<BoardProps> = ({
       onDrop={handleBoardDropOnNewZone}
       className={clsx(
         'w-full flex-1 min-h-0 bg-table-felt rounded-2xl border p-4 md:p-6 shadow-2xl relative flex flex-col justify-between overflow-hidden transition-all',
-        isBoardDragOver ? 'border-amber-400/80 ring-2 ring-amber-400/30' : 'border-emerald-900/60'
+        isBoardDragOver ? 'border-amber-400/80 ring-2 ring-amber-400/30' : 'border-emerald-800/80'
       )}
     >
       {/* Background Ambient Radial Gradient */}
       <div className="absolute inset-0 bg-radial from-emerald-500/5 via-transparent to-black/40 pointer-events-none" />
 
       {/* Board Header Bar */}
-      <div className="flex items-center justify-between pb-3 border-b border-emerald-800/40 z-10 mb-4">
-        <div className="flex items-center gap-2">
-          <span className="w-3 h-3 rounded-full bg-emerald-500 ring-4 ring-emerald-500/20" />
-          <h2 className="text-sm font-bold uppercase tracking-wider text-emerald-200/90">
+      <div className="flex items-center justify-between pb-3 border-b border-emerald-700/60 z-10 mb-4">
+        <div className="flex items-center gap-2.5">
+          <span className="w-3.5 h-3.5 rounded-full bg-emerald-400 ring-4 ring-emerald-500/30" />
+          <h2 className="text-base font-extrabold uppercase tracking-wider text-emerald-100">
             Table Board ({melds.length} Melds)
           </h2>
         </div>
-        <span className="text-xs text-emerald-300/60 font-mono hidden sm:inline">
+        <span className="text-sm text-emerald-200 font-medium hidden sm:inline">
           Container-level drop targets • Instant auto-reordering into logical groups & runs
         </span>
       </div>
@@ -252,10 +252,10 @@ export const Board: React.FC<BoardProps> = ({
         className="flex-1 overflow-y-auto z-10 pr-1 pb-4 min-h-[260px] scroll-smooth"
       >
         {melds.length === 0 ? (
-          <div className="w-full h-56 rounded-xl border-2 border-dashed border-emerald-700/50 flex flex-col items-center justify-center text-emerald-300/60 transition-all hover:border-emerald-500/80 hover:bg-emerald-950/20 group">
-            <PlusCircle className="w-10 h-10 mb-2 opacity-50 group-hover:opacity-100 group-hover:scale-110 transition-all text-emerald-400" />
-            <p className="text-sm font-medium">Table is currently empty</p>
-            <p className="text-xs opacity-70 mt-1">
+          <div className="w-full h-56 rounded-xl border-2 border-dashed border-emerald-600/70 flex flex-col items-center justify-center text-emerald-200 transition-all hover:border-emerald-400 hover:bg-emerald-950/30 group">
+            <PlusCircle className="w-12 h-12 mb-2 text-emerald-300 group-hover:scale-110 transition-all" />
+            <p className="text-base font-bold text-emerald-100">Table is currently empty</p>
+            <p className="text-sm text-emerald-200 font-medium mt-1.5">
               {isHumanTurn ? 'Drag tiles anywhere on the table to start a new meld' : 'Waiting for opponent move...'}
             </p>
           </div>
@@ -279,13 +279,13 @@ export const Board: React.FC<BoardProps> = ({
 
       {/* Bottom Gradient Fade Overlay for Overflow Indication */}
       {isScrolledUp && (
-        <div className="absolute bottom-12 inset-x-0 h-16 bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent pointer-events-none z-20" />
+        <div className="absolute bottom-12 inset-x-0 h-16 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent pointer-events-none z-20" />
       )}
 
       {/* Floating Scroll Overflow Banner Indicator */}
       {isScrolledUp && (
-        <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-30 px-3.5 py-1.5 rounded-full bg-slate-900/95 border border-amber-400/50 text-amber-300 text-xs font-bold shadow-2xl flex items-center gap-1.5 animate-bounce pointer-events-none">
-          <ChevronDown className="w-4 h-4 text-amber-400" />
+        <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-30 px-4 py-2 rounded-full bg-slate-900 border border-amber-400 text-amber-200 text-sm font-extrabold shadow-2xl flex items-center gap-2 animate-bounce pointer-events-none">
+          <ChevronDown className="w-4 h-4 text-amber-300" />
           <span>{hiddenMeldCount} more meld(s) below — Scroll to view</span>
         </div>
       )}
@@ -296,13 +296,13 @@ export const Board: React.FC<BoardProps> = ({
           onDragOver={handleBoardDragOver}
           onDrop={handleBoardDropOnNewZone}
           className={clsx(
-            'mt-3 py-2.5 px-4 rounded-xl border border-dashed text-xs font-semibold flex items-center justify-center gap-2 transition-all cursor-pointer z-10',
+            'mt-3 py-3 px-4 rounded-xl border border-dashed text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer z-10',
             isBoardDragOver
-              ? 'border-amber-400 bg-amber-500/20 text-amber-200 scale-102 shadow-lg shadow-amber-500/30'
-              : 'border-emerald-600/40 bg-emerald-950/30 text-emerald-300/80 hover:border-emerald-400 hover:bg-emerald-950/50 hover:text-emerald-100'
+              ? 'border-amber-400 bg-amber-500/25 text-amber-100 scale-102 shadow-lg shadow-amber-500/40 ring-2 ring-amber-400/50'
+              : 'border-emerald-500/60 bg-emerald-950/50 text-emerald-200 hover:border-emerald-300 hover:bg-emerald-950/70 hover:text-white'
           )}
         >
-          <PlusCircle className="w-4 h-4 text-emerald-400 animate-pulse" />
+          <PlusCircle className="w-5 h-5 text-emerald-300 animate-pulse" />
           <span>Drop tile anywhere here to form a NEW table meld</span>
         </div>
       )}

@@ -70,15 +70,15 @@ export function App() {
       {notification && (
         <div
           className={clsx(
-            'fixed top-14 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 rounded-xl shadow-2xl border text-xs font-semibold flex items-center gap-2 transition-all animate-bounce',
-            notification.type === 'error' && 'bg-rose-950/90 border-rose-600 text-rose-200 shadow-rose-950/50',
-            notification.type === 'success' && 'bg-emerald-950/90 border-emerald-600 text-emerald-200 shadow-emerald-950/50',
-            notification.type === 'info' && 'bg-slate-900/95 border-amber-500/40 text-amber-200 shadow-slate-950/50'
+            'fixed top-14 left-1/2 -translate-x-1/2 z-50 px-5 py-3 rounded-xl shadow-2xl border text-sm font-bold flex items-center gap-2.5 transition-all animate-bounce',
+            notification.type === 'error' && 'bg-rose-950 border-rose-500 text-rose-100 shadow-rose-950/70',
+            notification.type === 'success' && 'bg-emerald-950 border-emerald-500 text-emerald-100 shadow-emerald-950/70',
+            notification.type === 'info' && 'bg-slate-900 border-amber-400 text-amber-100 shadow-slate-950/80'
           )}
         >
-          {notification.type === 'error' && <AlertCircle className="w-4 h-4 text-rose-400" />}
-          {notification.type === 'success' && <CheckCircle2 className="w-4 h-4 text-emerald-400" />}
-          {notification.type === 'info' && <Info className="w-4 h-4 text-amber-400" />}
+          {notification.type === 'error' && <AlertCircle className="w-5 h-5 text-rose-400" />}
+          {notification.type === 'success' && <CheckCircle2 className="w-5 h-5 text-emerald-400" />}
+          {notification.type === 'info' && <Info className="w-5 h-5 text-amber-400" />}
           <span>{notification.message}</span>
         </div>
       )}
@@ -143,9 +143,9 @@ export function App() {
       </main>
 
       {/* Debug Diagnostic Status Bar */}
-      <div className="w-full bg-slate-900/90 border-t border-slate-800 px-4 py-1 flex items-center justify-between text-[11px] font-mono text-slate-400 z-40">
-        <span className="truncate max-w-[70%]">🔍 {debugLog}</span>
-        <span className="text-amber-300">Board Melds: {boardMelds.length} | Hand: {humanPlayer?.hand?.length || 0} tiles</span>
+      <div className="w-full bg-slate-900 border-t border-slate-700 px-4 py-1.5 flex items-center justify-between text-xs font-mono text-slate-200 z-40">
+        <span className="truncate max-w-[70%] font-medium">🔍 {debugLog}</span>
+        <span className="text-amber-300 font-bold">Board Melds: {boardMelds.length} | Hand: {humanPlayer?.hand?.length || 0} tiles</span>
       </div>
 
       {/* Move Suggestions Hint Modal */}
