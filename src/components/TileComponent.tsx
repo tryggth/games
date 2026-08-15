@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import type { Tile, TileColor, DragItem } from '../types/game';
 import { Sparkles, Bot } from 'lucide-react';
 import { clsx } from 'clsx';
@@ -58,23 +59,21 @@ export const TileComponent: React.FC<TileComponentProps> = ({
 
   const handleDragStart = (e: React.DragEvent) => {
     setHoverPos(null);
-    const dragItem: DragItem = {
+    const item: DragItem = {
       tileId: tile.id,
       source,
       sourceMeldId,
       sourceIndex,
     };
-    e.dataTransfer.setData('application/json', JSON.stringify(dragItem));
+    e.dataTransfer.setData('application/json', JSON.stringify(item));
     e.dataTransfer.effectAllowed = 'move';
   };
 
   const handleDragOver = (e: React.DragEvent) => {
-    if (onDropOnTile) {
-      e.preventDefault();
-      e.stopPropagation();
-      e.dataTransfer.dropEffect = 'move';
-      setIsDragOver(true);
-    }
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = 'move';
+    setIsDragOver(true);
   };
 
   const handleDragLeave = (e: React.DragEvent) => {
@@ -107,6 +106,71 @@ export const TileComponent: React.FC<TileComponentProps> = ({
   }[size];
 
   const colorConfig = colorStyles[tile.color];
+
+  // Render floating magnifier portal attached directly to document.body to avoid transform/overflow trapping
+  const renderMagnifierPortal = () => {
+    if (!isMagnifierEnabled || !hoverPos || typeof document === 'undefined') return null;
+
+    const popupWidth = 100;
+    const popupHeight = 140;
+    const padding = 16;
+
+    let x = hoverPos.x + 24;
+    let y = hoverPos.y + 24;
+
+    // Viewport edge detection and flipping
+    if (x + popupWidth > window.innerWidth - padding) {
+      x = hoverPos.x - popupWidth - 16;
+    }
+    if (y + popupHeight > window.innerHeight - padding) {
+      y = hoverPos.y - popupHeight - 16;
+    }
+
+    x = Math.max(padding, x);
+    y = Math.max(padding, y);
+
+    return createPortal(
+      <div
+        style={{
+          position: 'fixed',
+          left: `${x}px`,
+          top: `${y}px`,
+          zIndex: 9999,
+        }}
+        className={clsx(
+          'w-24 h-34 rounded-2xl p-2.5 bg-gradient-to-b from-amber-50 via-amber-100 to-amber-200 border-2 border-amber-400 shadow-2xl ring-4 ring-amber-400/70 flex flex-col items-center justify-between pointer-events-none animate-fade-in',
+          colorConfig.text
+        )}
+      >
+        <div className="w-full flex items-center justify-between">
+          <span
+            className={clsx(
+              'w-3 h-3 rounded-full shadow-sm',
+              tile.color === 'red' && 'bg-red-500',
+              tile.color === 'blue' && 'bg-blue-500',
+              tile.color === 'black' && 'bg-slate-900',
+              tile.color === 'yellow' && 'bg-amber-500'
+            )}
+          />
+          <span className="text-[11px] font-mono opacity-80 font-extrabold tracking-wider">RUMMIKUB</span>
+        </div>
+
+        <div className="flex-1 flex items-center justify-center font-extrabold text-4xl">
+          {tile.isJoker ? (
+            <div className="flex flex-col items-center text-amber-600">
+              <Sparkles className="w-8 h-8" />
+              <span className="text-xs font-bold uppercase tracking-wider mt-1">JOKER</span>
+            </div>
+          ) : (
+            <span className="drop-shadow-md">{tile.value}</span>
+          )}
+        </div>
+
+        <div className="w-full h-1.5 rounded-full opacity-30 bg-slate-900" />
+      </div>,
+      document.body
+    );
+  };
 
   return (
     <>
@@ -182,46 +246,8 @@ export const TileComponent: React.FC<TileComponentProps> = ({
         <div className="w-full h-1 rounded-full opacity-20 bg-slate-900 mb-0.5" />
       </div>
 
-      {/* 2x Magnifier Floating Portal Preview */}
-      {isMagnifierEnabled && hoverPos && (
-        <div
-          style={{
-            position: 'fixed',
-            left: `${hoverPos.x + 24}px`,
-            top: `${hoverPos.y + 24}px`,
-          }}
-          className={clsx(
-            'w-22 h-32 rounded-2xl p-2 bg-gradient-to-b from-amber-50 via-amber-100 to-amber-200 border-2 border-amber-400 shadow-2xl ring-4 ring-amber-400/60 flex flex-col items-center justify-between pointer-events-none z-50 animate-fade-in',
-            colorConfig.text
-          )}
-        >
-          <div className="w-full flex items-center justify-between">
-            <span
-              className={clsx(
-                'w-3 h-3 rounded-full',
-                tile.color === 'red' && 'bg-red-500',
-                tile.color === 'blue' && 'bg-blue-500',
-                tile.color === 'black' && 'bg-slate-900',
-                tile.color === 'yellow' && 'bg-amber-500'
-              )}
-            />
-            <span className="text-xs font-mono opacity-70 font-bold">RUMMIKUB</span>
-          </div>
-
-          <div className="flex-1 flex items-center justify-center font-extrabold text-4xl">
-            {tile.isJoker ? (
-              <div className="flex flex-col items-center text-amber-600">
-                <Sparkles className="w-8 h-8" />
-                <span className="text-xs font-bold uppercase tracking-wider mt-1">JOKER</span>
-              </div>
-            ) : (
-              <span>{tile.value}</span>
-            )}
-          </div>
-
-          <div className="w-full h-1.5 rounded-full opacity-30 bg-slate-900" />
-        </div>
-      )}
+      {/* 2x Magnifier Floating Portal Attached to Document Body */}
+      {renderMagnifierPortal()}
     </>
   );
 };
