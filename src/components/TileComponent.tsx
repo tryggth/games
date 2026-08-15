@@ -99,10 +99,11 @@ export const TileComponent: React.FC<TileComponentProps> = ({
     setHoverPos(null);
   };
 
+  // sm is 2/3 of md (31px x 44px vs 46px x 66px)
   const sizeClasses = {
-    sm: 'w-8.5 h-12.5 text-lg rounded-md',
-    md: 'w-11.5 h-16.5 text-2xl rounded-lg',
-    lg: 'w-14.5 h-20.5 text-3xl rounded-xl',
+    sm: 'w-[31px] h-[44px] text-base rounded-md p-0.5',
+    md: 'w-11.5 h-16.5 text-2xl rounded-lg p-1',
+    lg: 'w-14.5 h-20.5 text-3xl rounded-xl p-1.5',
   }[size];
 
   const colorConfig = colorStyles[tile.color];
@@ -184,7 +185,7 @@ export const TileComponent: React.FC<TileComponentProps> = ({
         onMouseLeave={handleMouseLeave}
         onClick={onClick}
         className={clsx(
-          'relative select-none flex flex-col items-center justify-between p-1 cursor-grab active:cursor-grabbing',
+          'relative select-none flex flex-col items-center justify-between cursor-grab active:cursor-grabbing',
           'bg-gradient-to-b from-amber-50 via-amber-100 to-amber-200 border border-amber-300/80',
           'tile-shadow tile-hover transition-all duration-150 transform',
           sizeClasses,
@@ -202,7 +203,7 @@ export const TileComponent: React.FC<TileComponentProps> = ({
       >
         {/* Drawn Tile Highlight "NEW" Badge */}
         {isDrawnTile && (
-          <span className="absolute -top-2.5 -right-2.5 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 text-[11px] font-extrabold px-1.5 py-0.5 rounded-full shadow-lg border border-amber-300 animate-bounce z-30">
+          <span className="absolute -top-2.5 -right-2.5 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 text-xs font-extrabold px-1.5 py-0.5 rounded-full shadow-lg border border-amber-300 animate-bounce z-30">
             NEW
           </span>
         )}
@@ -222,28 +223,29 @@ export const TileComponent: React.FC<TileComponentProps> = ({
         <div className="w-full flex items-center justify-between px-0.5 pt-0.5">
           <span
             className={clsx(
-              'w-1.5 h-1.5 rounded-full',
+              size === 'sm' ? 'w-1 h-1' : 'w-1.5 h-1.5',
+              'rounded-full',
               tile.color === 'red' && 'bg-red-500',
               tile.color === 'blue' && 'bg-blue-500',
               tile.color === 'black' && 'bg-slate-900',
               tile.color === 'yellow' && 'bg-emerald-600'
             )}
           />
-          <span className="text-[11px] font-mono opacity-50 select-none">R</span>
+          <span className={clsx(size === 'sm' ? 'text-[8px]' : 'text-xs', 'font-mono opacity-70 font-bold select-none')}>R</span>
         </div>
 
-        <div className="flex-1 flex items-center justify-center font-bold tracking-tight">
+        <div className="flex-1 flex items-center justify-center font-black tracking-tight">
           {tile.isJoker ? (
             <div className="flex flex-col items-center text-amber-600 animate-pulse">
-              <Sparkles className="w-5 h-5" />
-              <span className="text-[12px] uppercase font-semibold">Joker</span>
+              <Sparkles className={size === 'sm' ? 'w-3 h-3' : 'w-5 h-5'} />
+              <span className={clsx(size === 'sm' ? 'text-[8px]' : 'text-sm', 'uppercase font-bold')}>Joker</span>
             </div>
           ) : (
             <span className="drop-shadow-sm">{tile.value}</span>
           )}
         </div>
 
-        <div className="w-full h-1 rounded-full opacity-20 bg-slate-900 mb-0.5" />
+        <div className={clsx(size === 'sm' ? 'h-0.5' : 'h-1', 'w-full rounded-full opacity-20 bg-slate-900 mb-0.5')} />
       </div>
 
       {/* 2x Magnifier Floating Portal Attached to Document Body */}

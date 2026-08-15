@@ -142,7 +142,7 @@ const MeldContainer: React.FC<{
             source="board"
             sourceMeldId={meld.id}
             sourceIndex={idx}
-            size="md"
+            size="sm"
           />
         ))}
       </div>
