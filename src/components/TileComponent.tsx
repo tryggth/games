@@ -143,17 +143,25 @@ export const TileComponent: React.FC<TileComponentProps> = ({
           colorConfig.text
         )}
       >
-        <div className="w-full flex items-center justify-between">
+        <div className="w-full flex items-center justify-between px-1">
           <span
             className={clsx(
-              'w-3 h-3 rounded-full shadow-sm',
+              'w-3.5 h-3.5 rounded-full shadow-sm',
               tile.color === 'red' && 'bg-red-500',
               tile.color === 'blue' && 'bg-blue-500',
               tile.color === 'black' && 'bg-slate-900',
               tile.color === 'yellow' && 'bg-emerald-600'
             )}
           />
-          <span className="text-[11px] font-mono opacity-80 font-extrabold tracking-wider">RUMMIKUB</span>
+          <span
+            className={clsx(
+              'w-3.5 h-3.5 rounded-full shadow-sm opacity-30',
+              tile.color === 'red' && 'bg-red-500',
+              tile.color === 'blue' && 'bg-blue-500',
+              tile.color === 'black' && 'bg-slate-900',
+              tile.color === 'yellow' && 'bg-emerald-600'
+            )}
+          />
         </div>
 
         <div className="flex-1 flex items-center justify-center font-extrabold text-4xl">
@@ -223,7 +231,7 @@ export const TileComponent: React.FC<TileComponentProps> = ({
         <div className="w-full flex items-center justify-between px-0.5 pt-0.5">
           <span
             className={clsx(
-              size === 'sm' ? 'w-1 h-1' : 'w-1.5 h-1.5',
+              size === 'sm' ? 'w-1.5 h-1.5' : 'w-2 h-2',
               'rounded-full',
               tile.color === 'red' && 'bg-red-500',
               tile.color === 'blue' && 'bg-blue-500',
@@ -231,7 +239,16 @@ export const TileComponent: React.FC<TileComponentProps> = ({
               tile.color === 'yellow' && 'bg-emerald-600'
             )}
           />
-          <span className={clsx(size === 'sm' ? 'text-[8px]' : 'text-xs', 'font-mono opacity-70 font-bold select-none')}>R</span>
+          <span
+            className={clsx(
+              size === 'sm' ? 'w-1.5 h-1.5' : 'w-2 h-2',
+              'rounded-full opacity-25',
+              tile.color === 'red' && 'bg-red-500',
+              tile.color === 'blue' && 'bg-blue-500',
+              tile.color === 'black' && 'bg-slate-900',
+              tile.color === 'yellow' && 'bg-emerald-600'
+            )}
+          />
         </div>
 
         <div className="flex-1 flex items-center justify-center font-black tracking-tight">
