@@ -1,6 +1,6 @@
 ================================================================================
  RUMMIKUB PRO - COMBINED SOURCE CODE BUNDLE
- Generated on: 2026-08-15T23:44:24.095Z
+ Generated on: 2026-08-20T01:22:30.499Z
  Total Source Files: 41
 ================================================================================
 
@@ -386,7 +386,7 @@ See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rule
  * FILE: public/sw.js
  * ============================================================================= */
 
-const CACHE_NAME = 'rummikub-pwa-v1.0.1786837460461';
+const CACHE_NAME = 'rummikub-pwa-v1.0.1787188946995';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -2921,7 +2921,7 @@ function getSubsetsOfLength<T>(arr: T[], len: number): T[][] {
  * ============================================================================= */
 
 import type { Tile, Meld, Player, TurnSnapshot, GameStatus, DragItem } from '../types/game';
-import { generateTilePool, deepCopyTile, deepCopyMelds } from './tilePool';
+import { generateTilePool, createTilePool, deepCopyTile, deepCopyMelds } from './tilePool';
 import { isValidMeld, normalizeMeld, normalizeBoard, validateBoard } from './validator';
 import { executeAiTurn } from './ai';
 
@@ -2947,6 +2947,13 @@ export interface MoveResult {
   selectedTileIds?: string[];
 }
 
+export interface TileConservationCheck {
+  valid: boolean;
+  total: number;
+  duplicates: string[];
+  missingCount: number;
+}
+
 /**
  * Pure helper to sort hand tiles into logical groups/runs (by color, then value).
  */
@@ -2958,6 +2965,116 @@ export function createSortedHand(tiles: Tile[]): Tile[] {
     if (a.color !== b.color) return colorOrder[a.color] - colorOrder[b.color];
     return a.value - b.value;
   });
+}
+
+/**
+ * Verifies tile conservation: ensures all 106 canonical tiles exist exactly once across
+ * the draw pool, player hands, and table board melds (2 of each color 1-13 + 2 Jokers).
+ */
+export function verifyTileConservation(state: CoreGameState): TileConservationCheck {
+  const canonicalPool = createTilePool();
+  const canonicalMap = new Map(canonicalPool.map((t) => [t.id, t]));
+
+  const allActiveTiles: Tile[] = [
+    ...state.tilePool,
+    ...state.players.flatMap((p) => p.hand),
+    ...state.boardMelds.flatMap((m) => m.tiles),
+  ];
+
+  const seenIds = new Map<string, number>();
+  const duplicates: string[] = [];
+
+  for (const t of allActiveTiles) {
+    const count = (seenIds.get(t.id) || 0) + 1;
+    seenIds.set(t.id, count);
+    if (count === 2) {
+      duplicates.push(t.id);
+    }
+  }
+
+  let missingCount = 0;
+  for (const canonicalId of canonicalMap.keys()) {
+    if (!seenIds.has(canonicalId)) {
+      missingCount++;
+    }
+  }
+
+  return {
+    valid: allActiveTiles.length === 106 && duplicates.length === 0 && missingCount === 0,
+    total: allActiveTiles.length,
+    duplicates,
+    missingCount,
+  };
+}
+
+/**
+ * Authoritative Tile Conservation Guard & Sanitizer.
+ * Enforces that no duplicates exist and no tiles are lost across state transitions.
+ */
+export function sanitizeTileConservation(state: CoreGameState): CoreGameState {
+  const canonicalPool = createTilePool();
+  const canonicalMap = new Map(canonicalPool.map((t) => [t.id, t]));
+  const seenTileIds = new Set<string>();
+
+  // 1. Sanitize table board melds (keep first occurrence of any tile ID)
+  const cleanBoardMelds: Meld[] = state.boardMelds.map((m) => {
+    const uniqueTiles: Tile[] = [];
+    for (const t of m.tiles) {
+      if (!seenTileIds.has(t.id) && canonicalMap.has(t.id)) {
+        seenTileIds.add(t.id);
+        uniqueTiles.push(deepCopyTile(t));
+      }
+    }
+    const norm = normalizeMeld(uniqueTiles);
+    const val = isValidMeld(norm);
+    return {
+      ...m,
+      tiles: norm,
+      isValid: val.isValid,
+      type: val.type,
+      value: val.value,
+      errorReason: val.errorReason,
+    };
+  }).filter((m) => m.tiles.length > 0);
+
+  // 2. Sanitize player hands (deduping any phantom duplicates)
+  const cleanPlayers: Player[] = state.players.map((p) => {
+    const uniqueHand: Tile[] = [];
+    for (const t of p.hand) {
+      if (!seenTileIds.has(t.id) && canonicalMap.has(t.id)) {
+        seenTileIds.add(t.id);
+        uniqueHand.push(deepCopyTile(t));
+      }
+    }
+    return {
+      ...p,
+      hand: createSortedHand(uniqueHand),
+    };
+  });
+
+  // 3. Sanitize draw pool (deduping against board and hands)
+  const cleanPool: Tile[] = [];
+  for (const t of state.tilePool) {
+    if (!seenTileIds.has(t.id) && canonicalMap.has(t.id)) {
+      seenTileIds.add(t.id);
+      cleanPool.push(deepCopyTile(t));
+    }
+  }
+
+  // 4. Return any missing canonical tiles back to the pool
+  for (const [canonId, canonTile] of canonicalMap.entries()) {
+    if (!seenTileIds.has(canonId)) {
+      seenTileIds.add(canonId);
+      cleanPool.push(deepCopyTile(canonTile));
+    }
+  }
+
+  return {
+    ...state,
+    boardMelds: cleanBoardMelds,
+    players: cleanPlayers,
+    tilePool: cleanPool,
+  };
 }
 
 /**
@@ -3044,7 +3161,7 @@ export function advanceTurn(
 
   const logMsg = `Advanced turn to ${nextPlayer.name} (Index: ${nextIndex}). Board Melds: ${cleanBoard.length}.`;
 
-  return {
+  const rawNextState: CoreGameState = {
     ...state,
     tilePool: nextPool.map(deepCopyTile),
     boardMelds: cleanBoard,
@@ -3055,6 +3172,8 @@ export function advanceTurn(
     autoSplitLinks: [],
     debugLog: logMsg,
   };
+
+  return sanitizeTileConservation(rawNextState);
 }
 
 /**
@@ -3092,6 +3211,20 @@ export function executeDropTile(
       const tileIdx = sourceMeld.tiles.findIndex((t) => t.id === item.tileId);
       if (tileIdx !== -1) {
         movedTile = sourceMeld.tiles[tileIdx];
+
+        // RULE: Once a tile is committed to the table from a previous turn, it can NEVER be moved to the private hand tray
+        if (targetLocation.type === 'rack' || targetLocation.type === 'hand') {
+          const turnStartHand = state.turnSnapshot ? state.turnSnapshot.hand : human.hand;
+          const isFromTurnStartHand = turnStartHand.some((t) => t.id === item.tileId);
+          if (!isFromTurnStartHand) {
+            return {
+              nextState: state,
+              soundEffect: 'error',
+              toastMessage: { text: 'Table tiles from previous turns cannot be returned to your hand tray.', type: 'error' },
+            };
+          }
+        }
+
         sourceMeld.tiles.splice(tileIdx, 1);
 
         // Update validity of remaining source meld
@@ -3144,12 +3277,14 @@ export function executeDropTile(
     idx === 0 ? { ...p, hand: createSortedHand(currentHand) } : p
   );
 
+  const sanitized = sanitizeTileConservation({
+    ...state,
+    boardMelds: currentBoard,
+    players: updatedPlayers,
+  });
+
   return {
-    nextState: {
-      ...state,
-      boardMelds: currentBoard,
-      players: updatedPlayers,
-    },
+    nextState: sanitized,
     soundEffect: 'drop',
   };
 }
@@ -3215,12 +3350,14 @@ export function executeCreateMeldFromSelection(
     idx === 0 ? { ...p, hand: createSortedHand(currentHand) } : p
   );
 
+  const sanitized = sanitizeTileConservation({
+    ...state,
+    boardMelds: currentBoard,
+    players: updatedPlayers,
+  });
+
   return {
-    nextState: {
-      ...state,
-      boardMelds: currentBoard,
-      players: updatedPlayers,
-    },
+    nextState: sanitized,
     soundEffect: 'drop',
     selectedTileIds: [],
   };
@@ -3268,17 +3405,20 @@ export function executeSplitMeldAt(
 
   currentBoard.splice(targetIdx, 1, leftMeld, rightMeld);
 
+  const sanitized = sanitizeTileConservation({
+    ...state,
+    boardMelds: currentBoard,
+  });
+
   return {
-    nextState: {
-      ...state,
-      boardMelds: currentBoard,
-    },
+    nextState: sanitized,
     soundEffect: 'drop',
   };
 }
 
 /**
  * Pure handler for player drawing a tile.
+ * Restores board to committedBoardMelds, reverts hand to turn start snapshot, and adds 1 drawn tile.
  */
 export function executeDrawTile(state: CoreGameState): MoveResult {
   if (state.activePlayerIndex !== 0 || state.gameStatus === 'ended') {
@@ -3298,33 +3438,19 @@ export function executeDrawTile(state: CoreGameState): MoveResult {
     };
   }
 
-  // Restore board to authoritative committedBoardMelds (or valid melds if committed is empty)
-  const effectiveCommitted =
-    committedBoard.length > 0
-      ? committedBoard
-      : (human.hasInitialMeld ? state.boardMelds.filter((m) => m.isValid) : []);
-  const restoredBoard = deepCopyMelds(effectiveCommitted);
+  // Restore table board strictly to authoritative committedBoardMelds
+  const restoredBoard = deepCopyMelds(committedBoard);
 
-  // Return any uncommitted staged tiles from board back into human hand
-  const turnStartHand = snapshot ? snapshot.hand : human.hand;
-  const committedTileIds = new Set(effectiveCommitted.flatMap((m) => m.tiles.map((t) => t.id)));
-
-  let currentHand = [...human.hand];
-  const currentHandTileIds = new Set(currentHand.map((t) => t.id));
-
-  const uncommittedHandTiles = turnStartHand.filter(
-    (t) => !currentHandTileIds.has(t.id) && !committedTileIds.has(t.id)
-  );
-
-  currentHand = [...currentHand, ...uncommittedHandTiles];
+  // Restore human hand strictly to turn start snapshot hand
+  const turnStartHand = snapshot ? snapshot.hand.map(deepCopyTile) : human.hand.map(deepCopyTile);
 
   // Draw 1 tile from pool
   const drawnTile = deepCopyTile(currentPool[0]);
   const remainingPool = currentPool.slice(1);
-  currentHand.push(drawnTile);
+  const nextHand = [...turnStartHand, drawnTile];
 
   const updatedPlayers = state.players.map((p, idx) =>
-    idx === 0 ? { ...p, hand: createSortedHand(currentHand) } : p
+    idx === 0 ? { ...p, hand: createSortedHand(nextHand) } : p
   );
 
   const tileName = drawnTile.isJoker ? 'Joker' : `${drawnTile.color} ${drawnTile.value}`;
@@ -3415,7 +3541,7 @@ export function executeEndTurn(state: CoreGameState): MoveResult {
       players: updatedPlayers,
     };
     return {
-      nextState: winState,
+      nextState: sanitizeTileConservation(winState),
       soundEffect: 'win',
       toastMessage: { text: '🎉 CONGRATULATIONS! You emptied your hand and won the game!', type: 'success' },
     };
@@ -3466,7 +3592,7 @@ export function executeAiTurnStep(state: CoreGameState): MoveResult {
       players: updatedPlayers,
     };
     return {
-      nextState: winState,
+      nextState: sanitizeTileConservation(winState),
       soundEffect: 'error',
       toastMessage: { text: `🤖 ${currentAiPlayer.name} has played all tiles and won!`, type: 'info' },
     };
