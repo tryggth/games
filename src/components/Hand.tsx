@@ -98,8 +98,8 @@ export const Hand: React.FC<HandProps> = ({
         </div>
       </div>
 
-      {/* Auto-Sorted Flex Wrap Hand Tiles Container */}
-      <div className="w-full min-h-[76px] max-h-44 md:max-h-52 overflow-y-auto pt-3 pb-1 pr-1 z-10 flex flex-wrap gap-2.5 items-start content-start">
+      {/* Auto-Sorted Flex Wrap Hand Tiles Container with Consistent Vertical Alignment */}
+      <div className="w-full min-h-[76px] max-h-44 md:max-h-52 overflow-y-auto pt-3 pb-1 pr-1 z-10 flex flex-wrap gap-2.5 items-end content-start">
         {hand.length === 0 ? (
           <div className="w-full h-full flex items-center justify-center text-amber-300/80 text-sm font-bold font-mono">
             [Your hand tray is empty! You played all your tiles.]
@@ -114,8 +114,8 @@ export const Hand: React.FC<HandProps> = ({
               <React.Fragment key={tile.id}>
                 {isNewGroup && (
                   <div
-                    key={`spacer-${tile.id}`}
-                    className="w-11 h-16 pointer-events-none flex-shrink-0"
+                    key={`divider-${tile.id}`}
+                    className="w-0.5 h-12 bg-amber-900/60 my-auto rounded-full mx-0.5 pointer-events-none flex-shrink-0"
                     aria-hidden="true"
                   />
                 )}
