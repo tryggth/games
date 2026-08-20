@@ -156,24 +156,48 @@ export const Board: React.FC<BoardProps> = ({
   const [canScrollDown, setCanScrollDown] = useState(false);
   const [hasOverflow, setHasOverflow] = useState(false);
 
-  // Track board overflow state and scroll boundaries
+  // Real-time DOM scroll and overflow boundary calculation
   const checkOverflow = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
 
-    const overflows = el.scrollHeight > el.clientHeight + 10;
-    const scrollUpAvailable = el.scrollTop > 8;
-    const scrollDownAvailable = el.scrollTop + el.clientHeight < el.scrollHeight - 8;
+    const overflows = el.scrollHeight > el.clientHeight + 4;
+    const scrollUpAvailable = el.scrollTop > 4;
+    const scrollDownAvailable = el.scrollTop + el.clientHeight < el.scrollHeight - 4;
 
     setHasOverflow(overflows);
     setCanScrollUp(scrollUpAvailable);
     setCanScrollDown(scrollDownAvailable);
   }, []);
 
+  // Use ResizeObserver and animation frames to ensure instant, accurate measurement after any reflow
   useEffect(() => {
     checkOverflow();
-    window.addEventListener('resize', checkOverflow);
-    return () => window.removeEventListener('resize', checkOverflow);
+    const el = scrollRef.current;
+    if (!el) return;
+
+    let rafId: number;
+    const update = () => {
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(checkOverflow);
+    };
+
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+
+    // Also observe the inner container if present
+    const inner = el.firstElementChild;
+    if (inner) {
+      ro.observe(inner);
+    }
+
+    window.addEventListener('resize', update);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+      ro.disconnect();
+      window.removeEventListener('resize', update);
+    };
   }, [melds, checkOverflow]);
 
   const handleScrollUp = useCallback(() => {
@@ -218,6 +242,9 @@ export const Board: React.FC<BoardProps> = ({
       // Ignore invalid JSON
     }
   };
+
+  // Show scroll controls whenever there are multiple melds or content overflows
+  const showScrollControls = melds.length >= 2 || hasOverflow;
 
   return (
     <div
@@ -267,8 +294,8 @@ export const Board: React.FC<BoardProps> = ({
           )}
         </div>
 
-        {/* Dedicated Right-Side Scroll Arrow Column (Active whenever melds extend to 2+ rows) */}
-        {hasOverflow && (
+        {/* Dedicated Right-Side Scroll Arrow Column */}
+        {showScrollControls && (
           <div className="flex flex-col justify-center gap-3 flex-none z-20 select-none py-2">
             <button
               onClick={handleScrollUp}
@@ -276,8 +303,8 @@ export const Board: React.FC<BoardProps> = ({
               className={clsx(
                 'w-12 h-20 rounded-2xl border-2 flex flex-col items-center justify-center gap-1 transition-all shadow-xl',
                 canScrollUp
-                  ? 'bg-slate-900 border-amber-400 text-amber-300 hover:bg-slate-800 hover:scale-105 active:scale-95 cursor-pointer shadow-amber-500/30'
-                  : 'bg-slate-900/40 border-slate-700 text-slate-600 cursor-not-allowed opacity-40'
+                  ? 'bg-slate-900 border-amber-400 text-amber-300 hover:bg-slate-800 hover:scale-105 active:scale-95 cursor-pointer shadow-amber-500/30 ring-2 ring-amber-400/40'
+                  : 'bg-slate-900/40 border-slate-700 text-slate-600 cursor-not-allowed opacity-35'
               )}
               title="Scroll Up (▲)"
             >
@@ -291,8 +318,8 @@ export const Board: React.FC<BoardProps> = ({
               className={clsx(
                 'w-12 h-20 rounded-2xl border-2 flex flex-col items-center justify-center gap-1 transition-all shadow-xl',
                 canScrollDown
-                  ? 'bg-slate-900 border-amber-400 text-amber-300 hover:bg-slate-800 hover:scale-105 active:scale-95 cursor-pointer shadow-amber-500/30'
-                  : 'bg-slate-900/40 border-slate-700 text-slate-600 cursor-not-allowed opacity-40'
+                  ? 'bg-slate-900 border-amber-400 text-amber-300 hover:bg-slate-800 hover:scale-105 active:scale-95 cursor-pointer shadow-amber-500/30 ring-2 ring-amber-400/40'
+                  : 'bg-slate-900/40 border-slate-700 text-slate-600 cursor-not-allowed opacity-35'
               )}
               title="Scroll Down (▼)"
             >
