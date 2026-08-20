@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rummikub-pwa-v1.0.1787252742487';
+const CACHE_NAME = 'rummikub-pwa-v1.0.1787253004135';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -40,11 +40,28 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+// Message listener for instant skipWaiting
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    console.log('[Service Worker] SKIP_WAITING received, skipping waiting...');
+    self.skipWaiting();
+  }
+});
+
 // Smart Fetch Strategy:
+// - version.json: Always Network (bypass cache completely for upgrade checks)
 // - Navigation / HTML: Network First (always load latest online, fall back to cache offline)
 // - Assets: Cache First (fast loading, fall back to network)
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+
+  // Never cache version.json so live update polling is 100% instant
+  if (event.request.url.includes('version.json')) {
+    event.respondWith(
+      fetch(event.request, { cache: 'no-store' }).catch(() => new Response('{}', { status: 200 }))
+    );
+    return;
+  }
 
   const isHTML =
     event.request.mode === 'navigate' ||

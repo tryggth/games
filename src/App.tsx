@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useGameState } from './hooks/useGameState';
 import { usePwaInstall } from './hooks/usePwaInstall';
+import { useAppUpdate } from './hooks/useAppUpdate';
 import { Header } from './components/Header';
 import { Board } from './components/Board';
 import { Hand } from './components/Hand';
@@ -14,6 +15,7 @@ import { clsx } from 'clsx';
 export function App() {
   const [isRulesOpen, setIsRulesOpen] = useState(false);
   const { installPwa } = usePwaInstall();
+  const { hasUpdate, applyUpdate } = useAppUpdate();
 
   const {
     tilePool,
@@ -94,6 +96,8 @@ export function App() {
         soundEnabled={soundEnabled}
         isMagnifierEnabled={isMagnifierEnabled}
         botLastMoveMessage={botLastMoveMessage}
+        hasUpdate={hasUpdate}
+        onApplyUpdate={applyUpdate}
         onToggleSound={toggleSound}
         onToggleMagnifier={toggleMagnifier}
         onOpenRules={() => setIsRulesOpen(true)}

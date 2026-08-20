@@ -12,6 +12,8 @@ interface HeaderProps {
   soundEnabled: boolean;
   isMagnifierEnabled: boolean;
   botLastMoveMessage?: string | null;
+  hasUpdate?: boolean;
+  onApplyUpdate?: () => void;
   onToggleSound: () => void;
   onToggleMagnifier: () => void;
   onOpenRules: () => void;
@@ -31,6 +33,8 @@ export const Header: React.FC<HeaderProps> = ({
   soundEnabled,
   isMagnifierEnabled,
   botLastMoveMessage,
+  hasUpdate = false,
+  onApplyUpdate,
   onToggleSound,
   onToggleMagnifier,
   onOpenRules,
@@ -104,6 +108,18 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Action & Settings Buttons */}
         <div className="flex items-center gap-2">
+          {/* Blinking Upgrade Notification Button (Only displayed when there is an upgrade) */}
+          {hasUpdate && onApplyUpdate && (
+            <button
+              onClick={onApplyUpdate}
+              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 text-slate-950 font-black text-xs md:text-sm shadow-2xl shadow-amber-500/60 flex items-center gap-2 border-2 border-yellow-100 animate-pulse hover:scale-105 active:scale-95 transition-all cursor-pointer ring-4 ring-amber-400/90"
+              title="A new version of Rummikub is available! Click to update immediately."
+            >
+              <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-slate-950 animate-spin" style={{ animationDuration: '3s' }} />
+              <span>UPGRADE (CLICK TO UPDATE)</span>
+            </button>
+          )}
+
           {onInstallApp && (
             <button
               onClick={onInstallApp}

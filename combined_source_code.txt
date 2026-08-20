@@ -1,7 +1,7 @@
 ================================================================================
  RUMMIKUB PRO - COMBINED SOURCE CODE BUNDLE
- Generated on: 2026-08-20T19:05:44.786Z
- Total Source Files: 41
+ Generated on: 2026-08-20T19:10:07.078Z
+ Total Source Files: 43
 ================================================================================
 
 
@@ -386,7 +386,7 @@ See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rule
  * FILE: public/sw.js
  * ============================================================================= */
 
-const CACHE_NAME = 'rummikub-pwa-v1.0.1787252742487';
+const CACHE_NAME = 'rummikub-pwa-v1.0.1787253004135';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -428,11 +428,28 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+// Message listener for instant skipWaiting
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    console.log('[Service Worker] SKIP_WAITING received, skipping waiting...');
+    self.skipWaiting();
+  }
+});
+
 // Smart Fetch Strategy:
+// - version.json: Always Network (bypass cache completely for upgrade checks)
 // - Navigation / HTML: Network First (always load latest online, fall back to cache offline)
 // - Assets: Cache First (fast loading, fall back to network)
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+
+  // Never cache version.json so live update polling is 100% instant
+  if (event.request.url.includes('version.json')) {
+    event.respondWith(
+      fetch(event.request, { cache: 'no-store' }).catch(() => new Response('{}', { status: 200 }))
+    );
+    return;
+  }
 
   const isHTML =
     event.request.mode === 'navigate' ||
@@ -470,6 +487,17 @@ self.addEventListener('fetch', (event) => {
   }
 });
 
+
+
+/* =============================================================================
+ * FILE: public/version.json
+ * ============================================================================= */
+
+{
+  "version": "v1.0.1787253004135",
+  "buildVersion": "rummikub-pwa-v1.0.1787253004135",
+  "timestamp": 1787253004138
+}
 
 
 /* =============================================================================
@@ -670,6 +698,7 @@ self.addEventListener('fetch', (event) => {
 import { useState } from 'react';
 import { useGameState } from './hooks/useGameState';
 import { usePwaInstall } from './hooks/usePwaInstall';
+import { useAppUpdate } from './hooks/useAppUpdate';
 import { Header } from './components/Header';
 import { Board } from './components/Board';
 import { Hand } from './components/Hand';
@@ -683,6 +712,7 @@ import { clsx } from 'clsx';
 export function App() {
   const [isRulesOpen, setIsRulesOpen] = useState(false);
   const { installPwa } = usePwaInstall();
+  const { hasUpdate, applyUpdate } = useAppUpdate();
 
   const {
     tilePool,
@@ -763,6 +793,8 @@ export function App() {
         soundEnabled={soundEnabled}
         isMagnifierEnabled={isMagnifierEnabled}
         botLastMoveMessage={botLastMoveMessage}
+        hasUpdate={hasUpdate}
+        onApplyUpdate={applyUpdate}
         onToggleSound={toggleSound}
         onToggleMagnifier={toggleMagnifier}
         onOpenRules={() => setIsRulesOpen(true)}
@@ -1343,6 +1375,8 @@ interface HeaderProps {
   soundEnabled: boolean;
   isMagnifierEnabled: boolean;
   botLastMoveMessage?: string | null;
+  hasUpdate?: boolean;
+  onApplyUpdate?: () => void;
   onToggleSound: () => void;
   onToggleMagnifier: () => void;
   onOpenRules: () => void;
@@ -1362,6 +1396,8 @@ export const Header: React.FC<HeaderProps> = ({
   soundEnabled,
   isMagnifierEnabled,
   botLastMoveMessage,
+  hasUpdate = false,
+  onApplyUpdate,
   onToggleSound,
   onToggleMagnifier,
   onOpenRules,
@@ -1435,6 +1471,18 @@ export const Header: React.FC<HeaderProps> = ({
 
         {/* Action & Settings Buttons */}
         <div className="flex items-center gap-2">
+          {/* Blinking Upgrade Notification Button (Only displayed when there is an upgrade) */}
+          {hasUpdate && onApplyUpdate && (
+            <button
+              onClick={onApplyUpdate}
+              className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-400 via-yellow-300 to-amber-500 text-slate-950 font-black text-xs md:text-sm shadow-2xl shadow-amber-500/60 flex items-center gap-2 border-2 border-yellow-100 animate-pulse hover:scale-105 active:scale-95 transition-all cursor-pointer ring-4 ring-amber-400/90"
+              title="A new version of Rummikub is available! Click to update immediately."
+            >
+              <Sparkles className="w-4 h-4 md:w-5 md:h-5 text-slate-950 animate-spin" style={{ animationDuration: '3s' }} />
+              <span>UPGRADE (CLICK TO UPDATE)</span>
+            </button>
+          )}
+
           {onInstallApp && (
             <button
               onClick={onInstallApp}
@@ -4125,6 +4173,134 @@ export function normalizeBoard(melds: Meld[]): Meld[] {
 
 
 /* =============================================================================
+ * FILE: src/hooks/useAppUpdate.ts
+ * ============================================================================= */
+
+import { useState, useEffect, useCallback, useRef } from 'react';
+
+export function useAppUpdate() {
+  const [hasUpdate, setHasUpdate] = useState(false);
+  const waitingWorkerRef = useRef<ServiceWorker | null>(null);
+  const currentVersionRef = useRef<string | null>(null);
+
+  // Check version.json on server and Service Worker registration
+  const checkForUpdate = useCallback(async () => {
+    // 1. Check Service Worker registration state
+    if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
+      try {
+        const reg = await navigator.serviceWorker.getRegistration();
+        if (reg) {
+          // If a new worker is already waiting
+          if (reg.waiting) {
+            waitingWorkerRef.current = reg.waiting;
+            setHasUpdate(true);
+            return;
+          }
+
+          // Trigger background check for updated sw.js
+          reg.update().catch(() => {});
+
+          reg.onupdatefound = () => {
+            const installingWorker = reg.installing;
+            if (installingWorker) {
+              installingWorker.onstatechange = () => {
+                if (
+                  installingWorker.state === 'installed' &&
+                  navigator.serviceWorker.controller
+                ) {
+                  waitingWorkerRef.current = installingWorker;
+                  setHasUpdate(true);
+                }
+              };
+            }
+          };
+        }
+      } catch (err) {
+        console.warn('[PWA Update] SW check error:', err);
+      }
+    }
+
+    // 2. HTTP Poll version.json as a fallback
+    try {
+      const response = await fetch(`./version.json?t=${Date.now()}`, {
+        cache: 'no-store',
+        headers: { 'Cache-Control': 'no-cache, no-store, must-revalidate' },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        if (data && data.buildVersion) {
+          if (!currentVersionRef.current) {
+            // First run, initialize current version baseline
+            currentVersionRef.current = data.buildVersion;
+          } else if (currentVersionRef.current !== data.buildVersion) {
+            console.log('[PWA Update] Detected new version on server:', data.buildVersion);
+            setHasUpdate(true);
+          }
+        }
+      }
+    } catch {
+      // Offline or network unavailable
+    }
+  }, []);
+
+  useEffect(() => {
+    // Initial check on load
+    checkForUpdate();
+
+    // Check periodically every 25 seconds
+    const interval = setInterval(checkForUpdate, 25000);
+
+    // Check immediately when user returns to/focuses the app window
+    const handleFocus = () => {
+      checkForUpdate();
+    };
+
+    window.addEventListener('focus', handleFocus);
+    window.addEventListener('online', checkForUpdate);
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener('online', checkForUpdate);
+    };
+  }, [checkForUpdate]);
+
+  // Apply update immediately
+  const applyUpdate = useCallback(() => {
+    console.log('[PWA Update] Applying upgrade now...');
+
+    // Tell waiting worker to take over immediately
+    if (waitingWorkerRef.current) {
+      waitingWorkerRef.current.postMessage({ type: 'SKIP_WAITING' });
+    } else if (typeof navigator !== 'undefined' && navigator.serviceWorker && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' });
+    }
+
+    // Clear stale caches and reload
+    if (typeof caches !== 'undefined') {
+      caches
+        .keys()
+        .then((keys) => Promise.all(keys.map((k) => caches.delete(k))))
+        .catch(() => {})
+        .finally(() => {
+          window.location.reload();
+        });
+    } else {
+      window.location.reload();
+    }
+  }, []);
+
+  return {
+    hasUpdate,
+    applyUpdate,
+    checkForUpdate,
+  };
+}
+
+
+
+/* =============================================================================
  * FILE: src/hooks/useGameState.ts
  * ============================================================================= */
 
@@ -4751,15 +4927,25 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const SW_PATH = path.join(__dirname, 'public', 'sw.js');
+const VERSION_PATH = path.join(__dirname, 'public', 'version.json');
+
+const version = process.env.VITE_APP_VERSION || `v1.0.${Date.now()}`;
+const buildVersion = `rummikub-pwa-${version}`;
 
 if (fs.existsSync(SW_PATH)) {
   let content = fs.readFileSync(SW_PATH, 'utf-8');
-  const version = process.env.VITE_APP_VERSION || `v1.0.${Date.now()}`;
-  const buildVersion = `rummikub-pwa-${version}`;
   content = content.replace(/const CACHE_NAME = '.*?';/, `const CACHE_NAME = '${buildVersion}';`);
   fs.writeFileSync(SW_PATH, content, 'utf-8');
   console.log(`[PWA Build] Invalidation cache key updated -> ${buildVersion}`);
 }
+
+// Write version.json for HTTP-based real-time update polling
+fs.writeFileSync(
+  VERSION_PATH,
+  JSON.stringify({ version, buildVersion, timestamp: Date.now() }, null, 2),
+  'utf-8'
+);
+console.log(`[PWA Build] version.json generated -> ${version}`);
 
 
 
