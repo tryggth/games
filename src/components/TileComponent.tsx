@@ -35,9 +35,9 @@ const colorStyles: Record<TileColor, { text: string; bg: string; border: string 
     border: 'border-slate-800/30',
   },
   yellow: {
-    text: 'text-orange-500 font-black',
-    bg: 'bg-orange-500/10',
-    border: 'border-orange-500/30',
+    text: 'text-lime-600 font-black',
+    bg: 'bg-lime-500/10',
+    border: 'border-lime-500/30',
   },
 };
 
@@ -133,7 +133,7 @@ export const TileComponent: React.FC<TileComponentProps> = ({
     const colorDisplayName = tile.isJoker
       ? 'JOKER'
       : tile.color === 'yellow'
-      ? 'ORANGE'
+      ? 'CHARTREUSE'
       : tile.color.toUpperCase();
 
     return createPortal(
@@ -157,7 +157,7 @@ export const TileComponent: React.FC<TileComponentProps> = ({
               tile.color === 'red' && 'bg-red-500',
               tile.color === 'blue' && 'bg-blue-500',
               tile.color === 'black' && 'bg-slate-900',
-              tile.color === 'yellow' && 'bg-orange-500'
+              tile.color === 'yellow' && 'bg-lime-500'
             )}
           />
           <span
@@ -166,7 +166,7 @@ export const TileComponent: React.FC<TileComponentProps> = ({
               tile.color === 'red' && 'bg-red-500',
               tile.color === 'blue' && 'bg-blue-500',
               tile.color === 'black' && 'bg-slate-900',
-              tile.color === 'yellow' && 'bg-orange-500'
+              tile.color === 'yellow' && 'bg-lime-500'
             )}
           />
         </div>
@@ -249,7 +249,7 @@ export const TileComponent: React.FC<TileComponentProps> = ({
               tile.color === 'red' && 'bg-red-500',
               tile.color === 'blue' && 'bg-blue-500',
               tile.color === 'black' && 'bg-slate-900',
-              tile.color === 'yellow' && 'bg-orange-500'
+              tile.color === 'yellow' && 'bg-lime-500'
             )}
           />
           <span
@@ -259,7 +259,7 @@ export const TileComponent: React.FC<TileComponentProps> = ({
               tile.color === 'red' && 'bg-red-500',
               tile.color === 'blue' && 'bg-blue-500',
               tile.color === 'black' && 'bg-slate-900',
-              tile.color === 'yellow' && 'bg-orange-500'
+              tile.color === 'yellow' && 'bg-lime-500'
             )}
           />
         </div>

@@ -1,6 +1,6 @@
 ================================================================================
  RUMMIKUB PRO - COMBINED SOURCE CODE BUNDLE
- Generated on: 2026-08-20T01:49:53.728Z
+ Generated on: 2026-08-20T01:55:05.667Z
  Total Source Files: 41
 ================================================================================
 
@@ -386,7 +386,7 @@ See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rule
  * FILE: public/sw.js
  * ============================================================================= */
 
-const CACHE_NAME = 'rummikub-pwa-v1.0.1787190591596';
+const CACHE_NAME = 'rummikub-pwa-v1.0.1787190903589';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -1760,7 +1760,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({ isOpen, onClose }) => {
               <div className="p-4 rounded-xl bg-slate-800 border border-slate-600 shadow-sm">
                 <h4 className="font-extrabold text-amber-300 mb-1.5 text-sm uppercase tracking-wider">Groups</h4>
                 <p className="text-sm text-slate-200 leading-relaxed">
-                  3 or 4 tiles of the <strong className="text-white">same number value</strong> with <strong className="text-white">different colors</strong> (e.g. Red 7, Blue 7, Black 7, Orange 7).
+                  3 or 4 tiles of the <strong className="text-white">same number value</strong> with <strong className="text-white">different colors</strong> (e.g. Red 7, Blue 7, Black 7, Chartreuse 7).
                 </p>
               </div>
 
@@ -1855,9 +1855,9 @@ const colorStyles: Record<TileColor, { text: string; bg: string; border: string 
     border: 'border-slate-800/30',
   },
   yellow: {
-    text: 'text-orange-500 font-black',
-    bg: 'bg-orange-500/10',
-    border: 'border-orange-500/30',
+    text: 'text-lime-600 font-black',
+    bg: 'bg-lime-500/10',
+    border: 'border-lime-500/30',
   },
 };
 
@@ -1953,7 +1953,7 @@ export const TileComponent: React.FC<TileComponentProps> = ({
     const colorDisplayName = tile.isJoker
       ? 'JOKER'
       : tile.color === 'yellow'
-      ? 'ORANGE'
+      ? 'CHARTREUSE'
       : tile.color.toUpperCase();
 
     return createPortal(
@@ -1977,7 +1977,7 @@ export const TileComponent: React.FC<TileComponentProps> = ({
               tile.color === 'red' && 'bg-red-500',
               tile.color === 'blue' && 'bg-blue-500',
               tile.color === 'black' && 'bg-slate-900',
-              tile.color === 'yellow' && 'bg-orange-500'
+              tile.color === 'yellow' && 'bg-lime-500'
             )}
           />
           <span
@@ -1986,7 +1986,7 @@ export const TileComponent: React.FC<TileComponentProps> = ({
               tile.color === 'red' && 'bg-red-500',
               tile.color === 'blue' && 'bg-blue-500',
               tile.color === 'black' && 'bg-slate-900',
-              tile.color === 'yellow' && 'bg-orange-500'
+              tile.color === 'yellow' && 'bg-lime-500'
             )}
           />
         </div>
@@ -2069,7 +2069,7 @@ export const TileComponent: React.FC<TileComponentProps> = ({
               tile.color === 'red' && 'bg-red-500',
               tile.color === 'blue' && 'bg-blue-500',
               tile.color === 'black' && 'bg-slate-900',
-              tile.color === 'yellow' && 'bg-orange-500'
+              tile.color === 'yellow' && 'bg-lime-500'
             )}
           />
           <span
@@ -2079,7 +2079,7 @@ export const TileComponent: React.FC<TileComponentProps> = ({
               tile.color === 'red' && 'bg-red-500',
               tile.color === 'blue' && 'bg-blue-500',
               tile.color === 'black' && 'bg-slate-900',
-              tile.color === 'yellow' && 'bg-orange-500'
+              tile.color === 'yellow' && 'bg-lime-500'
             )}
           />
         </div>
