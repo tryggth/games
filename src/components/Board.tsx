@@ -309,23 +309,6 @@ export const Board: React.FC<BoardProps> = ({
           </div>
         )}
       </div>
-
-      {/* Footer Drop Prompt Zone */}
-      {melds.length > 0 && isHumanTurn && (
-        <div
-          onDragOver={handleBoardDragOver}
-          onDrop={handleBoardDropOnNewZone}
-          className={clsx(
-            'mt-3 py-3 px-4 rounded-xl border border-dashed text-sm font-bold flex items-center justify-center gap-2 transition-all cursor-pointer z-10',
-            isBoardDragOver
-              ? 'border-amber-400 bg-amber-500/25 text-amber-100 scale-102 shadow-lg shadow-amber-500/40 ring-2 ring-amber-400/50'
-              : 'border-emerald-500/60 bg-emerald-950/50 text-emerald-200 hover:border-emerald-300 hover:bg-emerald-950/70 hover:text-white'
-          )}
-        >
-          <PlusCircle className="w-5 h-5 text-emerald-300 animate-pulse" />
-          <span>Drop tile anywhere here to form a NEW table meld</span>
-        </div>
-      )}
     </div>
   );
 };
