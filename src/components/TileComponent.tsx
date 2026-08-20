@@ -35,9 +35,9 @@ const colorStyles: Record<TileColor, { text: string; bg: string; border: string 
     border: 'border-slate-800/30',
   },
   yellow: {
-    text: 'text-pink-600 font-black',
-    bg: 'bg-pink-500/10',
-    border: 'border-pink-500/30',
+    text: 'text-orange-500 font-black',
+    bg: 'bg-orange-500/10',
+    border: 'border-orange-500/30',
   },
 };
 
@@ -150,7 +150,7 @@ export const TileComponent: React.FC<TileComponentProps> = ({
               tile.color === 'red' && 'bg-red-500',
               tile.color === 'blue' && 'bg-blue-500',
               tile.color === 'black' && 'bg-slate-900',
-              tile.color === 'yellow' && 'bg-pink-500'
+              tile.color === 'yellow' && 'bg-orange-500'
             )}
           />
           <span
@@ -159,7 +159,7 @@ export const TileComponent: React.FC<TileComponentProps> = ({
               tile.color === 'red' && 'bg-red-500',
               tile.color === 'blue' && 'bg-blue-500',
               tile.color === 'black' && 'bg-slate-900',
-              tile.color === 'yellow' && 'bg-pink-500'
+              tile.color === 'yellow' && 'bg-orange-500'
             )}
           />
         </div>
@@ -236,7 +236,7 @@ export const TileComponent: React.FC<TileComponentProps> = ({
               tile.color === 'red' && 'bg-red-500',
               tile.color === 'blue' && 'bg-blue-500',
               tile.color === 'black' && 'bg-slate-900',
-              tile.color === 'yellow' && 'bg-pink-500'
+              tile.color === 'yellow' && 'bg-orange-500'
             )}
           />
           <span
@@ -246,7 +246,7 @@ export const TileComponent: React.FC<TileComponentProps> = ({
               tile.color === 'red' && 'bg-red-500',
               tile.color === 'blue' && 'bg-blue-500',
               tile.color === 'black' && 'bg-slate-900',
-              tile.color === 'yellow' && 'bg-pink-500'
+              tile.color === 'yellow' && 'bg-orange-500'
             )}
           />
         </div>
