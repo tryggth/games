@@ -8,6 +8,7 @@ interface BoardProps {
   melds: Meld[];
   selectedTileIds: string[];
   highlightedMeldIds?: string[];
+  recentlyPlacedTileIds?: string[];
   isMagnifierEnabled?: boolean;
   onToggleTileSelection: (tileId: string) => void;
   onDropTile: (
@@ -26,6 +27,7 @@ const MeldContainer: React.FC<{
   meld: Meld;
   selectedTileIds: string[];
   isHighlighted?: boolean;
+  recentlyPlacedTileIds?: string[];
   isMagnifierEnabled?: boolean;
   onToggleTileSelection: (tileId: string) => void;
   onDropTile: (
@@ -41,6 +43,7 @@ const MeldContainer: React.FC<{
   meld,
   selectedTileIds,
   isHighlighted = false,
+  recentlyPlacedTileIds = [],
   isMagnifierEnabled = true,
   onToggleTileSelection,
   onDropTile,
@@ -90,7 +93,7 @@ const MeldContainer: React.FC<{
         isDragOver
           ? 'bg-amber-950/70 border-amber-400 ring-4 ring-amber-400/80 shadow-2xl shadow-amber-500/50 scale-102 z-30'
           : isHighlighted
-          ? 'ring-2 ring-amber-400 bg-amber-500/15 shadow-lg shadow-amber-500/30 scale-101 border-amber-400/70 z-20'
+          ? 'ring-4 ring-cyan-400 bg-cyan-950/80 shadow-2xl shadow-cyan-500/60 scale-102 border-cyan-300 z-20'
           : meld.isValid
           ? 'bg-emerald-950/40 border-emerald-600/40 hover:border-emerald-500/70'
           : 'bg-rose-950/60 border-rose-500/70 ring-1 ring-rose-500/50 shadow-rose-950/50'
@@ -108,9 +111,9 @@ const MeldContainer: React.FC<{
           )}
 
           {isHighlighted && (
-            <span className="inline-flex items-center gap-1 text-xs font-extrabold text-amber-100 bg-amber-500/25 px-2 py-0.5 rounded-md border border-amber-400/60 animate-pulse shadow-sm">
-              <Bot className="w-3.5 h-3.5 text-amber-300" />
-              <span>Bot Move</span>
+            <span className="inline-flex items-center gap-1.5 text-xs font-black text-slate-950 bg-cyan-400 px-2.5 py-0.5 rounded-md border border-cyan-200 shadow-md animate-pulse">
+              <Bot className="w-3.5 h-3.5 text-slate-950 animate-bounce" />
+              <span>BOT LAST PLAY</span>
             </span>
           )}
         </div>
@@ -123,6 +126,7 @@ const MeldContainer: React.FC<{
             key={`${meld.id}_${tile.id}_${idx}`}
             tile={tile}
             isSelected={selectedTileIds.includes(tile.id)}
+            isRecentlyPlaced={recentlyPlacedTileIds.includes(tile.id)}
             isMagnifierEnabled={isMagnifierEnabled}
             onClick={() => isHumanTurn && onToggleTileSelection(tile.id)}
             source="board"
@@ -140,6 +144,7 @@ export const Board: React.FC<BoardProps> = ({
   melds,
   selectedTileIds,
   highlightedMeldIds = [],
+  recentlyPlacedTileIds = [],
   isMagnifierEnabled = true,
   onToggleTileSelection,
   onDropTile,
@@ -264,6 +269,7 @@ export const Board: React.FC<BoardProps> = ({
                   meld={meld}
                   selectedTileIds={selectedTileIds}
                   isHighlighted={highlightedMeldIds.includes(meld.id)}
+                  recentlyPlacedTileIds={recentlyPlacedTileIds}
                   isMagnifierEnabled={isMagnifierEnabled}
                   onToggleTileSelection={onToggleTileSelection}
                   onDropTile={onDropTile}

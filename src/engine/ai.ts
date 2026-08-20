@@ -7,6 +7,8 @@ export interface AiMoveResult {
   drewTile: boolean;
   playedTilesCount: number;
   message: string;
+  affectedMeldIds?: string[];
+  recentlyPlacedTileIds?: string[];
 }
 
 /**
@@ -80,6 +82,8 @@ export function executeAiTurn(
           drewTile: false,
           playedTilesCount: meldCandidate.length,
           message: `${aiPlayer.name} made initial meld with ${val} points!`,
+          affectedMeldIds: [newMeld.id],
+          recentlyPlacedTileIds: meldCandidate.map((t) => t.id),
         };
       }
     }
@@ -107,6 +111,8 @@ export function executeAiTurn(
       drewTile: false,
       playedTilesCount: bestMeld.length,
       message: `${aiPlayer.name} played a meld of ${bestMeld.length} tiles!`,
+      affectedMeldIds: [newMeld.id],
+      recentlyPlacedTileIds: bestMeld.map((t) => t.id),
     };
   }
 
@@ -131,6 +137,8 @@ export function executeAiTurn(
           drewTile: false,
           playedTilesCount: 1,
           message: `${aiPlayer.name} added a tile to table meld!`,
+          affectedMeldIds: [targetMeld.id],
+          recentlyPlacedTileIds: [tileToTry.id],
         };
       }
 
@@ -151,6 +159,8 @@ export function executeAiTurn(
           drewTile: false,
           playedTilesCount: 1,
           message: `${aiPlayer.name} added a tile to table meld!`,
+          affectedMeldIds: [targetMeld.id],
+          recentlyPlacedTileIds: [tileToTry.id],
         };
       }
     }
@@ -167,6 +177,8 @@ function handleAiDraw(aiPlayer: Player, boardMelds: Meld[], tilePool: Tile[]): A
       drewTile: true,
       playedTilesCount: 0,
       message: `${aiPlayer.name} passed (pool empty).`,
+      affectedMeldIds: [],
+      recentlyPlacedTileIds: [],
     };
   }
 
@@ -177,5 +189,7 @@ function handleAiDraw(aiPlayer: Player, boardMelds: Meld[], tilePool: Tile[]): A
     drewTile: true,
     playedTilesCount: 0,
     message: `${aiPlayer.name} drew 1 tile from the pool.`,
+    affectedMeldIds: [],
+    recentlyPlacedTileIds: [],
   };
 }

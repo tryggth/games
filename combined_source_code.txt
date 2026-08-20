@@ -1,6 +1,6 @@
 ================================================================================
  RUMMIKUB PRO - COMBINED SOURCE CODE BUNDLE
- Generated on: 2026-08-20T18:57:32.704Z
+ Generated on: 2026-08-20T19:01:35.572Z
  Total Source Files: 41
 ================================================================================
 
@@ -386,7 +386,7 @@ See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rule
  * FILE: public/sw.js
  * ============================================================================= */
 
-const CACHE_NAME = 'rummikub-pwa-v1.0.1787252250513';
+const CACHE_NAME = 'rummikub-pwa-v1.0.1787252492159';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -697,6 +697,7 @@ export function App() {
     isAiThinking,
     soundEnabled,
     highlightedMeldIds,
+    recentlyPlacedTileIds,
     drawnTileId,
     botLastMoveMessage,
     debugLog,
@@ -777,6 +778,7 @@ export function App() {
           melds={boardMelds}
           selectedTileIds={selectedTileIds}
           highlightedMeldIds={highlightedMeldIds}
+          recentlyPlacedTileIds={recentlyPlacedTileIds}
           isMagnifierEnabled={isMagnifierEnabled}
           onToggleTileSelection={toggleTileSelection}
           onDropTile={handleDropTile}
@@ -867,6 +869,7 @@ interface BoardProps {
   melds: Meld[];
   selectedTileIds: string[];
   highlightedMeldIds?: string[];
+  recentlyPlacedTileIds?: string[];
   isMagnifierEnabled?: boolean;
   onToggleTileSelection: (tileId: string) => void;
   onDropTile: (
@@ -885,6 +888,7 @@ const MeldContainer: React.FC<{
   meld: Meld;
   selectedTileIds: string[];
   isHighlighted?: boolean;
+  recentlyPlacedTileIds?: string[];
   isMagnifierEnabled?: boolean;
   onToggleTileSelection: (tileId: string) => void;
   onDropTile: (
@@ -900,6 +904,7 @@ const MeldContainer: React.FC<{
   meld,
   selectedTileIds,
   isHighlighted = false,
+  recentlyPlacedTileIds = [],
   isMagnifierEnabled = true,
   onToggleTileSelection,
   onDropTile,
@@ -949,7 +954,7 @@ const MeldContainer: React.FC<{
         isDragOver
           ? 'bg-amber-950/70 border-amber-400 ring-4 ring-amber-400/80 shadow-2xl shadow-amber-500/50 scale-102 z-30'
           : isHighlighted
-          ? 'ring-2 ring-amber-400 bg-amber-500/15 shadow-lg shadow-amber-500/30 scale-101 border-amber-400/70 z-20'
+          ? 'ring-4 ring-cyan-400 bg-cyan-950/80 shadow-2xl shadow-cyan-500/60 scale-102 border-cyan-300 z-20'
           : meld.isValid
           ? 'bg-emerald-950/40 border-emerald-600/40 hover:border-emerald-500/70'
           : 'bg-rose-950/60 border-rose-500/70 ring-1 ring-rose-500/50 shadow-rose-950/50'
@@ -967,9 +972,9 @@ const MeldContainer: React.FC<{
           )}
 
           {isHighlighted && (
-            <span className="inline-flex items-center gap-1 text-xs font-extrabold text-amber-100 bg-amber-500/25 px-2 py-0.5 rounded-md border border-amber-400/60 animate-pulse shadow-sm">
-              <Bot className="w-3.5 h-3.5 text-amber-300" />
-              <span>Bot Move</span>
+            <span className="inline-flex items-center gap-1.5 text-xs font-black text-slate-950 bg-cyan-400 px-2.5 py-0.5 rounded-md border border-cyan-200 shadow-md animate-pulse">
+              <Bot className="w-3.5 h-3.5 text-slate-950 animate-bounce" />
+              <span>BOT LAST PLAY</span>
             </span>
           )}
         </div>
@@ -982,6 +987,7 @@ const MeldContainer: React.FC<{
             key={`${meld.id}_${tile.id}_${idx}`}
             tile={tile}
             isSelected={selectedTileIds.includes(tile.id)}
+            isRecentlyPlaced={recentlyPlacedTileIds.includes(tile.id)}
             isMagnifierEnabled={isMagnifierEnabled}
             onClick={() => isHumanTurn && onToggleTileSelection(tile.id)}
             source="board"
@@ -999,6 +1005,7 @@ export const Board: React.FC<BoardProps> = ({
   melds,
   selectedTileIds,
   highlightedMeldIds = [],
+  recentlyPlacedTileIds = [],
   isMagnifierEnabled = true,
   onToggleTileSelection,
   onDropTile,
@@ -1123,6 +1130,7 @@ export const Board: React.FC<BoardProps> = ({
                   meld={meld}
                   selectedTileIds={selectedTileIds}
                   isHighlighted={highlightedMeldIds.includes(meld.id)}
+                  recentlyPlacedTileIds={recentlyPlacedTileIds}
                   isMagnifierEnabled={isMagnifierEnabled}
                   onToggleTileSelection={onToggleTileSelection}
                   onDropTile={onDropTile}
@@ -2284,6 +2292,8 @@ export interface AiMoveResult {
   drewTile: boolean;
   playedTilesCount: number;
   message: string;
+  affectedMeldIds?: string[];
+  recentlyPlacedTileIds?: string[];
 }
 
 /**
@@ -2357,6 +2367,8 @@ export function executeAiTurn(
           drewTile: false,
           playedTilesCount: meldCandidate.length,
           message: `${aiPlayer.name} made initial meld with ${val} points!`,
+          affectedMeldIds: [newMeld.id],
+          recentlyPlacedTileIds: meldCandidate.map((t) => t.id),
         };
       }
     }
@@ -2384,6 +2396,8 @@ export function executeAiTurn(
       drewTile: false,
       playedTilesCount: bestMeld.length,
       message: `${aiPlayer.name} played a meld of ${bestMeld.length} tiles!`,
+      affectedMeldIds: [newMeld.id],
+      recentlyPlacedTileIds: bestMeld.map((t) => t.id),
     };
   }
 
@@ -2408,6 +2422,8 @@ export function executeAiTurn(
           drewTile: false,
           playedTilesCount: 1,
           message: `${aiPlayer.name} added a tile to table meld!`,
+          affectedMeldIds: [targetMeld.id],
+          recentlyPlacedTileIds: [tileToTry.id],
         };
       }
 
@@ -2428,6 +2444,8 @@ export function executeAiTurn(
           drewTile: false,
           playedTilesCount: 1,
           message: `${aiPlayer.name} added a tile to table meld!`,
+          affectedMeldIds: [targetMeld.id],
+          recentlyPlacedTileIds: [tileToTry.id],
         };
       }
     }
@@ -2444,6 +2462,8 @@ function handleAiDraw(aiPlayer: Player, boardMelds: Meld[], tilePool: Tile[]): A
       drewTile: true,
       playedTilesCount: 0,
       message: `${aiPlayer.name} passed (pool empty).`,
+      affectedMeldIds: [],
+      recentlyPlacedTileIds: [],
     };
   }
 
@@ -2454,6 +2474,8 @@ function handleAiDraw(aiPlayer: Player, boardMelds: Meld[], tilePool: Tile[]): A
     drewTile: true,
     playedTilesCount: 0,
     message: `${aiPlayer.name} drew 1 tile from the pool.`,
+    affectedMeldIds: [],
+    recentlyPlacedTileIds: [],
   };
 }
 
@@ -2975,6 +2997,8 @@ export interface MoveResult {
   toastMessage?: { text: string; type: 'info' | 'success' | 'error' };
   drawnTileId?: string;
   selectedTileIds?: string[];
+  highlightedMeldIds?: string[];
+  recentlyPlacedTileIds?: string[];
 }
 
 export interface TileConservationCheck {
@@ -3635,6 +3659,8 @@ export function executeAiTurnStep(state: CoreGameState): MoveResult {
       ...nextState,
       botLastMoveMessage: aiResult.message,
     },
+    highlightedMeldIds: aiResult.affectedMeldIds || [],
+    recentlyPlacedTileIds: aiResult.recentlyPlacedTileIds || [],
   };
 }
 
@@ -4133,6 +4159,7 @@ export function useGameState() {
   // Simple UI-specific transient state
   const [selectedTileIds, setSelectedTileIds] = useState<string[]>([]);
   const [highlightedMeldIds, setHighlightedMeldIds] = useState<string[]>([]);
+  const [recentlyPlacedTileIds, setRecentlyPlacedTileIds] = useState<string[]>([]);
   const [drawnTileId, setDrawnTileId] = useState<string | null>(null);
   const [notification, setNotification] = useState<NotificationState | null>(null);
   const [isAiThinking, setIsAiThinking] = useState(false);
@@ -4164,6 +4191,7 @@ export function useGameState() {
 
   const clearMeldHighlights = useCallback(() => {
     setHighlightedMeldIds([]);
+    setRecentlyPlacedTileIds([]);
   }, []);
 
   const startNewGame = useCallback(() => {
@@ -4323,6 +4351,12 @@ export function useGameState() {
         if (result.toastMessage) {
           showToast(result.toastMessage.text, result.toastMessage.type);
         }
+        if (result.highlightedMeldIds) {
+          setHighlightedMeldIds(result.highlightedMeldIds);
+        }
+        if (result.recentlyPlacedTileIds) {
+          setRecentlyPlacedTileIds(result.recentlyPlacedTileIds);
+        }
         if (result.soundEffect === 'error') soundEngine.playError();
         return result.nextState;
       });
@@ -4349,6 +4383,7 @@ export function useGameState() {
     isAiThinking,
     soundEnabled,
     highlightedMeldIds,
+    recentlyPlacedTileIds,
     drawnTileId,
     botLastMoveMessage: gameState.botLastMoveMessage,
     debugLog: gameState.debugLog,

@@ -28,6 +28,7 @@ export function App() {
     isAiThinking,
     soundEnabled,
     highlightedMeldIds,
+    recentlyPlacedTileIds,
     drawnTileId,
     botLastMoveMessage,
     debugLog,
@@ -108,6 +109,7 @@ export function App() {
           melds={boardMelds}
           selectedTileIds={selectedTileIds}
           highlightedMeldIds={highlightedMeldIds}
+          recentlyPlacedTileIds={recentlyPlacedTileIds}
           isMagnifierEnabled={isMagnifierEnabled}
           onToggleTileSelection={toggleTileSelection}
           onDropTile={handleDropTile}

@@ -16,6 +16,7 @@ export function useGameState() {
   // Simple UI-specific transient state
   const [selectedTileIds, setSelectedTileIds] = useState<string[]>([]);
   const [highlightedMeldIds, setHighlightedMeldIds] = useState<string[]>([]);
+  const [recentlyPlacedTileIds, setRecentlyPlacedTileIds] = useState<string[]>([]);
   const [drawnTileId, setDrawnTileId] = useState<string | null>(null);
   const [notification, setNotification] = useState<NotificationState | null>(null);
   const [isAiThinking, setIsAiThinking] = useState(false);
@@ -47,6 +48,7 @@ export function useGameState() {
 
   const clearMeldHighlights = useCallback(() => {
     setHighlightedMeldIds([]);
+    setRecentlyPlacedTileIds([]);
   }, []);
 
   const startNewGame = useCallback(() => {
@@ -206,6 +208,12 @@ export function useGameState() {
         if (result.toastMessage) {
           showToast(result.toastMessage.text, result.toastMessage.type);
         }
+        if (result.highlightedMeldIds) {
+          setHighlightedMeldIds(result.highlightedMeldIds);
+        }
+        if (result.recentlyPlacedTileIds) {
+          setRecentlyPlacedTileIds(result.recentlyPlacedTileIds);
+        }
         if (result.soundEffect === 'error') soundEngine.playError();
         return result.nextState;
       });
@@ -232,6 +240,7 @@ export function useGameState() {
     isAiThinking,
     soundEnabled,
     highlightedMeldIds,
+    recentlyPlacedTileIds,
     drawnTileId,
     botLastMoveMessage: gameState.botLastMoveMessage,
     debugLog: gameState.debugLog,

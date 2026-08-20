@@ -23,6 +23,8 @@ export interface MoveResult {
   toastMessage?: { text: string; type: 'info' | 'success' | 'error' };
   drawnTileId?: string;
   selectedTileIds?: string[];
+  highlightedMeldIds?: string[];
+  recentlyPlacedTileIds?: string[];
 }
 
 export interface TileConservationCheck {
@@ -683,5 +685,7 @@ export function executeAiTurnStep(state: CoreGameState): MoveResult {
       ...nextState,
       botLastMoveMessage: aiResult.message,
     },
+    highlightedMeldIds: aiResult.affectedMeldIds || [],
+    recentlyPlacedTileIds: aiResult.recentlyPlacedTileIds || [],
   };
 }
