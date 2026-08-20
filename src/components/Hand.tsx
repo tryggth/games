@@ -19,7 +19,7 @@ export const Hand: React.FC<HandProps> = ({
   humanPlayer,
   selectedTileIds,
   drawnTileId,
-  isMagnifierEnabled = false,
+  isMagnifierEnabled = true,
   onToggleTileSelection,
   onClearSelection,
   onCreateMeldFromSelection,

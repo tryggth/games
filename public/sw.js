@@ -1,4 +1,4 @@
-const CACHE_NAME = 'rummikub-pwa-v1.0.1787190903589';
+const CACHE_NAME = 'rummikub-pwa-v1.0.1787252113784';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

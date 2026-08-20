@@ -20,7 +20,14 @@ export function useGameState() {
   const [notification, setNotification] = useState<NotificationState | null>(null);
   const [isAiThinking, setIsAiThinking] = useState(false);
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [isMagnifierEnabled, setIsMagnifierEnabled] = useState(false);
+  const [isMagnifierEnabled, setIsMagnifierEnabled] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem('rummikub_magnifier_enabled');
+      return saved !== null ? saved === 'true' : true;
+    } catch {
+      return true;
+    }
+  });
   const [hintResult, setHintResult] = useState<HintResult | null>(null);
   const [isHintOpen, setIsHintOpen] = useState(false);
 
@@ -60,7 +67,13 @@ export function useGameState() {
   }, []);
 
   const toggleMagnifier = useCallback(() => {
-    setIsMagnifierEnabled((prev) => !prev);
+    setIsMagnifierEnabled((prev) => {
+      const next = !prev;
+      try {
+        localStorage.setItem('rummikub_magnifier_enabled', String(next));
+      } catch {}
+      return next;
+    });
   }, []);
 
   const toggleTileSelection = useCallback((tileId: string) => {

@@ -46,7 +46,7 @@ export const TileComponent: React.FC<TileComponentProps> = ({
   isSelected = false,
   isRecentlyPlaced = false,
   isDrawnTile = false,
-  isMagnifierEnabled = false,
+  isMagnifierEnabled = true,
   onClick,
   source,
   sourceMeldId,
