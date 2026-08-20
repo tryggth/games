@@ -1,6 +1,6 @@
 ================================================================================
  RUMMIKUB PRO - COMBINED SOURCE CODE BUNDLE
- Generated on: 2026-08-20T01:22:30.499Z
+ Generated on: 2026-08-20T01:25:53.212Z
  Total Source Files: 41
 ================================================================================
 
@@ -386,7 +386,7 @@ See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rule
  * FILE: public/sw.js
  * ============================================================================= */
 
-const CACHE_NAME = 'rummikub-pwa-v1.0.1787188946995';
+const CACHE_NAME = 'rummikub-pwa-v1.0.1787189151111';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -860,7 +860,7 @@ export default App;
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import type { Meld, DragItem } from '../types/game';
 import { TileComponent } from './TileComponent';
-import { XCircle, Bot, PlusCircle, ChevronDown } from 'lucide-react';
+import { XCircle, Bot, PlusCircle, ChevronDown, ChevronUp } from 'lucide-react';
 import { clsx } from 'clsx';
 
 interface BoardProps {
@@ -1006,25 +1006,22 @@ export const Board: React.FC<BoardProps> = ({
 }) => {
   const [isBoardDragOver, setIsBoardDragOver] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [isScrolledUp, setIsScrolledUp] = useState(false);
-  const [hiddenMeldCount, setHiddenMeldCount] = useState(0);
+  const [canScrollUp, setCanScrollUp] = useState(false);
+  const [canScrollDown, setCanScrollDown] = useState(false);
+  const [hasOverflow, setHasOverflow] = useState(false);
 
-  // Check if board content overflows and user has content below
+  // Track board overflow state and scroll boundaries
   const checkOverflow = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
 
-    const hasScrollBelow = el.scrollHeight > el.clientHeight && el.scrollTop + el.clientHeight < el.scrollHeight - 20;
-    setIsScrolledUp(hasScrollBelow);
+    const overflows = el.scrollHeight > el.clientHeight + 10;
+    const scrollUpAvailable = el.scrollTop > 8;
+    const scrollDownAvailable = el.scrollTop + el.clientHeight < el.scrollHeight - 8;
 
-    if (hasScrollBelow) {
-      // Estimate hidden melds based on average container height
-      const remainingHeight = el.scrollHeight - (el.scrollTop + el.clientHeight);
-      const estHidden = Math.max(1, Math.ceil(remainingHeight / 120));
-      setHiddenMeldCount(estHidden);
-    } else {
-      setHiddenMeldCount(0);
-    }
+    setHasOverflow(overflows);
+    setCanScrollUp(scrollUpAvailable);
+    setCanScrollDown(scrollDownAvailable);
   }, []);
 
   useEffect(() => {
@@ -1032,6 +1029,18 @@ export const Board: React.FC<BoardProps> = ({
     window.addEventListener('resize', checkOverflow);
     return () => window.removeEventListener('resize', checkOverflow);
   }, [melds, checkOverflow]);
+
+  const handleScrollUp = useCallback(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ top: -140, behavior: 'smooth' });
+    }
+  }, []);
+
+  const handleScrollDown = useCallback(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ top: 140, behavior: 'smooth' });
+    }
+  }, []);
 
   const handleBoardDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -1090,50 +1099,75 @@ export const Board: React.FC<BoardProps> = ({
         </span>
       </div>
 
-      {/* Dense Multi-Meld Flex-Wrap Grid Container with Scroll Feedback */}
-      <div
-        ref={scrollRef}
-        onScroll={checkOverflow}
-        className="flex-1 overflow-y-auto z-10 pr-1 pb-4 min-h-[260px] scroll-smooth"
-      >
-        {melds.length === 0 ? (
-          <div className="w-full h-56 rounded-xl border-2 border-dashed border-emerald-600/70 flex flex-col items-center justify-center text-emerald-200 transition-all hover:border-emerald-400 hover:bg-emerald-950/30 group">
-            <PlusCircle className="w-12 h-12 mb-2 text-emerald-300 group-hover:scale-110 transition-all" />
-            <p className="text-base font-bold text-emerald-100">Table is currently empty</p>
-            <p className="text-sm text-emerald-200 font-medium mt-1.5">
-              {isHumanTurn ? 'Drag tiles anywhere on the table to start a new meld' : 'Waiting for opponent move...'}
-            </p>
-          </div>
-        ) : (
-          <div className="flex flex-wrap gap-4 items-start content-start">
-            {melds.map((meld) => (
-              <MeldContainer
-                key={meld.id}
-                meld={meld}
-                selectedTileIds={selectedTileIds}
-                isHighlighted={highlightedMeldIds.includes(meld.id)}
-                isMagnifierEnabled={isMagnifierEnabled}
-                onToggleTileSelection={onToggleTileSelection}
-                onDropTile={onDropTile}
-                isHumanTurn={isHumanTurn}
-              />
-            ))}
+      {/* Main Board Content Row (Melds Grid + Dedicated Right-Side Scroll Arrows) */}
+      <div className="flex-1 min-h-0 flex gap-3 relative z-10 overflow-hidden">
+        {/* Dense Multi-Meld Flex-Wrap Grid Container with Smooth Scrolling */}
+        <div
+          ref={scrollRef}
+          onScroll={checkOverflow}
+          className="flex-1 overflow-y-auto pr-1 pb-4 min-h-[260px] scroll-smooth"
+        >
+          {melds.length === 0 ? (
+            <div className="w-full h-56 rounded-xl border-2 border-dashed border-emerald-600/70 flex flex-col items-center justify-center text-emerald-200 transition-all hover:border-emerald-400 hover:bg-emerald-950/30 group">
+              <PlusCircle className="w-12 h-12 mb-2 text-emerald-300 group-hover:scale-110 transition-all" />
+              <p className="text-base font-bold text-emerald-100">Table is currently empty</p>
+              <p className="text-sm text-emerald-200 font-medium mt-1.5">
+                {isHumanTurn ? 'Drag tiles anywhere on the table to start a new meld' : 'Waiting for opponent move...'}
+              </p>
+            </div>
+          ) : (
+            <div className="flex flex-wrap gap-3.5 items-start content-start">
+              {melds.map((meld) => (
+                <MeldContainer
+                  key={meld.id}
+                  meld={meld}
+                  selectedTileIds={selectedTileIds}
+                  isHighlighted={highlightedMeldIds.includes(meld.id)}
+                  isMagnifierEnabled={isMagnifierEnabled}
+                  onToggleTileSelection={onToggleTileSelection}
+                  onDropTile={onDropTile}
+                  isHumanTurn={isHumanTurn}
+                />
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Dedicated Right-Side Scroll Arrow Column (Active whenever melds extend to 2+ rows) */}
+        {hasOverflow && (
+          <div className="flex flex-col justify-center gap-3 flex-none z-20 select-none py-2">
+            <button
+              onClick={handleScrollUp}
+              disabled={!canScrollUp}
+              className={clsx(
+                'w-12 h-20 rounded-2xl border-2 flex flex-col items-center justify-center gap-1 transition-all shadow-xl',
+                canScrollUp
+                  ? 'bg-slate-900 border-amber-400 text-amber-300 hover:bg-slate-800 hover:scale-105 active:scale-95 cursor-pointer shadow-amber-500/30'
+                  : 'bg-slate-900/40 border-slate-700 text-slate-600 cursor-not-allowed opacity-40'
+              )}
+              title="Scroll Up (▲)"
+            >
+              <ChevronUp className="w-7 h-7 stroke-[3]" />
+              <span className="text-[10px] font-black uppercase tracking-wider">UP</span>
+            </button>
+
+            <button
+              onClick={handleScrollDown}
+              disabled={!canScrollDown}
+              className={clsx(
+                'w-12 h-20 rounded-2xl border-2 flex flex-col items-center justify-center gap-1 transition-all shadow-xl',
+                canScrollDown
+                  ? 'bg-slate-900 border-amber-400 text-amber-300 hover:bg-slate-800 hover:scale-105 active:scale-95 cursor-pointer shadow-amber-500/30'
+                  : 'bg-slate-900/40 border-slate-700 text-slate-600 cursor-not-allowed opacity-40'
+              )}
+              title="Scroll Down (▼)"
+            >
+              <span className="text-[10px] font-black uppercase tracking-wider">DOWN</span>
+              <ChevronDown className="w-7 h-7 stroke-[3]" />
+            </button>
           </div>
         )}
       </div>
-
-      {/* Bottom Gradient Fade Overlay for Overflow Indication */}
-      {isScrolledUp && (
-        <div className="absolute bottom-12 inset-x-0 h-16 bg-gradient-to-t from-slate-950 via-slate-950/90 to-transparent pointer-events-none z-20" />
-      )}
-
-      {/* Floating Scroll Overflow Banner Indicator */}
-      {isScrolledUp && (
-        <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-30 px-4 py-2 rounded-full bg-slate-900 border border-amber-400 text-amber-200 text-sm font-extrabold shadow-2xl flex items-center gap-2 animate-bounce pointer-events-none">
-          <ChevronDown className="w-4 h-4 text-amber-300" />
-          <span>{hiddenMeldCount} more meld(s) below — Scroll to view</span>
-        </div>
-      )}
 
       {/* Footer Drop Prompt Zone */}
       {melds.length > 0 && isHumanTurn && (
