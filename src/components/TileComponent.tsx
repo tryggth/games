@@ -112,8 +112,8 @@ export const TileComponent: React.FC<TileComponentProps> = ({
   const renderMagnifierPortal = () => {
     if (!isMagnifierEnabled || !hoverPos || typeof document === 'undefined') return null;
 
-    const popupWidth = 100;
-    const popupHeight = 140;
+    const popupWidth = 104;
+    const popupHeight = 148;
     const padding = 16;
 
     let x = hoverPos.x + 24;
@@ -130,6 +130,12 @@ export const TileComponent: React.FC<TileComponentProps> = ({
     x = Math.max(padding, x);
     y = Math.max(padding, y);
 
+    const colorDisplayName = tile.isJoker
+      ? 'JOKER'
+      : tile.color === 'yellow'
+      ? 'ORANGE'
+      : tile.color.toUpperCase();
+
     return createPortal(
       <div
         style={{
@@ -139,10 +145,11 @@ export const TileComponent: React.FC<TileComponentProps> = ({
           zIndex: 9999,
         }}
         className={clsx(
-          'w-24 h-34 rounded-2xl p-2.5 bg-gradient-to-b from-amber-50 via-amber-100 to-amber-200 border-2 border-amber-400 shadow-2xl ring-4 ring-amber-400/70 flex flex-col items-center justify-between pointer-events-none animate-fade-in',
+          'w-26 h-37 rounded-2xl p-2 bg-gradient-to-b from-amber-50 via-amber-100 to-amber-200 border-2 border-amber-400 shadow-2xl ring-4 ring-amber-400/70 flex flex-col items-center justify-between pointer-events-none animate-fade-in',
           colorConfig.text
         )}
       >
+        {/* Top Indicator Dots */}
         <div className="w-full flex items-center justify-between px-1">
           <span
             className={clsx(
@@ -164,6 +171,7 @@ export const TileComponent: React.FC<TileComponentProps> = ({
           />
         </div>
 
+        {/* Center Large Value / Joker Icon */}
         <div className="flex-1 flex items-center justify-center font-extrabold text-4xl">
           {tile.isJoker ? (
             <div className="flex flex-col items-center text-amber-600">
@@ -175,7 +183,12 @@ export const TileComponent: React.FC<TileComponentProps> = ({
           )}
         </div>
 
-        <div className="w-full h-1.5 rounded-full opacity-30 bg-slate-900" />
+        {/* High-Contrast Color Name Badge at Bottom */}
+        <div className="w-full py-1 px-1.5 rounded-lg bg-slate-900 border border-amber-400/60 flex items-center justify-center shadow-md">
+          <span className="text-xs font-black uppercase tracking-widest text-amber-300">
+            {colorDisplayName}
+          </span>
+        </div>
       </div>,
       document.body
     );
