@@ -64,7 +64,7 @@ export const RulesModal: React.FC<RulesModalProps> = ({ isOpen, onClose }) => {
               <div className="p-4 rounded-xl bg-slate-800 border border-slate-600 shadow-sm">
                 <h4 className="font-extrabold text-amber-300 mb-1.5 text-sm uppercase tracking-wider">Groups</h4>
                 <p className="text-sm text-slate-200 leading-relaxed">
-                  3 or 4 tiles of the <strong className="text-white">same number value</strong> with <strong className="text-white">different colors</strong> (e.g. Red 7, Blue 7, Black 7, Green 7).
+                  3 or 4 tiles of the <strong className="text-white">same number value</strong> with <strong className="text-white">different colors</strong> (e.g. Red 7, Blue 7, Black 7, Pink 7).
                 </p>
               </div>
 
