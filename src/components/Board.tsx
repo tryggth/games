@@ -232,19 +232,6 @@ export const Board: React.FC<BoardProps> = ({
       {/* Background Ambient Radial Gradient */}
       <div className="absolute inset-0 bg-radial from-emerald-500/5 via-transparent to-black/40 pointer-events-none" />
 
-      {/* Board Header Bar */}
-      <div className="flex items-center justify-between pb-3 border-b border-emerald-700/60 z-10 mb-4">
-        <div className="flex items-center gap-2.5">
-          <span className="w-3.5 h-3.5 rounded-full bg-emerald-400 ring-4 ring-emerald-500/30" />
-          <h2 className="text-base font-extrabold uppercase tracking-wider text-emerald-100">
-            Table Board ({melds.length} Melds)
-          </h2>
-        </div>
-        <span className="text-sm text-emerald-200 font-medium hidden sm:inline">
-          Container-level drop targets • Instant auto-reordering into logical groups & runs
-        </span>
-      </div>
-
       {/* Main Board Content Row (Melds Grid + Dedicated Right-Side Scroll Arrows) */}
       <div className="flex-1 min-h-0 flex gap-3 relative z-10 overflow-hidden">
         {/* Dense Multi-Meld Flex-Wrap Grid Container with Smooth Scrolling */}
