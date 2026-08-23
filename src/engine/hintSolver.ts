@@ -16,10 +16,14 @@ export interface HintResult {
   moves: HintMove[];
 }
 
+export function formatColorName(color: string): string {
+  return color.toLowerCase() === 'yellow' ? 'LIME' : color.toUpperCase();
+}
+
 /**
  * Helper to produce a clear, human-readable description of an existing table meld.
  * Examples:
- * - "Group of 11s [BLACK, BLUE, YELLOW]"
+ * - "Group of 11s [BLACK, BLUE, LIME]"
  * - "Run of RED [8, 9, 10]"
  */
 export function formatMeldDescription(meld: Meld): string {
@@ -30,14 +34,14 @@ export function formatMeldDescription(meld: Meld): string {
 
   if (isRun) {
     const nonJoker = norm.find((t) => !t.isJoker);
-    const colorStr = nonJoker ? nonJoker.color.toUpperCase() : 'MIXED';
+    const colorStr = nonJoker ? formatColorName(nonJoker.color) : 'MIXED';
     const valuesStr = norm.map((t) => (t.isJoker ? 'Joker' : t.value)).join(', ');
     return `Run of ${colorStr} [${valuesStr}]`;
   } else {
     // Group of same values across different colors
     const nonJoker = norm.find((t) => !t.isJoker);
     const valStr = nonJoker ? `${nonJoker.value}s` : 'Jokers';
-    const colorsStr = norm.map((t) => (t.isJoker ? 'Joker' : t.color.toUpperCase())).join(', ');
+    const colorsStr = norm.map((t) => (t.isJoker ? 'Joker' : formatColorName(t.color))).join(', ');
     return `Group of ${valStr} [${colorsStr}]`;
   }
 }
@@ -82,7 +86,7 @@ export function findPossibleMoves(
             const title = valRes.type === 'run' ? 'Play Run from Hand' : 'Play Group from Hand';
             const desc =
               valRes.type === 'run'
-                ? `Form a Run of ${norm[0].color.toUpperCase()} (${norm[0].value}–${norm[norm.length - 1].value}) [${points} pts]`
+                ? `Form a Run of ${formatColorName(norm[0].color)} (${norm[0].value}–${norm[norm.length - 1].value}) [${points} pts]`
                 : `Form a Group of ${norm[0].value}s [${points} pts]`;
 
             if (!moveDescriptions.has(desc)) {
@@ -120,7 +124,7 @@ export function findPossibleMoves(
     const meldDesc = formatMeldDescription(meld);
 
     for (const ht of hand) {
-      const tileName = `${ht.color.toUpperCase()} ${ht.isJoker ? 'Joker' : ht.value}`;
+      const tileName = `${formatColorName(ht.color)} ${ht.isJoker ? 'Joker' : ht.value}`;
 
       // Test prepending to meld
       const prependSet = [ht, ...meld.tiles];
@@ -175,7 +179,7 @@ export function findPossibleMoves(
       const baseRightValue = getEffectiveMeldPointValue(right);
 
       for (const ht of hand) {
-        const tileName = `${ht.color.toUpperCase()} ${ht.isJoker ? 'Joker' : ht.value}`;
+        const tileName = `${formatColorName(ht.color)} ${ht.isJoker ? 'Joker' : ht.value}`;
 
         // Case A: Attach hand tile to left fragment
         const leftPrepend = [ht, ...left];
@@ -256,15 +260,18 @@ export function findPossibleMoves(
     }
   }
 
-  // Sort moves prioritizing highest net point values first
+  // Sort hint recommendations descending by point value
   moves.sort((a, b) => (b.pointValue || 0) - (a.pointValue || 0));
 
   return {
     hasMoves: moves.length > 0,
-    moves: moves.slice(0, 6),
+    moves: moves.slice(0, 8),
   };
 }
 
+/**
+ * Helper to generate subsets of array with specific length
+ */
 function getSubsetsOfLength<T>(arr: T[], len: number): T[][] {
   const results: T[][] = [];
   function helper(start: number, current: T[]) {

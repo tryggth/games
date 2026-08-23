@@ -533,7 +533,8 @@ export function executeDrawTile(state: CoreGameState): MoveResult {
     idx === 0 ? { ...p, hand: createSortedHand(nextHand) } : p
   );
 
-  const tileName = drawnTile.isJoker ? 'Joker' : `${drawnTile.color} ${drawnTile.value}`;
+  const colorName = drawnTile.color === 'yellow' ? 'Lime' : drawnTile.color;
+  const tileName = drawnTile.isJoker ? 'Joker' : `${colorName} ${drawnTile.value}`;
   const nextState = advanceTurn(state, restoredBoard, updatedPlayers, remainingPool, true);
 
   return {
