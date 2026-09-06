@@ -35,9 +35,9 @@ const colorStyles: Record<TileColor, { text: string; bg: string; border: string 
     border: 'border-slate-800/30',
   },
   yellow: {
-    text: 'text-[#8df05b] font-black [text-shadow:_0_1px_2px_rgba(0,0,0,0.6),_0_0_1px_rgba(0,0,0,0.8)]',
-    bg: 'bg-[#8df05b]/15',
-    border: 'border-[#8df05b]/40',
+    text: 'text-[#00FF00] font-black [text-shadow:_0_1px_2px_rgba(0,0,0,0.6),_0_0_1px_rgba(0,0,0,0.8)]',
+    bg: 'bg-[#00FF00]/15',
+    border: 'border-[#00FF00]/40',
   },
 };
 
@@ -133,7 +133,7 @@ export const TileComponent: React.FC<TileComponentProps> = ({
     const colorDisplayName = tile.isJoker
       ? 'JOKER'
       : tile.color === 'yellow'
-      ? 'LIME'
+      ? 'GREEN'
       : tile.color.toUpperCase();
 
     return createPortal(
@@ -157,7 +157,7 @@ export const TileComponent: React.FC<TileComponentProps> = ({
               tile.color === 'red' && 'bg-red-500',
               tile.color === 'blue' && 'bg-blue-500',
               tile.color === 'black' && 'bg-slate-900',
-              tile.color === 'yellow' && 'bg-[#8df05b]'
+              tile.color === 'yellow' && 'bg-[#00FF00]'
             )}
           />
           <span
@@ -166,7 +166,7 @@ export const TileComponent: React.FC<TileComponentProps> = ({
               tile.color === 'red' && 'bg-red-500',
               tile.color === 'blue' && 'bg-blue-500',
               tile.color === 'black' && 'bg-slate-900',
-              tile.color === 'yellow' && 'bg-[#8df05b]'
+              tile.color === 'yellow' && 'bg-[#00FF00]'
             )}
           />
         </div>
@@ -249,7 +249,7 @@ export const TileComponent: React.FC<TileComponentProps> = ({
               tile.color === 'red' && 'bg-red-500',
               tile.color === 'blue' && 'bg-blue-500',
               tile.color === 'black' && 'bg-slate-900',
-              tile.color === 'yellow' && 'bg-[#8df05b]'
+              tile.color === 'yellow' && 'bg-[#00FF00]'
             )}
           />
           <span
@@ -259,7 +259,7 @@ export const TileComponent: React.FC<TileComponentProps> = ({
               tile.color === 'red' && 'bg-red-500',
               tile.color === 'blue' && 'bg-blue-500',
               tile.color === 'black' && 'bg-slate-900',
-              tile.color === 'yellow' && 'bg-[#8df05b]'
+              tile.color === 'yellow' && 'bg-[#00FF00]'
             )}
           />
         </div>

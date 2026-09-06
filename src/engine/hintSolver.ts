@@ -17,13 +17,13 @@ export interface HintResult {
 }
 
 export function formatColorName(color: string): string {
-  return color.toLowerCase() === 'yellow' ? 'LIME' : color.toUpperCase();
+  return color.toLowerCase() === 'yellow' ? 'GREEN' : color.toUpperCase();
 }
 
 /**
  * Helper to produce a clear, human-readable description of an existing table meld.
  * Examples:
- * - "Group of 11s [BLACK, BLUE, LIME]"
+ * - "Group of 11s [BLACK, BLUE, GREEN]"
  * - "Run of RED [8, 9, 10]"
  */
 export function formatMeldDescription(meld: Meld): string {
